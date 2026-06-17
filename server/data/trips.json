@@ -1,0 +1,146 @@
+[
+  {
+    "id": "wenchi-day-trip",
+    "title": "Wenchi Day Trip",
+    "destination": "Wenchi Crater Lake",
+    "description": "Walk the green crater rim, ride down to the lake, visit the island monastery, and share a calm group day outside Addis Ababa.",
+    "date": "2026-10-12",
+    "duration": "Day Trip",
+    "price": 3200,
+    "difficulty": "Easy",
+    "availableSeats": 18,
+    "meetingPoint": "Mexico Square, Addis Ababa",
+    "departureTime": "06:00",
+    "returnTime": "19:30",
+    "includes": [
+      "Transport",
+      "Local guide",
+      "Lunch",
+      "Entrance fee",
+      "Photography"
+    ],
+    "whatToBring": [
+      "Comfortable walking shoes",
+      "Water bottle",
+      "Sun hat",
+      "Light jacket"
+    ],
+    "notIncluded": [
+      "Personal snacks",
+      "Horse ride fees",
+      "Personal insurance"
+    ],
+    "itinerary": [
+      "Meet the group in Addis Ababa and depart early.",
+      "Arrive at Wenchi and start the crater-view walk.",
+      "Visit the lakeside area and island monastery.",
+      "Enjoy lunch, photos, and relaxed free time before returning."
+    ],
+    "safetyNotes": "This is a guided group trip. Stay with the guide during the crater walk and follow local boat safety instructions.",
+    "coverImage": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80",
+    "galleryImages": [
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80"
+    ],
+    "status": "Published",
+    "createdBy": "admin",
+    "createdAt": "2026-06-17T09:27:40.723Z",
+    "updatedAt": "2026-06-17T09:27:40.723Z"
+  },
+  {
+    "id": "erta-ale-expedition",
+    "title": "Erta Ale Expedition",
+    "destination": "Erta Ale Volcano",
+    "description": "A multi-day desert adventure to one of Ethiopia's most dramatic volcanic landscapes with local Afar support.",
+    "date": "2026-11-08",
+    "duration": "Multi-day",
+    "price": 18500,
+    "difficulty": "Hard",
+    "availableSeats": 10,
+    "meetingPoint": "Bole International Airport domestic terminal",
+    "departureTime": "08:00",
+    "returnTime": "21:00",
+    "includes": [
+      "4x4 transport",
+      "Guides",
+      "Camping gear",
+      "Meals",
+      "Permits"
+    ],
+    "whatToBring": [
+      "Headlamp",
+      "Hiking boots",
+      "Power bank",
+      "Light sleeping layer"
+    ],
+    "notIncluded": [
+      "Flights",
+      "Travel insurance",
+      "Personal gear"
+    ],
+    "itinerary": [
+      "Travel toward Afar and meet the local support crew.",
+      "Drive through desert landscapes toward Erta Ale.",
+      "Hike to the volcano camp and visit the crater area.",
+      "Return through Afar villages and continue back to Addis Ababa."
+    ],
+    "safetyNotes": "This trip requires heat tolerance and good walking fitness. Guides may adjust timing for weather and volcanic conditions.",
+    "coverImage": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80",
+    "galleryImages": [
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80"
+    ],
+    "status": "Published",
+    "createdBy": "admin",
+    "createdAt": "2026-06-17T09:27:40.723Z",
+    "updatedAt": "2026-06-17T09:27:40.723Z"
+  },
+  {
+    "id": "bale-mountains-weekend",
+    "title": "Bale Mountains Weekend",
+    "destination": "Bale Mountains National Park",
+    "description": "A cool highland escape with moorland views, forest walks, wildlife spotting, and fresh mountain air.",
+    "date": "2026-12-04",
+    "duration": "Weekend",
+    "price": 9800,
+    "difficulty": "Medium",
+    "availableSeats": 14,
+    "meetingPoint": "Megenagna, Addis Ababa",
+    "departureTime": "05:30",
+    "returnTime": "20:00",
+    "includes": [
+      "Transport",
+      "Guide",
+      "Lodge stay",
+      "Park entrance",
+      "Breakfast"
+    ],
+    "whatToBring": [
+      "Warm jacket",
+      "Rain shell",
+      "Reusable bottle",
+      "Trail snacks"
+    ],
+    "notIncluded": [
+      "Dinner",
+      "Personal purchases",
+      "Horse trekking"
+    ],
+    "itinerary": [
+      "Depart Addis Ababa and drive toward Bale.",
+      "Explore forest trails and viewpoints.",
+      "Visit Sanetti Plateau and nearby scenic stops.",
+      "Return after breakfast and a short morning walk."
+    ],
+    "safetyNotes": "Highland weather changes quickly. Bring warm layers and follow the guide during wildlife areas.",
+    "coverImage": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=80",
+    "galleryImages": [
+      "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+    ],
+    "status": "Draft",
+    "createdBy": "admin",
+    "createdAt": "2026-06-17T09:27:40.723Z",
+    "updatedAt": "2026-06-17T09:27:40.723Z"
+  }
+]
