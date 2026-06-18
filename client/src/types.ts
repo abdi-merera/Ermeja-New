@@ -41,6 +41,18 @@ export type ContactForm = {
   message: string;
 };
 
+export type AdminLoginForm = {
+  email: string;
+  password: string;
+};
+
+export type AdminSession = {
+  accessToken: string;
+  refreshToken: string;
+  email: string;
+  expiresAt: number;
+};
+
 export type Booking = {
   id: string;
   tripId: string;
@@ -75,8 +87,12 @@ export type AdminTripForm = {
   returnTime: string;
   includes: string;
   whatToBring: string;
+  notIncluded: string;
+  itinerary: string;
+  safetyNotes: string;
   description: string;
   coverImage: string;
+  galleryImages: string;
   status: TripStatus;
 };
 

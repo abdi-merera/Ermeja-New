@@ -96,51 +96,145 @@
     "updatedAt": "2026-06-17T09:27:40.723Z"
   },
   {
-    "id": "bale-mountains-weekend",
-    "title": "Bale Mountains Weekend",
-    "destination": "Bale Mountains National Park",
-    "description": "A cool highland escape with moorland views, forest walks, wildlife spotting, and fresh mountain air.",
-    "date": "2026-12-04",
-    "duration": "Weekend",
-    "price": 9800,
-    "difficulty": "Medium",
-    "availableSeats": 14,
-    "meetingPoint": "Megenagna, Addis Ababa",
+    "id": "entoto-sunrise-walk",
+    "title": "Entoto Sunrise Walk",
+    "destination": "Entoto Hills",
+    "description": "A refreshing early-morning walk above Addis Ababa with forest air, city views, sunrise stops, and a slow coffee finish.",
+    "date": "2026-09-20",
+    "duration": "Morning Trip",
+    "price": 1800,
+    "difficulty": "Easy",
+    "availableSeats": 20,
+    "meetingPoint": "Shiro Meda, Addis Ababa",
     "departureTime": "05:30",
-    "returnTime": "20:00",
+    "returnTime": "11:30",
+    "includes": [
+      "Guide",
+      "Coffee stop",
+      "Photography",
+      "Route support"
+    ],
+    "whatToBring": [
+      "Walking shoes",
+      "Water bottle",
+      "Light jacket",
+      "Sun protection"
+    ],
+    "notIncluded": [
+      "Breakfast",
+      "Personal transport",
+      "Personal expenses"
+    ],
+    "itinerary": [
+      "Meet before sunrise at Shiro Meda.",
+      "Walk through Entoto's forest trails and viewpoint route.",
+      "Stop for photos as the city wakes up below.",
+      "Finish with coffee and return before midday."
+    ],
+    "safetyNotes": "This is a light walk, but mornings can be cold. Bring a layer and stay with the group on forest paths.",
+    "coverImage": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=80",
+    "galleryImages": [
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+    ],
+    "status": "Published",
+    "createdBy": "admin",
+    "createdAt": "2026-06-18T10:20:00.000Z",
+    "updatedAt": "2026-06-18T10:20:00.000Z"
+  },
+  {
+    "id": "menagesha-forest-escape",
+    "title": "Menagesha Forest Escape",
+    "destination": "Menagesha Suba Forest",
+    "description": "A green forest trail day with shaded climbs, old-growth trees, picnic pauses, and a calmer pace outside the city.",
+    "date": "2026-09-27",
+    "duration": "Day Trip",
+    "price": 2600,
+    "difficulty": "Medium",
+    "availableSeats": 16,
+    "meetingPoint": "Megenagna, Addis Ababa",
+    "departureTime": "06:30",
+    "returnTime": "18:00",
     "includes": [
       "Transport",
       "Guide",
-      "Lodge stay",
-      "Park entrance",
-      "Breakfast"
+      "Entrance fee",
+      "Lunch snack"
     ],
     "whatToBring": [
-      "Warm jacket",
-      "Rain shell",
-      "Reusable bottle",
-      "Trail snacks"
+      "Trail shoes",
+      "Rain jacket",
+      "Water bottle",
+      "Small backpack"
+    ],
+    "notIncluded": [
+      "Full lunch",
+      "Personal snacks",
+      "Personal insurance"
+    ],
+    "itinerary": [
+      "Depart Addis Ababa and drive toward Menagesha.",
+      "Begin the forest trail with guided pacing.",
+      "Take a picnic and photo break under the trees.",
+      "Return to Addis after an easy afternoon descent."
+    ],
+    "safetyNotes": "Forest trails can be muddy after rain. Wear shoes with grip and keep water-resistant layers nearby.",
+    "coverImage": "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1400&q=80",
+    "galleryImages": [
+      "https://images.unsplash.com/photo-1473773508845-188df298d2d1?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=900&q=80"
+    ],
+    "status": "Published",
+    "createdBy": "admin",
+    "createdAt": "2026-06-18T10:20:00.000Z",
+    "updatedAt": "2026-06-18T10:20:00.000Z"
+  },
+  {
+    "id": "blue-nile-falls-weekend",
+    "title": "Blue Nile Falls Weekend",
+    "destination": "Bahir Dar and Blue Nile Falls",
+    "description": "A weekend route built around waterfall views, relaxed lakeside time, easy walking, and warm group travel rhythm.",
+    "date": "2026-10-24",
+    "duration": "Weekend",
+    "price": 11200,
+    "difficulty": "Easy",
+    "availableSeats": 12,
+    "meetingPoint": "Bole area, Addis Ababa",
+    "departureTime": "07:00",
+    "returnTime": "20:30",
+    "includes": [
+      "Transport",
+      "Guide",
+      "Hotel stay",
+      "Breakfast",
+      "Entrance fee"
+    ],
+    "whatToBring": [
+      "Comfortable shoes",
+      "Light rain jacket",
+      "Power bank",
+      "Camera"
     ],
     "notIncluded": [
       "Dinner",
-      "Personal purchases",
-      "Horse trekking"
+      "Boat extras",
+      "Personal expenses"
     ],
     "itinerary": [
-      "Depart Addis Ababa and drive toward Bale.",
-      "Explore forest trails and viewpoints.",
-      "Visit Sanetti Plateau and nearby scenic stops.",
-      "Return after breakfast and a short morning walk."
+      "Travel from Addis Ababa toward Bahir Dar.",
+      "Settle in and enjoy a relaxed lakeside evening.",
+      "Walk the Blue Nile Falls route with the guide.",
+      "Return after breakfast and a final viewpoint stop."
     ],
-    "safetyNotes": "Highland weather changes quickly. Bring warm layers and follow the guide during wildlife areas.",
-    "coverImage": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=80",
+    "safetyNotes": "Waterfall paths may be slippery in wet weather. Follow the guide at viewpoints and bridges.",
+    "coverImage": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80",
     "galleryImages": [
-      "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
     ],
-    "status": "Draft",
+    "status": "Published",
     "createdBy": "admin",
-    "createdAt": "2026-06-17T09:27:40.723Z",
-    "updatedAt": "2026-06-17T09:27:40.723Z"
+    "createdAt": "2026-06-18T10:20:00.000Z",
+    "updatedAt": "2026-06-18T10:20:00.000Z"
   }
 ]

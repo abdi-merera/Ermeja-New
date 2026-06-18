@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { CalendarDays, CheckCircle2, Clock, Compass, Filter, Gauge, MapPin, MessageCircle, Search, Ticket, Users } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, Compass, Filter, Gauge, MessageCircle, Search, Ticket, Users } from "lucide-react";
 import { orangeButton, whatsappNumber, yellowButton } from "../constants";
+import { TripCard } from "../components/TripCard";
 import type { Trip } from "../types";
 import { formatDate, formatPrice } from "../utils";
 
@@ -191,9 +192,9 @@ export function TripsPage({ trips, chooseTrip }: { trips: Trip[]; chooseTrip: (t
           </div>
 
           {filteredTrips.length ? (
-            <div className="grid gap-6">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {filteredTrips.map((trip) => (
-                <TripRow key={trip.id} trip={trip} onSelect={chooseTrip} />
+                <TripCard key={trip.id} trip={trip} onSelect={chooseTrip} />
               ))}
             </div>
           ) : (
@@ -268,86 +269,6 @@ function SupportCard({ Icon, title, text }: { Icon: typeof CalendarDays; title: 
       </div>
       <h3 className="mt-4 text-lg font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-300">{text}</p>
-    </div>
-  );
-}
-
-function TripRow({ trip, onSelect }: { trip: Trip; onSelect: (trip: Trip) => void }) {
-  return (
-    <article className="group overflow-hidden rounded-[2rem] border border-[#114F3C]/10 bg-white p-2 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#114F3C]/10 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
-      <div className="grid gap-0 overflow-hidden rounded-[1.5rem] lg:grid-cols-[300px_1fr]">
-        <div className="relative min-h-72 overflow-hidden bg-[#FCE4B4] lg:min-h-full">
-          <img className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" src={trip.coverImage} alt={trip.destination} />
-          <div className="absolute inset-0 bg-[#114F3C]/10" />
-          <div className="absolute left-4 top-4 rounded-full bg-[#F8A900] px-4 py-2 text-sm font-black text-[#114F3C] shadow-lg">{trip.duration}</div>
-          <div className="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur dark:bg-[#10241C]/90">
-            <p className="flex items-center gap-2 text-sm font-black text-[#F54C0D]">
-              <MapPin className="h-4 w-4" />
-              {trip.destination}
-            </p>
-            <p className="mt-1 truncate text-xs font-semibold text-stone-600 dark:text-stone-300">Meeting: {trip.meetingPoint}</p>
-          </div>
-        </div>
-
-        <div className="p-5 sm:p-6">
-          <div className="flex flex-col justify-between gap-5 xl:flex-row xl:items-start">
-            <div className="min-w-0">
-              <h3 className="text-2xl font-black leading-tight text-[#114F3C] dark:text-[#F8A900] sm:text-3xl">{trip.title}</h3>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-700 dark:text-stone-300">{trip.description}</p>
-            </div>
-            <div className="shrink-0 rounded-2xl bg-[#FCE4B4] px-5 py-4 text-left text-[#114F3C] shadow-sm xl:text-right">
-              <p className="text-xs font-black uppercase tracking-[0.14em]">Price</p>
-              <p className="mt-1 text-2xl font-black">{formatPrice(trip.price)}</p>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Fact Icon={CalendarDays} label="Date" value={formatDate(trip.date)} />
-            <Fact Icon={Gauge} label="Difficulty" value={trip.difficulty} />
-            <Fact Icon={Users} label="Seats" value={`${trip.availableSeats} open`} />
-            <Fact Icon={Ticket} label="Package" value={trip.includes.slice(0, 2).join(", ") || "Inclusive"} />
-          </div>
-
-          {trip.includes.length ? (
-            <div className="mt-5 rounded-2xl bg-stone-50 p-4 dark:bg-white/5">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-[#F54C0D]">Included highlights</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {trip.includes.slice(0, 4).map((item) => (
-                  <span key={item} className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-black text-[#114F3C] shadow-sm dark:bg-white/10 dark:text-stone-200">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-[#F54C0D]" />
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          <div className="mt-6 flex flex-col gap-3 border-t border-[#114F3C]/10 pt-5 dark:border-white/10 sm:flex-row sm:items-center">
-            <button type="button" onClick={() => onSelect(trip)} className={`rounded-2xl px-5 py-4 text-sm font-black transition ${yellowButton}`}>
-              View Trip Details
-            </button>
-            <a className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black transition ${orangeButton}`} href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Ermija Hiking, I want to book ${trip.title}.`)}`}>
-              <MessageCircle className="h-4 w-4" />
-              Book on WhatsApp
-            </a>
-            <p className="text-sm font-semibold leading-6 text-stone-500 dark:text-stone-400 sm:ml-auto">
-              Meeting: {trip.meetingPoint}
-            </p>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function Fact({ Icon, label, value }: { Icon: typeof CalendarDays; label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-2xl bg-stone-50 p-4 text-sm shadow-sm dark:bg-white/5">
-      <div className="flex items-center gap-2 text-[#F54C0D]">
-        <Icon className="h-4 w-4 shrink-0" />
-        <span className="text-xs font-black uppercase tracking-[0.12em]">{label}</span>
-      </div>
-      <p className="mt-2 truncate font-bold text-stone-700 dark:text-stone-300">{value}</p>
     </div>
   );
 }

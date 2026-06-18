@@ -2,7 +2,7 @@ import { Camera, Compass, Leaf, Map, ShieldCheck, Star, Users } from "lucide-rea
 import type { LucideIcon } from "lucide-react";
 import type { AdminTripForm, Page } from "./types";
 
-export const whatsappNumber = "251911234567";
+export const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "251911234567";
 export const brandGreen = "bg-[#114F3C]";
 export const yellowButton = "bg-[#F8A900] text-[#114F3C] hover:bg-[#ffc247]";
 export const orangeButton = "bg-[#F54C0D] text-white hover:bg-[#d63f07]";
@@ -85,7 +85,11 @@ export const emptyAdminTripForm: AdminTripForm = {
   returnTime: "",
   includes: "Transport, Guide, Entrance fee",
   whatToBring: "Water bottle, Comfortable shoes, Light jacket",
+  notIncluded: "Personal expenses, Extra snacks, Personal insurance",
+  itinerary: "Meet the guide and group.\nTravel to the destination.\nEnjoy the guided hiking experience.\nReturn with the group.",
+  safetyNotes: "Trip details are checked by Ermija Hiking staff before publication.",
   description: "",
   coverImage: "",
+  galleryImages: "",
   status: "Draft"
 };

@@ -1,8 +1,9 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 dotenv.config();
@@ -11,9 +12,58 @@ const app = express();
 const port = process.env.PORT || 5000;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, "..", "data");
+const uploadDir = join(__dirname, "..", "uploads");
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "";
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5174";
+const whatsappNumber = process.env.WHATSAPP_NUMBER || "251911234567";
+const adminEmails = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 
-app.use(cors());
+const normalizedSupabaseUrl = supabaseUrl.replace(/\/$/, "");
+
+const ensureTrustedSupabaseUrl = (value) => {
+  if (!value) {
+    return "";
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || !url.hostname.endsWith(".supabase.co")) {
+      throw new Error("SUPABASE_URL must be an https://*.supabase.co URL.");
+    }
+    return url.toString().replace(/\/$/, "");
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Invalid SUPABASE_URL.");
+  }
+};
+
+const trustedSupabaseUrl = ensureTrustedSupabaseUrl(normalizedSupabaseUrl);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || origin === allowedOrigin) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin not allowed by CORS."));
+    }
+  })
+);
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
 app.use(express.json({ limit: "2mb" }));
+mkdirSync(uploadDir, { recursive: true });
+app.use("/uploads", express.static(uploadDir));
 
 const now = new Date().toISOString();
 
@@ -89,6 +139,146 @@ const seedTrips = [
     updatedAt: now
   },
   {
+    id: "entoto-sunrise-walk",
+    title: "Entoto Sunrise Walk",
+    destination: "Entoto Hills",
+    description:
+      "A refreshing early-morning walk above Addis Ababa with forest air, city views, sunrise stops, and a slow coffee finish.",
+    date: "2026-09-20",
+    duration: "Morning Trip",
+    price: 1800,
+    difficulty: "Easy",
+    availableSeats: 20,
+    meetingPoint: "Shiro Meda, Addis Ababa",
+    departureTime: "05:30",
+    returnTime: "11:30",
+    includes: ["Guide", "Coffee stop", "Photography", "Route support"],
+    whatToBring: ["Walking shoes", "Water bottle", "Light jacket", "Sun protection"],
+    notIncluded: ["Breakfast", "Personal transport", "Personal expenses"],
+    itinerary: [
+      "Meet before sunrise at Shiro Meda.",
+      "Walk through Entoto's forest trails and viewpoint route.",
+      "Stop for photos as the city wakes up below.",
+      "Finish with coffee and return before midday."
+    ],
+    safetyNotes: "This is a light walk, but mornings can be cold. Bring a layer and stay with the group on forest paths.",
+    coverImage:
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=80",
+    galleryImages: [
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+    ],
+    status: "Published",
+    createdBy: "admin",
+    createdAt: now,
+    updatedAt: now
+  },
+  {
+    id: "menagesha-forest-escape",
+    title: "Menagesha Forest Escape",
+    destination: "Menagesha Suba Forest",
+    description:
+      "A green forest trail day with shaded climbs, old-growth trees, picnic pauses, and a calmer pace outside the city.",
+    date: "2026-09-27",
+    duration: "Day Trip",
+    price: 2600,
+    difficulty: "Medium",
+    availableSeats: 16,
+    meetingPoint: "Megenagna, Addis Ababa",
+    departureTime: "06:30",
+    returnTime: "18:00",
+    includes: ["Transport", "Guide", "Entrance fee", "Lunch snack"],
+    whatToBring: ["Trail shoes", "Rain jacket", "Water bottle", "Small backpack"],
+    notIncluded: ["Full lunch", "Personal snacks", "Personal insurance"],
+    itinerary: [
+      "Depart Addis Ababa and drive toward Menagesha.",
+      "Begin the forest trail with guided pacing.",
+      "Take a picnic and photo break under the trees.",
+      "Return to Addis after an easy afternoon descent."
+    ],
+    safetyNotes: "Forest trails can be muddy after rain. Wear shoes with grip and keep water-resistant layers nearby.",
+    coverImage:
+      "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1400&q=80",
+    galleryImages: [
+      "https://images.unsplash.com/photo-1473773508845-188df298d2d1?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=900&q=80"
+    ],
+    status: "Published",
+    createdBy: "admin",
+    createdAt: now,
+    updatedAt: now
+  },
+  {
+    id: "blue-nile-falls-weekend",
+    title: "Blue Nile Falls Weekend",
+    destination: "Bahir Dar and Blue Nile Falls",
+    description:
+      "A weekend route built around waterfall views, relaxed lakeside time, easy walking, and warm group travel rhythm.",
+    date: "2026-10-24",
+    duration: "Weekend",
+    price: 11200,
+    difficulty: "Easy",
+    availableSeats: 12,
+    meetingPoint: "Bole area, Addis Ababa",
+    departureTime: "07:00",
+    returnTime: "20:30",
+    includes: ["Transport", "Guide", "Hotel stay", "Breakfast", "Entrance fee"],
+    whatToBring: ["Comfortable shoes", "Light rain jacket", "Power bank", "Camera"],
+    notIncluded: ["Dinner", "Boat extras", "Personal expenses"],
+    itinerary: [
+      "Travel from Addis Ababa toward Bahir Dar.",
+      "Settle in and enjoy a relaxed lakeside evening.",
+      "Walk the Blue Nile Falls route with the guide.",
+      "Return after breakfast and a final viewpoint stop."
+    ],
+    safetyNotes: "Waterfall paths may be slippery in wet weather. Follow the guide at viewpoints and bridges.",
+    coverImage:
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80",
+    galleryImages: [
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+    ],
+    status: "Published",
+    createdBy: "admin",
+    createdAt: now,
+    updatedAt: now
+  },
+  {
+    id: "debre-libanos-gorge-walk",
+    title: "Debre Libanos Gorge Walk",
+    destination: "Debre Libanos and Jemma Gorge",
+    description:
+      "A scenic day trip with monastery history, big gorge views, a guided walking route, and a strong photography finish.",
+    date: "2026-11-21",
+    duration: "Day Trip",
+    price: 2900,
+    difficulty: "Medium",
+    availableSeats: 18,
+    meetingPoint: "Piassa, Addis Ababa",
+    departureTime: "06:00",
+    returnTime: "19:00",
+    includes: ["Transport", "Guide", "Entrance fee", "Lunch"],
+    whatToBring: ["Comfortable shoes", "Hat", "Water bottle", "Light jacket"],
+    notIncluded: ["Personal purchases", "Extra snacks", "Personal insurance"],
+    itinerary: [
+      "Depart Addis Ababa in the morning.",
+      "Visit Debre Libanos and continue to the gorge viewpoint.",
+      "Walk the guided route with photo stops.",
+      "Share lunch and return to Addis in the evening."
+    ],
+    safetyNotes: "Some viewpoint edges are exposed. Keep distance from cliff edges and follow guide instructions.",
+    coverImage:
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1400&q=80",
+    galleryImages: [
+      "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+    ],
+    status: "Published",
+    createdBy: "admin",
+    createdAt: now,
+    updatedAt: now
+  },
+  {
     id: "bale-mountains-weekend",
     title: "Bale Mountains Weekend",
     destination: "Bale Mountains National Park",
@@ -133,7 +323,7 @@ const ensureDataDir = () => {
 
 const readCollection = (fileName, fallback) => {
   ensureDataDir();
-  const filePath = join(dataDir, fileName);
+  const filePath = safeJoin(dataDir, fileName);
 
   if (!existsSync(filePath)) {
     writeFileSync(filePath, JSON.stringify(fallback, null, 2));
@@ -149,7 +339,7 @@ const readCollection = (fileName, fallback) => {
 
 const writeCollection = (fileName, value) => {
   ensureDataDir();
-  writeFileSync(join(dataDir, fileName), JSON.stringify(value, null, 2));
+  writeFileSync(safeJoin(dataDir, fileName), JSON.stringify(value, null, 2));
 };
 
 let trips = readCollection("trips.json", seedTrips);
@@ -171,6 +361,114 @@ const publicTrip = (trip) => ({
   bookingsCount: bookings.filter((booking) => booking.tripId === trip.id).length
 });
 
+function safeJoin(baseDir, fileName) {
+  const basePath = resolve(baseDir);
+  const targetPath = resolve(basePath, fileName);
+
+  if (targetPath !== basePath && !targetPath.startsWith(`${basePath}\\`) && !targetPath.startsWith(`${basePath}/`)) {
+    throw new Error("Invalid file path.");
+  }
+
+  return targetPath;
+}
+
+function textValue(value, maxLength) {
+  return String(value || "").trim().slice(0, maxLength);
+}
+
+function isTooLong(value, maxLength) {
+  return String(value || "").length > maxLength;
+}
+
+function requireTrustedOrigin(req, res, next) {
+  const origin = req.get("origin");
+
+  if (origin && origin !== allowedOrigin) {
+    res.status(403).json({ message: "Request origin is not allowed." });
+    return;
+  }
+
+  next();
+}
+
+function requireJsonBody(req, res, next) {
+  if (!req.is("application/json")) {
+    res.status(415).json({ message: "Content-Type must be application/json." });
+    return;
+  }
+
+  next();
+}
+
+function createRateLimiter({ windowMs, max }) {
+  const hits = new Map();
+
+  return (req, res, next) => {
+    const key = req.ip || req.socket.remoteAddress || "unknown";
+    const nowMs = Date.now();
+    const current = hits.get(key) || { count: 0, resetAt: nowMs + windowMs };
+
+    if (current.resetAt <= nowMs) {
+      current.count = 0;
+      current.resetAt = nowMs + windowMs;
+    }
+
+    current.count += 1;
+    hits.set(key, current);
+
+    if (current.count > max) {
+      res.status(429).json({ message: "Too many requests. Please try again later." });
+      return;
+    }
+
+    next();
+  };
+}
+
+const publicWriteLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10 });
+
+const requireAdmin = async (req, res, next) => {
+  if (!trustedSupabaseUrl || !supabaseAnonKey || !adminEmails.length) {
+    res.status(500).json({ message: "Admin auth is not configured." });
+    return;
+  }
+
+  const authHeader = req.get("authorization") || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+
+  if (!token) {
+    res.status(401).json({ message: "Admin login required." });
+    return;
+  }
+
+  try {
+    const response = await fetch(`${trustedSupabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      res.status(401).json({ message: "Admin session expired. Please log in again." });
+      return;
+    }
+
+    const user = await response.json();
+    const email = String(user.email || "").toLowerCase();
+
+    if (!adminEmails.includes(email)) {
+      res.status(403).json({ message: "This account is not allowed to manage the admin dashboard." });
+      return;
+    }
+
+    req.adminUser = user;
+    next();
+  } catch {
+    res.status(503).json({ message: "Unable to verify admin session." });
+  }
+};
+
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
@@ -180,9 +478,14 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.get("/api/trips", (req, res) => {
-  const includeDrafts = req.query.includeDrafts === "true";
-  const visibleTrips = includeDrafts ? trips : trips.filter((trip) => trip.status === "Published");
+  const visibleTrips = trips.filter((trip) => trip.status === "Published");
   res.json(visibleTrips.map(publicTrip));
+});
+
+app.use("/api/admin", requireTrustedOrigin);
+
+app.get("/api/admin/trips", requireAdmin, (_req, res) => {
+  res.json(trips.map(publicTrip));
 });
 
 app.get("/api/trips/:id", (req, res) => {
@@ -196,11 +499,16 @@ app.get("/api/trips/:id", (req, res) => {
   res.json(publicTrip(trip));
 });
 
-app.post("/api/bookings", (req, res) => {
+app.post("/api/bookings", requireTrustedOrigin, requireJsonBody, publicWriteLimiter, (req, res) => {
   const { tripId, customerName, phone, numberOfPeople, message } = req.body;
 
   if (!tripId || !customerName || !phone || !numberOfPeople) {
     res.status(400).json({ message: "Trip, name, phone, and number of people are required." });
+    return;
+  }
+
+  if (isTooLong(tripId, 140) || isTooLong(customerName, 80) || isTooLong(phone, 32) || isTooLong(message, 800)) {
+    res.status(400).json({ message: "Booking fields are too long." });
     return;
   }
 
@@ -221,10 +529,10 @@ app.post("/api/bookings", (req, res) => {
   const booking = {
     id: `booking-${Date.now()}`,
     tripId,
-    customerName,
-    phone,
+    customerName: textValue(customerName, 80),
+    phone: textValue(phone, 32),
     numberOfPeople: people,
-    message: message || "",
+    message: textValue(message, 800),
     status: "New",
     createdAt: new Date().toISOString()
   };
@@ -237,17 +545,17 @@ app.post("/api/bookings", (req, res) => {
 
   res.status(201).json({
     booking,
-    whatsappUrl: `https://wa.me/251911234567?text=${encodeURIComponent(
+    whatsappUrl: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
       `Hello Ermija Hiking, I want to book ${trip.title} for ${people} people. My name is ${customerName}.`
     )}`
   });
 });
 
-app.get("/api/admin/bookings", (_req, res) => {
+app.get("/api/admin/bookings", requireAdmin, (_req, res) => {
   res.json(bookings);
 });
 
-app.patch("/api/admin/bookings/:id", (req, res) => {
+app.patch("/api/admin/bookings/:id", requireAdmin, (req, res) => {
   const bookingIndex = bookings.findIndex((booking) => booking.id === req.params.id);
 
   if (bookingIndex === -1) {
@@ -265,7 +573,7 @@ app.patch("/api/admin/bookings/:id", (req, res) => {
   res.json(bookings[bookingIndex]);
 });
 
-app.post("/api/contact", (req, res) => {
+app.post("/api/contact", requireTrustedOrigin, requireJsonBody, publicWriteLimiter, (req, res) => {
   const { name, phone, email, message } = req.body;
 
   if (!name || !phone || !message) {
@@ -273,12 +581,17 @@ app.post("/api/contact", (req, res) => {
     return;
   }
 
+  if (isTooLong(name, 80) || isTooLong(phone, 32) || isTooLong(email, 120) || isTooLong(message, 1200)) {
+    res.status(400).json({ message: "Contact fields are too long." });
+    return;
+  }
+
   const contactMessage = {
     id: `message-${Date.now()}`,
-    name,
-    phone,
-    email: email || "",
-    message,
+    name: textValue(name, 80),
+    phone: textValue(phone, 32),
+    email: textValue(email, 120),
+    message: textValue(message, 1200),
     status: "New",
     createdAt: new Date().toISOString()
   };
@@ -288,11 +601,11 @@ app.post("/api/contact", (req, res) => {
   res.status(201).json(contactMessage);
 });
 
-app.get("/api/admin/messages", (_req, res) => {
+app.get("/api/admin/messages", requireAdmin, (_req, res) => {
   res.json(contactMessages);
 });
 
-app.patch("/api/admin/messages/:id", (req, res) => {
+app.patch("/api/admin/messages/:id", requireAdmin, (req, res) => {
   const messageIndex = contactMessages.findIndex((message) => message.id === req.params.id);
 
   if (messageIndex === -1) {
@@ -310,8 +623,38 @@ app.patch("/api/admin/messages/:id", (req, res) => {
   res.json(contactMessages[messageIndex]);
 });
 
-app.post("/api/admin/trips", (req, res) => {
-  const { title, destination, date, duration, price, difficulty, availableSeats, meetingPoint, departureTime, returnTime, includes, whatToBring, description, coverImage, galleryImages, status } = req.body;
+app.post(
+  "/api/admin/uploads",
+  requireAdmin,
+  express.raw({ type: ["image/jpeg", "image/png", "image/webp", "image/gif"], limit: "8mb" }),
+  (req, res) => {
+    const extensionByType = {
+      "image/jpeg": ".jpg",
+      "image/png": ".png",
+      "image/webp": ".webp",
+      "image/gif": ".gif"
+    };
+    const contentType = req.get("content-type") || "";
+    const extension = extensionByType[contentType];
+
+    if (!extension) {
+      res.status(415).json({ message: "Please upload a JPG, PNG, WEBP, or GIF image." });
+      return;
+    }
+
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+      res.status(400).json({ message: "No image file was received." });
+      return;
+    }
+
+    const fileName = `${Date.now()}-${randomUUID()}${extension}`;
+    writeFileSync(safeJoin(uploadDir, fileName), req.body);
+    res.status(201).json({ url: `/uploads/${fileName}` });
+  }
+);
+
+app.post("/api/admin/trips", requireAdmin, (req, res) => {
+  const { title, destination, date, duration, price, difficulty, availableSeats, meetingPoint, departureTime, returnTime, includes, whatToBring, notIncluded, itinerary, safetyNotes, description, coverImage, galleryImages, status } = req.body;
 
   if (!title || !destination || !date || !duration || !price || !difficulty || !availableSeats || !description) {
     res.status(400).json({ message: "Missing required trip fields." });
@@ -336,9 +679,9 @@ app.post("/api/admin/trips", (req, res) => {
     returnTime: returnTime || "To be announced",
     includes: Array.isArray(includes) ? includes : String(includes || "").split(",").map((item) => item.trim()).filter(Boolean),
     whatToBring: Array.isArray(whatToBring) ? whatToBring : String(whatToBring || "").split(",").map((item) => item.trim()).filter(Boolean),
-    notIncluded: ["Personal expenses"],
-    itinerary: ["Meet the guide and group.", "Travel to the destination.", "Enjoy the guided hiking experience.", "Return with the group."],
-    safetyNotes: "Trip details are checked by Ermija Hiking staff before publication.",
+    notIncluded: Array.isArray(notIncluded) && notIncluded.length ? notIncluded : ["Personal expenses"],
+    itinerary: Array.isArray(itinerary) && itinerary.length ? itinerary : ["Meet the guide and group.", "Travel to the destination.", "Enjoy the guided hiking experience.", "Return with the group."],
+    safetyNotes: safetyNotes || "Trip details are checked by Ermija Hiking staff before publication.",
     coverImage: coverImage || "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80",
     galleryImages: Array.isArray(galleryImages) ? galleryImages : [],
     status: status === "Published" ? "Published" : "Draft",
@@ -352,7 +695,7 @@ app.post("/api/admin/trips", (req, res) => {
   res.status(201).json(trip);
 });
 
-app.patch("/api/admin/trips/:id", (req, res) => {
+app.patch("/api/admin/trips/:id", requireAdmin, (req, res) => {
   const tripIndex = trips.findIndex((trip) => trip.id === req.params.id);
 
   if (tripIndex === -1) {
@@ -372,7 +715,7 @@ app.patch("/api/admin/trips/:id", (req, res) => {
   res.json(trips[tripIndex]);
 });
 
-app.delete("/api/admin/trips/:id", (req, res) => {
+app.delete("/api/admin/trips/:id", requireAdmin, (req, res) => {
   const beforeCount = trips.length;
   trips = trips.filter((trip) => trip.id !== req.params.id);
 

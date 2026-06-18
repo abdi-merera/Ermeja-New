@@ -95,6 +95,7 @@ const splitHighlights = [
 
 function CircularSplitGallery({ images, activeImage, setActiveImage }: { images: string[]; activeImage: number; setActiveImage: (index: number) => void }) {
   const [isGalleryHovered, setIsGalleryHovered] = useState(false);
+  const [hoveredImage, setHoveredImage] = useState<number | null>(null);
   const splitImages = images.slice(0, 4);
 
   return (
@@ -105,7 +106,7 @@ function CircularSplitGallery({ images, activeImage, setActiveImage }: { images:
         onMouseEnter={() => setIsGalleryHovered(true)}
         onMouseLeave={() => {
           setIsGalleryHovered(false);
-          setActiveImage(0);
+          setHoveredImage(null);
         }}
       >
         {splitImages.map((image, index) => (
@@ -116,16 +117,24 @@ function CircularSplitGallery({ images, activeImage, setActiveImage }: { images:
             className="col-start-1 row-start-1 aspect-square w-full cursor-pointer object-cover shadow-2xl shadow-black/25"
             style={
               {
-                "--_i": 0,
+                "--_i": hoveredImage === index ? 1 : 0,
                 borderRadius: "50%",
                 clipPath: splitClipPaths[index],
                 transform: isGalleryHovered ? "translate(0,0)" : splitTransforms[index],
-                transition: ".3s, z-index 0s .3s",
-                zIndex: 0
+                transition: hoveredImage === index ? "transform .12s, clip-path .18s .08s, z-index 0s" : ".18s, z-index 0s .18s",
+                zIndex: hoveredImage === index ? 10 : 0
               } as CSSProperties
             }
-            onMouseEnter={() => setActiveImage(index)}
-            onFocus={() => setActiveImage(index)}
+            onMouseEnter={() => {
+              setActiveImage(index);
+              setHoveredImage(index);
+            }}
+            onMouseLeave={() => setHoveredImage(null)}
+            onFocus={() => {
+              setActiveImage(index);
+              setHoveredImage(index);
+            }}
+            onBlur={() => setHoveredImage(null)}
             tabIndex={0}
           />
         ))}
