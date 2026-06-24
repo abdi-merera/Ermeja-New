@@ -21,9 +21,9 @@ export function Navbar({
 }) {
   return (
     <header className={`sticky top-0 z-40 ${brandGreen} border-b border-white/10 shadow-lg shadow-[#114F3C]/20`}>
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <div className="flex w-full items-center justify-start px-4 py-4 sm:px-6 lg:px-8">
         <Logo onClick={() => choosePage("home")} />
-        <nav className="hidden items-center gap-1 lg:flex">
+        <nav className="ml-auto hidden items-center gap-1 lg:flex">
           {navItems.map((item) => (
             <button
               key={item.page}
@@ -37,13 +37,18 @@ export function Navbar({
             </button>
           ))}
         </nav>
-        <div className="hidden items-center gap-3 sm:flex">
+        <div className="hidden items-center gap-3 sm:ml-5 sm:flex lg:ml-24">
           <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-          <a className={`rounded-lg px-4 py-3 text-sm font-black transition ${yellowButton}`} href={`https://wa.me/${whatsappNumber}`}>
-            WhatsApp
+          <a
+            className={`inline-flex items-center justify-center rounded-lg p-3 transition ${yellowButton}`}
+            href={`https://wa.me/${whatsappNumber}`}
+            aria-label="Open WhatsApp chat"
+            title="WhatsApp"
+          >
+            <WhatsAppIcon className="h-5 w-5" />
           </a>
         </div>
-        <button type="button" className="rounded-lg bg-white/10 p-3 text-white lg:hidden" onClick={() => setMobileOpen((open) => !open)}>
+        <button type="button" className="ml-auto rounded-lg bg-white/10 p-3 text-white lg:ml-0 lg:hidden" onClick={() => setMobileOpen((open) => !open)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
@@ -60,16 +65,29 @@ export function Navbar({
                 {item.label}
               </button>
             ))}
-            <div className="grid gap-2 border-t border-white/10 pt-2 sm:hidden">
+            <div className="flex items-center gap-3 border-t border-white/10 pt-2 sm:hidden">
               <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-              <a className={`rounded-lg px-4 py-3 text-center text-sm font-black ${yellowButton}`} href={`https://wa.me/${whatsappNumber}`}>
-                WhatsApp
+              <a
+                className={`inline-flex items-center justify-center rounded-lg p-3 ${yellowButton}`}
+                href={`https://wa.me/${whatsappNumber}`}
+                aria-label="Open WhatsApp chat"
+                title="WhatsApp"
+              >
+                <WhatsAppIcon className="h-5 w-5" />
               </a>
             </div>
           </div>
         </div>
       ) : null}
     </header>
+  );
+}
+
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 32 32" aria-hidden="true" focusable="false" fill="currentColor">
+      <path d="M16 3C8.8 3 3 8.8 3 15.9c0 2.4.7 4.8 2 6.8L3.7 29l6.4-1.7c1.9 1 4 1.5 5.9 1.5 7.2 0 13-5.8 13-12.9S23.2 3 16 3Zm0 23.6c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.8 1 1-3.7-.2-.4c-1.1-1.7-1.7-3.7-1.7-5.8C5.9 10.5 10.4 5.9 16 5.9s10.1 4.6 10.1 10.1S21.6 26.6 16 26.6Zm5.7-7.6c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-.9 1.2-.3.2-.6.1c-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.6-1.8-1.7-2.1s0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2.1-.4 0-.6s-.7-1.7-1-2.3c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.9 1.2 3.3 1.4 3.5c.2.2 2.5 3.8 6 5.3.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 1.8-.8 2.1-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4Z" />
+    </svg>
   );
 }
 
@@ -83,7 +101,6 @@ function ThemeToggle({ isDarkMode, setIsDarkMode }: { isDarkMode: boolean; setIs
       title={isDarkMode ? "Light mode" : "Dark mode"}
     >
       {isDarkMode ? <Sun className="h-5 w-5 text-[#F8A900]" /> : <Moon className="h-5 w-5 text-[#F8A900]" />}
-      <span className="hidden lg:inline">{isDarkMode ? "Light" : "Dark"}</span>
     </button>
   );
 }

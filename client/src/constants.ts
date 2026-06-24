@@ -31,8 +31,7 @@ export const navItems: { label: string; page: Page }[] = [
   { label: "Trips", page: "trips" },
   { label: "Gallery", page: "gallery" },
   { label: "About", page: "about" },
-  { label: "Contact", page: "contact" },
-  { label: "Admin", page: "admin" }
+  { label: "Contact", page: "contact" }
 ];
 
 export const trustItems: { title: string; text: string; Icon: LucideIcon }[] = [
