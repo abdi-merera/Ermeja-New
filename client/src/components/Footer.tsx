@@ -12,7 +12,7 @@ export function Footer() {
         <div>
           <h3 className="font-black text-[#F8A900]">Contact</h3>
           <div className="mt-4 space-y-2 text-sm text-white/75">
-            <p>Phone: +251 911 234 567</p>
+            <p>Phone: +251 913 181 343</p>
             <p>Email: hello@ermijahiking.com</p>
             <p>Addis Ababa, Ethiopia</p>
           </div>
@@ -21,9 +21,11 @@ export function Footer() {
           <h3 className="font-black text-[#F8A900]">Social</h3>
           <div className="mt-4 flex flex-wrap gap-3">
             {[
+              ["Facebook", "https://facebook.com/"],
+              ["Telegram", "https://t.me/"],
+              ["WhatsApp", `https://wa.me/${whatsappNumber}`],
               ["Instagram", "https://instagram.com/"],
-              ["TikTok", "https://www.tiktok.com/"],
-              ["WhatsApp", `https://wa.me/${whatsappNumber}`]
+              ["TikTok", "https://www.tiktok.com/"]
             ].map(([item, href]) => (
               <a key={item} className="rounded-lg border border-white/15 px-4 py-2 text-sm font-bold text-white hover:bg-white/10" href={href}>
                 {item}

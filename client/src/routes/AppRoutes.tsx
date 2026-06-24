@@ -6,7 +6,7 @@ import { GalleryPage } from "../pages/GalleryPage";
 import { HomePage } from "../pages/HomePage";
 import { TripDetailPage } from "../pages/TripDetailPage";
 import { TripsPage } from "../pages/TripsPage";
-import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, BookingForm, BookingSubmitHandler, ContactForm, ContactMessage, ContactSubmitHandler, Page, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, BookingForm, BookingSubmitHandler, ContactForm, ContactMessage, ContactSubmitHandler, GalleryHighlight, Page, Trip, TripStatus } from "../types";
 
 export function AppRoutes({
   page,
@@ -14,6 +14,7 @@ export function AppRoutes({
   adminTrips,
   selectedTrip,
   galleryImages,
+  galleryHighlight,
   bookingForm,
   setBookingForm,
   submitBooking,
@@ -34,6 +35,7 @@ export function AppRoutes({
   deleteAdminTrip,
   updateBookingStatus,
   updateMessageStatus,
+  updateGalleryHighlight,
   bookings,
   messages,
   choosePage,
@@ -45,6 +47,7 @@ export function AppRoutes({
   adminTrips: Trip[];
   selectedTrip: Trip | null;
   galleryImages: string[];
+  galleryHighlight: GalleryHighlight;
   bookingForm: BookingForm;
   setBookingForm: (form: BookingForm) => void;
   submitBooking: BookingSubmitHandler;
@@ -65,6 +68,7 @@ export function AppRoutes({
   deleteAdminTrip: (trip: Trip) => void;
   updateBookingStatus: (booking: Booking, status: string) => void;
   updateMessageStatus: (message: ContactMessage, status: string) => void;
+  updateGalleryHighlight: (highlight: GalleryHighlight) => void;
   bookings: Booking[];
   messages: ContactMessage[];
   choosePage: (page: Page) => void;
@@ -94,7 +98,7 @@ export function AppRoutes({
   }
 
   if (page === "gallery") {
-    return <GalleryPage images={galleryImages} />;
+    return <GalleryPage images={galleryImages} highlight={galleryHighlight} />;
   }
 
   if (page === "about") {
@@ -125,6 +129,8 @@ export function AppRoutes({
         updateMessageStatus={updateMessageStatus}
         bookings={bookings}
         messages={messages}
+        galleryHighlight={galleryHighlight}
+        updateGalleryHighlight={updateGalleryHighlight}
       />
     );
   }

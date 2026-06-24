@@ -1,8 +1,8 @@
 import { Camera, Compass, Leaf, Map, ShieldCheck, Star, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { AdminTripForm, Page } from "./types";
+import type { AdminTripForm, GalleryHighlight, Page } from "./types";
 
-export const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "251911234567";
+export const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "251913181343";
 export const brandGreen = "bg-[#114F3C]";
 export const yellowButton = "bg-[#F8A900] text-[#114F3C] hover:bg-[#ffc247]";
 export const orangeButton = "bg-[#F54C0D] text-white hover:bg-[#d63f07]";
@@ -92,4 +92,30 @@ export const emptyAdminTripForm: AdminTripForm = {
   coverImage: "",
   galleryImages: "",
   status: "Draft"
+};
+
+export const defaultGalleryHighlight: GalleryHighlight = {
+  eyebrow: "Interactive highlight",
+  items: [
+    {
+      title: "Destination view",
+      text: "The first frame sets the location: crater rim, lake edge, mountain road, or volcanic landscape.",
+      image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      title: "Route texture",
+      text: "The second frame shows what the walk feels like underfoot, from forest paths to open highland tracks.",
+      image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      title: "Group rhythm",
+      text: "The third frame captures people moving together, sharing breaks, photos, and the pace of the day.",
+      image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      title: "After-walk memory",
+      text: "The fourth frame is the emotional close: the view, the light, and the moment guests remember later.",
+      image: "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80"
+    }
+  ]
 };

@@ -6,8 +6,8 @@ import type { ContactForm, ContactSubmitHandler } from "../types";
 const contactHeroImage = "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85";
 
 const contactCards = [
-  { title: "WhatsApp", text: "Fastest way to confirm seats, ask for prices, or plan a group trip.", value: "+251 911 234 567", Icon: MessageCircle },
-  { title: "Phone", text: "Call when you need quick timing, meeting point, or package details.", value: "+251 911 234 567", Icon: Phone },
+  { title: "WhatsApp", text: "Fastest way to confirm seats, ask for prices, or plan a group trip.", value: "+251 913 181 343", Icon: MessageCircle },
+  { title: "Phone", text: "Call when you need quick timing, meeting point, or package details.", value: "+251 913 181 343", Icon: Phone },
   { title: "Email", text: "Best for company outings, school groups, and detailed private requests.", value: "hello@ermijahiking.com", Icon: Mail }
 ];
 

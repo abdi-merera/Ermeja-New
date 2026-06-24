@@ -74,6 +74,17 @@ export type ContactMessage = {
   createdAt: string;
 };
 
+export type GalleryHighlightItem = {
+  title: string;
+  text: string;
+  image: string;
+};
+
+export type GalleryHighlight = {
+  eyebrow: string;
+  items: GalleryHighlightItem[];
+};
+
 export type AdminTripForm = {
   title: string;
   destination: string;

@@ -1,6 +1,7 @@
 import { CSSProperties, useMemo, useState } from "react";
 import { Camera, ChevronRight, Film, Heart, Image, Instagram, MapPin, Play, Sparkles, Users } from "lucide-react";
-import { orangeButton, whatsappNumber, yellowButton } from "../constants";
+import { defaultGalleryHighlight, orangeButton, whatsappNumber, yellowButton } from "../constants";
+import type { GalleryHighlight } from "../types";
 
 type GalleryCategory = "All" | "Destinations" | "Groups" | "Trails" | "Moments";
 
@@ -74,25 +75,6 @@ const splitClipPaths = [
 
 const splitTransforms = ["translate(0,-8px)", "translate(8px,0)", "translate(0,8px)", "translate(-8px,0)"];
 
-const splitHighlights = [
-  {
-    title: "Destination view",
-    text: "The first frame sets the location: crater rim, lake edge, mountain road, or volcanic landscape."
-  },
-  {
-    title: "Route texture",
-    text: "The second frame shows what the walk feels like underfoot, from forest paths to open highland tracks."
-  },
-  {
-    title: "Group rhythm",
-    text: "The third frame captures people moving together, sharing breaks, photos, and the pace of the day."
-  },
-  {
-    title: "After-walk memory",
-    text: "The fourth frame is the emotional close: the view, the light, and the moment guests remember later."
-  }
-];
-
 function CircularSplitGallery({ images, activeImage, setActiveImage }: { images: string[]; activeImage: number; setActiveImage: (index: number) => void }) {
   const [isGalleryHovered, setIsGalleryHovered] = useState(false);
   const [hoveredImage, setHoveredImage] = useState<number | null>(null);
@@ -143,9 +125,10 @@ function CircularSplitGallery({ images, activeImage, setActiveImage }: { images:
   );
 }
 
-export function GalleryPage({ images }: { images: string[] }) {
+export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { images: string[]; highlight?: GalleryHighlight }) {
   const [activeCategory, setActiveCategory] = useState<GalleryCategory>("All");
   const [activeSplitImage, setActiveSplitImage] = useState(0);
+  const splitHighlights = highlight.items.length === 4 ? highlight.items : defaultGalleryHighlight.items;
 
   const enrichedImages = useMemo(
     () =>
@@ -263,7 +246,7 @@ export function GalleryPage({ images }: { images: string[] }) {
         <section className="mt-12 overflow-hidden rounded-lg bg-[#114F3C] p-6 text-white shadow-2xl shadow-[#114F3C]/15 sm:p-8">
           <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1fr]">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#F8A900]">Interactive highlight</p>
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#F8A900]">{highlight.eyebrow || defaultGalleryHighlight.eyebrow}</p>
               <h2 className="mt-3 text-4xl font-black">{splitHighlights[activeSplitImage].title}</h2>
               <p className="mt-5 text-base leading-8 text-white/75">{splitHighlights[activeSplitImage].text}</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -283,7 +266,7 @@ export function GalleryPage({ images }: { images: string[] }) {
                 ))}
               </div>
             </div>
-            <CircularSplitGallery images={enrichedImages.slice(0, 4).map((item) => item.image)} activeImage={activeSplitImage} setActiveImage={setActiveSplitImage} />
+            <CircularSplitGallery images={splitHighlights.map((item) => item.image)} activeImage={activeSplitImage} setActiveImage={setActiveSplitImage} />
           </div>
         </section>
 

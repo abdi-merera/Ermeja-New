@@ -16,7 +16,7 @@ const uploadDir = join(__dirname, "..", "uploads");
 const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "";
 const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5174";
-const whatsappNumber = process.env.WHATSAPP_NUMBER || "251911234567";
+const whatsappNumber = process.env.WHATSAPP_NUMBER || "251913181343";
 const adminEmails = (process.env.ADMIN_EMAILS || "")
   .split(",")
   .map((email) => email.trim().toLowerCase())
@@ -315,6 +315,32 @@ const seedTrips = [
   }
 ];
 
+const defaultGalleryHighlight = {
+  eyebrow: "Interactive highlight",
+  items: [
+    {
+      title: "Destination view",
+      text: "The first frame sets the location: crater rim, lake edge, mountain road, or volcanic landscape.",
+      image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      title: "Route texture",
+      text: "The second frame shows what the walk feels like underfoot, from forest paths to open highland tracks.",
+      image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      title: "Group rhythm",
+      text: "The third frame captures people moving together, sharing breaks, photos, and the pace of the day.",
+      image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      title: "After-walk memory",
+      text: "The fourth frame is the emotional close: the view, the light, and the moment guests remember later.",
+      image: "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80"
+    }
+  ]
+};
+
 const ensureDataDir = () => {
   if (!existsSync(dataDir)) {
     mkdirSync(dataDir, { recursive: true });
@@ -345,10 +371,12 @@ const writeCollection = (fileName, value) => {
 let trips = readCollection("trips.json", seedTrips);
 let bookings = readCollection("bookings.json", []);
 let contactMessages = readCollection("messages.json", []);
+let galleryHighlight = readCollection("gallery-highlight.json", defaultGalleryHighlight);
 
 const saveTrips = () => writeCollection("trips.json", trips);
 const saveBookings = () => writeCollection("bookings.json", bookings);
 const saveMessages = () => writeCollection("messages.json", contactMessages);
+const saveGalleryHighlight = () => writeCollection("gallery-highlight.json", galleryHighlight);
 
 const slugify = (value) =>
   value
@@ -374,6 +402,22 @@ function safeJoin(baseDir, fileName) {
 
 function textValue(value, maxLength) {
   return String(value || "").trim().slice(0, maxLength);
+}
+
+function normalizeGalleryHighlight(value) {
+  const items = Array.isArray(value?.items) ? value.items : [];
+
+  return {
+    eyebrow: textValue(value?.eyebrow || defaultGalleryHighlight.eyebrow, 60),
+    items: defaultGalleryHighlight.items.map((fallback, index) => {
+      const item = items[index] || {};
+      return {
+        title: textValue(item.title || fallback.title, 80),
+        text: textValue(item.text || fallback.text, 280),
+        image: textValue(item.image || fallback.image, 600)
+      };
+    })
+  };
 }
 
 function isTooLong(value, maxLength) {
@@ -482,10 +526,32 @@ app.get("/api/trips", (req, res) => {
   res.json(visibleTrips.map(publicTrip));
 });
 
+app.get("/api/gallery-highlight", (_req, res) => {
+  res.json(normalizeGalleryHighlight(galleryHighlight));
+});
+
 app.use("/api/admin", requireTrustedOrigin);
 
 app.get("/api/admin/trips", requireAdmin, (_req, res) => {
   res.json(trips.map(publicTrip));
+});
+
+app.patch("/api/admin/gallery-highlight", requireAdmin, (req, res) => {
+  const items = Array.isArray(req.body?.items) ? req.body.items : [];
+
+  if (items.length !== 4) {
+    res.status(400).json({ message: "Gallery highlight needs exactly four items." });
+    return;
+  }
+
+  if (items.some((item) => !item?.title || !item?.text || !item?.image)) {
+    res.status(400).json({ message: "Each gallery highlight item needs title, text, and image." });
+    return;
+  }
+
+  galleryHighlight = normalizeGalleryHighlight(req.body);
+  saveGalleryHighlight();
+  res.json(galleryHighlight);
 });
 
 app.get("/api/trips/:id", (req, res) => {

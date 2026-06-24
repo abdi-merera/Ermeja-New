@@ -1,4 +1,4 @@
-import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, Trip, TripStatus } from "../types";
 import { splitCommaList } from "../utils";
 
 const adminSessionKey = "ermija-admin-session";
@@ -117,6 +117,14 @@ function trustedSupabaseProjectUrl() {
 
 export function getTrips() {
   return fetch("/api/trips").then((response) => parseResponse<Trip[]>(response));
+}
+
+export function getGalleryHighlight() {
+  return fetch("/api/gallery-highlight").then((response) => parseResponse<GalleryHighlight>(response));
+}
+
+export function updateGalleryHighlight(highlight: GalleryHighlight) {
+  return adminJsonRequest<GalleryHighlight>("/api/admin/gallery-highlight", "PATCH", highlight);
 }
 
 export function getAdminTrips() {

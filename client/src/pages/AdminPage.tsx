@@ -1,8 +1,8 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Edit3, ImagePlus, LogIn, Mail, MessageCircle, Phone, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
 import { orangeButton, whatsappNumber, yellowButton } from "../constants";
 import { uploadTripImage } from "../services/api";
-import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, ContactMessage, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, ContactMessage, GalleryHighlight, Trip, TripStatus } from "../types";
 import { formatDate, formatPrice, splitCommaList } from "../utils";
 
 const tripFilters = ["All", "Published", "Draft"] as const;
@@ -57,6 +57,8 @@ export function AdminPage({
   deleteAdminTrip,
   updateBookingStatus,
   updateMessageStatus,
+  galleryHighlight,
+  updateGalleryHighlight,
   bookings,
   messages
 }: {
@@ -75,6 +77,8 @@ export function AdminPage({
   deleteAdminTrip: (trip: Trip) => void;
   updateBookingStatus: (booking: Booking, status: string) => void;
   updateMessageStatus: (message: ContactMessage, status: string) => void;
+  galleryHighlight: GalleryHighlight;
+  updateGalleryHighlight: (highlight: GalleryHighlight) => void;
   bookings: Booking[];
   messages: ContactMessage[];
 }) {
@@ -269,6 +273,10 @@ export function AdminPage({
 
         {activeSection === "gallery" ? (
           <div className="space-y-6">
+            <AdminInbox title="Circular gallery highlight">
+              <GalleryHighlightEditor highlight={galleryHighlight} onSave={updateGalleryHighlight} />
+            </AdminInbox>
+
             <AdminInbox title="Gallery and media library">
               <div className="grid gap-3 sm:grid-cols-3">
                 <MiniStat label="Trips with media" value={mediaTrips.filter((item) => item.images.length).length} />
@@ -495,6 +503,101 @@ function EmptyAdminState({ text }: { text: string }) {
     <div className="rounded-lg border border-dashed border-[#114F3C]/20 bg-stone-50 p-5 text-center text-sm font-bold text-stone-600 dark:border-white/15 dark:bg-white/5 dark:text-stone-300">
       {text}
     </div>
+  );
+}
+
+function GalleryHighlightEditor({ highlight, onSave }: { highlight: GalleryHighlight; onSave: (highlight: GalleryHighlight) => void }) {
+  const [draft, setDraft] = useState<GalleryHighlight>(highlight);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState("");
+
+  useEffect(() => {
+    setDraft(highlight);
+  }, [highlight]);
+
+  const updateItem = (index: number, key: keyof GalleryHighlight["items"][number], value: string) => {
+    setDraft((current) => ({
+      ...current,
+      items: current.items.map((item, itemIndex) => (itemIndex === index ? { ...item, [key]: value } : item))
+    }));
+  };
+
+  const uploadHighlightImage = async (index: number, file: File | undefined) => {
+    if (!file) {
+      return;
+    }
+
+    setUploadError("");
+    setUploadingIndex(index);
+
+    try {
+      const result = await uploadTripImage(file);
+      updateItem(index, "image", result.url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Highlight image upload failed.");
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  const submitHighlight = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSave(draft);
+  };
+
+  return (
+    <form className="space-y-4" onSubmit={submitHighlight}>
+      <FieldLabel label="Small label above the title">
+        <input className={`${inputClass} w-full`} value={draft.eyebrow} onChange={(event) => setDraft({ ...draft, eyebrow: event.target.value })} />
+      </FieldLabel>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        {draft.items.map((item, index) => (
+          <article key={index} className="rounded-lg border border-stone-200 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <div className="grid gap-4 sm:grid-cols-[120px_1fr]">
+              <div>
+                <img className="h-28 w-full rounded-lg object-cover" src={item.image} alt={item.title || `Highlight ${index + 1}`} />
+                <label className={`mt-2 flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-[#114F3C]/25 px-3 py-2 text-center text-xs font-black text-[#114F3C] transition hover:border-[#F8A900] hover:bg-[#F8A900]/15 dark:border-white/15 dark:text-white ${uploadingIndex === index ? "pointer-events-none opacity-70" : ""}`}>
+                  {uploadingIndex === index ? "Uploading..." : "Upload"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="sr-only"
+                    onChange={(event) => {
+                      uploadHighlightImage(index, event.target.files?.[0]);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div className="space-y-3">
+                <FieldLabel label={`${String(index + 1).padStart(2, "0")} title`}>
+                  <input className={`${inputClass} w-full`} value={item.title} onChange={(event) => updateItem(index, "title", event.target.value)} />
+                </FieldLabel>
+                <FieldLabel label="Description">
+                  <textarea className={`${inputClass} min-h-20 w-full`} value={item.text} onChange={(event) => updateItem(index, "text", event.target.value)} />
+                </FieldLabel>
+                <FieldLabel label="Image URL">
+                  <input className={`${inputClass} w-full`} value={item.image} onChange={(event) => updateItem(index, "image", event.target.value)} />
+                </FieldLabel>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {uploadError ? <p className="text-sm font-bold text-red-600 dark:text-red-300">{uploadError}</p> : null}
+
+      <button
+        type="submit"
+        disabled={uploadingIndex !== null}
+        className={`inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black transition ${uploadingIndex !== null ? "cursor-not-allowed bg-stone-300 text-stone-600 dark:bg-white/10 dark:text-stone-400" : orangeButton}`}
+      >
+        <Save className="h-4 w-4" />
+        Save gallery highlight
+      </button>
+    </form>
   );
 }
 

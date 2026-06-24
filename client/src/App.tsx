@@ -1,12 +1,12 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { destinations, emptyAdminTripForm } from "./constants";
+import { defaultGalleryHighlight, destinations, emptyAdminTripForm } from "./constants";
 import { Footer } from "./components/Footer";
 import { Navbar } from "./components/Navbar";
 import { AppRoutes } from "./routes/AppRoutes";
 import { pageFromPath, pagePaths } from "./routes/routeUtils";
 import * as api from "./services/api";
-import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, Page, Trip, TripStatus } from "./types";
+import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, Page, Trip, TripStatus } from "./types";
 
 export function App() {
   const [page, setPage] = useState<Page>(() => pageFromPath(window.location.pathname));
@@ -23,6 +23,7 @@ export function App() {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [galleryHighlight, setGalleryHighlight] = useState<GalleryHighlight>(defaultGalleryHighlight);
   const [apiMessage, setApiMessage] = useState("");
   const [bookingForm, setBookingForm] = useState<BookingForm>({ customerName: "", phone: "", numberOfPeople: "1", message: "" });
   const [contactForm, setContactForm] = useState<ContactForm>({ name: "", phone: "", email: "", message: "" });
@@ -56,6 +57,7 @@ export function App() {
 
   useEffect(() => {
     loadTrips().catch(() => setApiMessage("Unable to load trips. Make sure the backend is running."));
+    api.getGalleryHighlight().then(setGalleryHighlight).catch(() => setGalleryHighlight(defaultGalleryHighlight));
   }, []);
 
   useEffect(() => {
@@ -200,6 +202,16 @@ export function App() {
     await loadAdminData();
   }
 
+  async function updateGalleryHighlight(nextHighlight: GalleryHighlight) {
+    try {
+      const savedHighlight = await api.updateGalleryHighlight(nextHighlight);
+      setGalleryHighlight(savedHighlight);
+      setApiMessage("Gallery highlight updated.");
+    } catch (error) {
+      setApiMessage(error instanceof Error ? error.message : "Gallery highlight was not updated.");
+    }
+  }
+
   async function submitAdminLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -248,6 +260,7 @@ export function App() {
         adminTrips={adminTrips}
         selectedTrip={selectedTrip}
         galleryImages={galleryImages}
+        galleryHighlight={galleryHighlight}
         bookingForm={bookingForm}
         setBookingForm={setBookingForm}
         submitBooking={submitBooking}
@@ -268,6 +281,7 @@ export function App() {
         deleteAdminTrip={deleteAdminTrip}
         updateBookingStatus={updateBookingStatus}
         updateMessageStatus={updateMessageStatus}
+        updateGalleryHighlight={updateGalleryHighlight}
         bookings={bookings}
         messages={messages}
         choosePage={choosePage}
