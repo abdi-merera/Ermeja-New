@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Ermija Hiking Website
 
 Node.js backend with a React TypeScript frontend for Ermija Hiking.
@@ -47,3 +48,6 @@ The admin login is a first-version staff gate only. Replace it with real authent
 The local JSON files are useful for development, but a production launch should move this data to MongoDB, PostgreSQL, or Supabase.
 
 Replace the placeholder phone, email, social links, and image URLs with final Ermija Hiking business details before launch.
+=======
+# Ermeja-New
+>>>>>>> b5a7d9bdf2034bf0d3154fd060c268bd6e1adf8d
