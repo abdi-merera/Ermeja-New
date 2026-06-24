@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { brandGreen, navItems, whatsappNumber, yellowButton } from "../constants";
 import type { Page } from "../types";
@@ -23,6 +23,7 @@ export function Navbar({
     <header className={`sticky top-0 z-40 ${brandGreen} border-b border-white/10 shadow-lg shadow-[#114F3C]/20`}>
       <div className="flex w-full items-center justify-start px-4 py-4 sm:px-6 lg:px-8">
         <Logo onClick={() => choosePage("home")} />
+        <FootstepTrail />
         <nav className="ml-auto hidden items-center gap-1 lg:flex">
           {navItems.map((item) => (
             <button
@@ -37,7 +38,7 @@ export function Navbar({
             </button>
           ))}
         </nav>
-        <div className="hidden items-center gap-3 sm:ml-5 sm:flex lg:ml-24">
+        <div className="ml-24 hidden items-center gap-3 lg:flex">
           <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
           <a
             className={`inline-flex items-center justify-center rounded-lg p-3 transition ${yellowButton}`}
@@ -65,7 +66,7 @@ export function Navbar({
                 {item.label}
               </button>
             ))}
-            <div className="flex items-center gap-3 border-t border-white/10 pt-2 sm:hidden">
+            <div className="flex items-center gap-3 border-t border-white/10 pt-2 lg:hidden">
               <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
               <a
                 className={`inline-flex items-center justify-center rounded-lg p-3 ${yellowButton}`}
@@ -80,6 +81,68 @@ export function Navbar({
         </div>
       ) : null}
     </header>
+  );
+}
+
+function FootstepTrail() {
+  const steps = [
+    { left: 0, top: 38, src: "/foot.svg" },
+    { left: 54, top: 38, src: "/foot-left.svg" },
+    { left: 108, top: 38, src: "/foot.svg" },
+    { left: 162, top: 38, src: "/foot-left.svg" },
+    { left: 216, top: 38, src: "/foot.svg" },
+    { left: 270, top: 38, src: "/foot-left.svg" }
+  ];
+
+  return (
+    <div className="ermija-footstep-trail relative ml-5 hidden h-14 w-96 sm:block" aria-hidden="true">
+      <style>
+        {`
+          @keyframes ermija-footstep {
+            0%, 1.4% {
+              opacity: 0;
+              transform: translateX(-5px) translateY(3px) scale(0.82) rotate(var(--step-rotate));
+            }
+            2.1%, 2.7% {
+              opacity: 1;
+              transform: translateX(0) translateY(0) scale(1) rotate(var(--step-rotate));
+            }
+            4.4%, 100% {
+              opacity: 0;
+              transform: translateX(5px) translateY(-2px) scale(0.88) rotate(var(--step-rotate));
+            }
+          }
+
+          .ermija-footstep-trail .footstep {
+            position: absolute;
+            opacity: 0;
+            animation: ermija-footstep 39s ease-in-out infinite;
+            animation-delay: var(--step-delay);
+            animation-fill-mode: both;
+            left: var(--step-left);
+            top: var(--step-top);
+            transform-origin: center;
+          }
+        `}
+      </style>
+      {steps.map((step, index) => (
+        <img
+          key={`${step.left}-${step.top}`}
+          src={step.src}
+          alt=""
+          className="footstep h-5 w-10 object-contain"
+          style={
+            {
+              "--step-delay": `${index * 1.55}s`,
+              "--step-left": `${step.left}px`,
+              "--step-top": `${step.top}px`,
+              "--step-rotate": "0deg",
+              filter: "brightness(0) invert(1)"
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
   );
 }
 

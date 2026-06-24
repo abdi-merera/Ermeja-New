@@ -252,7 +252,7 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {splitHighlights.map((highlight, index) => (
                   <button
-                    key={highlight.title}
+                    key={`${highlight.title}-${index}`}
                     type="button"
                     onMouseEnter={() => setActiveSplitImage(index)}
                     onFocus={() => setActiveSplitImage(index)}

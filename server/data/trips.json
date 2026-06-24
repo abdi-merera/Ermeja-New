@@ -1,146 +1,196 @@
 [
   {
     "id": "wenchi-day-trip",
-    "title": "Wenchi Day Trip",
+    "title": "Wenchi Crater Lake & Tourism Village Overnight Trip",
     "destination": "Wenchi Crater Lake",
-    "description": "Walk the green crater rim, ride down to the lake, visit the island monastery, and share a calm group day outside Addis Ababa.",
-    "date": "2026-10-12",
-    "duration": "Day Trip",
-    "price": 3200,
+    "description": "Join us for an incredible two-day, one-night weekend getaway to Wenchi, recognized as one of the world's best tourism villages! Experience scenic hiking, a boat trip, horse riding, natural hot springs, therapeutic mud baths, and swimming. Wrap up the evening with a cozy campfire and a delicious barbecue dinner.",
+    "date": "2026-10-11",
+    "duration": "Weekend",
+    "price": 8500,
     "difficulty": "Easy",
     "availableSeats": 18,
-    "meetingPoint": "Mexico Square, Addis Ababa",
+    "meetingPoint": "Mexico Square, Addis Ababa @ Wabe Shebele ",
     "departureTime": "06:00",
     "returnTime": "19:30",
     "includes": [
       "Transport",
-      "Local guide",
-      "Lunch",
       "Entrance fee",
+      "All meals",
+      "Barbecue dinner",
+      "Campfire",
+      "Horse riding",
+      "Boat trip",
+      "Tent",
+      "Bottled water",
+      "Local guide",
+      "Hiking",
+      "Mud bath",
+      "Swimming",
+      "Hot spring bath",
       "Photography"
     ],
     "whatToBring": [
+      "Swimwear",
+      "Extra clothing for mud bath",
+      "Warm clothes for campfire night",
       "Comfortable walking shoes",
-      "Water bottle",
-      "Sun hat",
-      "Light jacket"
+      "Sunscreen"
     ],
     "notIncluded": [
-      "Personal snacks",
-      "Horse ride fees",
-      "Personal insurance"
-    ],
-    "itinerary": [
-      "Meet the group in Addis Ababa and depart early.",
-      "Arrive at Wenchi and start the crater-view walk.",
-      "Visit the lakeside area and island monastery.",
-      "Enjoy lunch, photos, and relaxed free time before returning."
-    ],
-    "safetyNotes": "This is a guided group trip. Stay with the guide during the crater walk and follow local boat safety instructions.",
-    "coverImage": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80",
-    "galleryImages": [
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80"
-    ],
-    "status": "Published",
-    "createdBy": "admin",
-    "createdAt": "2026-06-17T09:27:40.723Z",
-    "updatedAt": "2026-06-17T09:27:40.723Z"
-  },
-  {
-    "id": "erta-ale-expedition",
-    "title": "Erta Ale Expedition",
-    "destination": "Erta Ale Volcano",
-    "description": "A multi-day desert adventure to one of Ethiopia's most dramatic volcanic landscapes with local Afar support.",
-    "date": "2026-11-08",
-    "duration": "Multi-day",
-    "price": 18500,
-    "difficulty": "Hard",
-    "availableSeats": 10,
-    "meetingPoint": "Bole International Airport domestic terminal",
-    "departureTime": "08:00",
-    "returnTime": "21:00",
-    "includes": [
-      "4x4 transport",
-      "Guides",
-      "Camping gear",
-      "Meals",
-      "Permits"
-    ],
-    "whatToBring": [
-      "Headlamp",
-      "Hiking boots",
-      "Power bank",
-      "Light sleeping layer"
-    ],
-    "notIncluded": [
-      "Flights",
-      "Travel insurance",
-      "Personal gear"
-    ],
-    "itinerary": [
-      "Travel toward Afar and meet the local support crew.",
-      "Drive through desert landscapes toward Erta Ale.",
-      "Hike to the volcano camp and visit the crater area.",
-      "Return through Afar villages and continue back to Addis Ababa."
-    ],
-    "safetyNotes": "This trip requires heat tolerance and good walking fitness. Guides may adjust timing for weather and volcanic conditions.",
-    "coverImage": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80",
-    "galleryImages": [
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80"
-    ],
-    "status": "Published",
-    "createdBy": "admin",
-    "createdAt": "2026-06-17T09:27:40.723Z",
-    "updatedAt": "2026-06-17T09:27:40.723Z"
-  },
-  {
-    "id": "entoto-sunrise-walk",
-    "title": "Entoto Sunrise Walk",
-    "destination": "Entoto Hills",
-    "description": "A refreshing early-morning walk above Addis Ababa with forest air, city views, sunrise stops, and a slow coffee finish.",
-    "date": "2026-09-20",
-    "duration": "Morning Trip",
-    "price": 1800,
-    "difficulty": "Easy",
-    "availableSeats": 20,
-    "meetingPoint": "Shiro Meda, Addis Ababa",
-    "departureTime": "05:30",
-    "returnTime": "11:30",
-    "includes": [
-      "Guide",
-      "Coffee stop",
-      "Photography",
-      "Route support"
-    ],
-    "whatToBring": [
-      "Walking shoes",
-      "Water bottle",
-      "Light jacket",
-      "Sun protection"
-    ],
-    "notIncluded": [
-      "Breakfast",
-      "Personal transport",
+      "Personal alcoholic beverages",
+      "Tips",
+      "Alcoholic drinks",
       "Personal expenses"
     ],
     "itinerary": [
-      "Meet before sunrise at Shiro Meda.",
-      "Walk through Entoto's forest trails and viewpoint route.",
-      "Stop for photos as the city wakes up below.",
-      "Finish with coffee and return before midday."
+      "Meet at Mexico (Wabi Shebele) at 06:00 AM and depart for Wenchi.",
+      "Arrive at Wenchi, begin the hiking journey, and enjoy a scenic boat trip and horse riding.",
+      "Set up camp, followed by a evening campfire and barbecue dinner.",
+      "Day 2: Experience the natural hot spring waters, mud bath, and swimming.",
+      "Enjoy lunch and relax before heading back to Addis Ababa."
     ],
-    "safetyNotes": "This is a light walk, but mornings can be cold. Bring a layer and stay with the group on forest paths.",
-    "coverImage": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1400&q=80",
+    "safetyNotes": "This is an active group trip involving water and outdoor trekking. Please follow the instructions of the local guide at all times, wear life jackets during the boat trip, and take caution near the hot springs.",
+    "coverImage": "/uploads/1782314000634-9bcec7d8-6267-42ed-8972-78d04558f0a7.jpg",
+    "galleryImages": [
+      "/uploads/1782314012627-bba4355c-1ee3-4b5b-bc12-e79028d4d3ac.jpg",
+      "/uploads/1782314013120-fc04a013-fec0-42a8-8cf7-320f0258b6ba.jpg",
+      "/uploads/1782314012735-66dc671c-c5e1-43e4-98ed-2bc1d3d2f05a.jpg",
+      "/uploads/1782314012713-c55c3669-87f8-4c8d-b549-9bfca06f9498.jpg",
+      "/uploads/1782314012686-4d94e9fe-039f-4e89-9c09-c52e2c365353.jpg",
+      "/uploads/1782314012591-83e0e429-4b11-4d49-9a60-846a8078c6e4.jpg",
+      "/uploads/1782314013232-7655b1e5-7e65-4f49-a8da-2fbb40a13493.jpg"
+    ],
+    "status": "Published",
+    "createdBy": "admin",
+    "createdAt": "2026-06-17T09:27:40.723Z",
+    "updatedAt": "2026-06-24T15:22:56.806Z"
+  },
+  {
+    "id": "erta-ale-expedition",
+    "title": "Overnight Trip to Doho Lodge & Benuna Village with Ermja Hiking",
+    "destination": "Doho Lodge & Benuna Village",
+    "description": "Join us for an exciting weekend getaway featuring an overnight trip to Doho Lodge & Benuna village paired with Ermja Hiking! Experience a scenic trek, explore Awash Park and its waterfall, and unwind with swimming in a natural hot spring pool and hot spring water baths. The package features a cozy evening campfire with a barbecue dinner and tent accommodations.",
+    "date": "2026-11-11",
+    "duration": "Weekend",
+    "price": 10500,
+    "difficulty": "Medium",
+    "availableSeats": 16,
+    "meetingPoint": "Zefmesh mall, Addis Ababa",
+    "departureTime": "06:00",
+    "returnTime": "21:00",
+    "includes": [
+      "Transport",
+      "Entrance fee",
+      "Awash Park (Waterfall)",
+      "All meals",
+      "Barbecue dinner",
+      "Campfire",
+      "Tent",
+      "Bottled water",
+      "Local guide",
+      "Hiking",
+      "Swimming in Natural Hot Spring Pool",
+      "Hot Spring Water & bath",
+      "Photograph"
+    ],
+    "whatToBring": [
+      "Swimwear",
+      "Extra clothing for hot springs",
+      "Warm clothes for campfire night",
+      "Comfortable hiking shoes",
+      "Sunscreen",
+      "Personal toiletries"
+    ],
+    "notIncluded": [
+      "Personal drinks",
+      "Souvenirs",
+      "Tips",
+      "Personal expenses"
+    ],
+    "itinerary": [
+      "Meet at Megenagn - Zefmesh mall at 06:00 AM and depart.",
+      "Arrive at Awash Park to view the waterfall and begin the hiking experience.",
+      "Head to Benuna Village and Doho Lodge to set up camp.",
+      "Enjoy an evening campfire and barbecue dinner.",
+      "Day 2: Relax and swim in the natural hot spring pool and take hot spring baths.",
+      "Enjoy meals and wrap up photography before returning back to Addis Ababa."
+    ],
+    "safetyNotes": "This is an active outdoor and hiking trip. Please follow instructions from the local guide, stay hydrated, and practice caution when swimming in the hot spring pools.",
+    "coverImage": "/uploads/1782314545712-9a78f862-d3d7-4212-8ca2-0042cd873ec4.webp",
     "galleryImages": [
       "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80",
+      "/uploads/1782314557027-5731025b-bb15-44b8-85b2-0f1f551c89d9.webp",
+      "/uploads/1782314557038-0629d1cb-7c71-4212-8339-60e66c25f663.webp",
+      "/uploads/1782314557004-c20e2986-56ab-433e-9e3f-b2348595403f.webp",
+      "/uploads/1782314557024-5a85d980-7093-46e5-9c53-e59936584e34.webp",
+      "/uploads/1782314557495-8df2e585-1a09-4a3f-9a13-217c57c53880.webp",
+      "/uploads/1782314557033-2c93a041-9073-4811-9990-175a27142417.webp"
+    ],
+    "status": "Published",
+    "createdBy": "admin",
+    "createdAt": "2026-06-17T09:27:40.723Z",
+    "updatedAt": "2026-06-24T15:22:41.047Z"
+  },
+  {
+    "id": "entoto-sunrise-walk",
+    "title": "Camping Trip To Langano",
+    "destination": "Lake Langano & Shalla National Park",
+    "description": "Join us for an amazing two-day, one-night camping getaway to Lake Langano! Explore the breathtaking scenery of Shalla National Park, visit Lake Shalla and Lake Zeway, and enjoy an active hiking experience. The trip includes cozy tent camping, a warm evening campfire, and a delicious barbecue dinner by the lakeside.",
+    "date": "2026-09-20",
+    "duration": "Weekend",
+    "price": 12000,
+    "difficulty": "Easy",
+    "availableSeats": 20,
+    "meetingPoint": "Mexico - Wabi Shebele, Addis Ababa",
+    "departureTime": "05:30",
+    "returnTime": "11:30",
+    "includes": [
+      "Transport",
+      "Entrance fee",
+      "All meals",
+      "Barbecue dinner",
+      "Campfire",
+      "Tent",
+      "Bottled water",
+      "Local guide",
+      "Hiking"
+    ],
+    "whatToBring": [
+      "Swimwear/beachwear",
+      "Comfortable walking shoes",
+      "Sunscreen",
+      "Sunglasses",
+      "Warm clothes for the evening campfire"
+    ],
+    "notIncluded": [
+      "Personal snacks",
+      "Alcoholic beverages",
+      "Tips",
+      "Personal expenses"
+    ],
+    "itinerary": [
+      "Meet at Mexico - Wabi Shebele at 06:00 AM and depart from Addis Ababa.",
+      "Stop by Lake Zeway for scenic views on the way.",
+      "Head to Shalla National Park and explore Lake Shalla.",
+      "Arrive at Lake Langano, set up camp, and enjoy hiking.",
+      "Unwind with an evening lakeside campfire and barbecue dinner.",
+      "Day 2: Relax by the lake, enjoy meals, and take final photos before returning to Addis Ababa."
+    ],
+    "safetyNotes": "This trip involves outdoor camping and walking near deep crater lakes. Please follow the safety guidance of the local guide and take care near the water edges.",
+    "coverImage": "/uploads/1782317873037-41a8a307-64bd-44a1-8911-11205a6833b2.jpg",
+    "galleryImages": [
+      "/uploads/1782317882626-6b180123-85ed-4715-aaab-5d08af5f2b14.jpg",
+      "/uploads/1782317893122-3bc6f77e-3523-4d99-bd2a-a41d4689442b.jpg",
+      "/uploads/1782317893010-befe77fc-5c7c-42d1-82c0-93e61b696036.jpg",
+      "/uploads/1782317893159-e0e597da-02d9-4c4d-88a9-0f72e404abf4.jpg",
+      "/uploads/1782317892991-dfd1a4d1-ed7b-482e-a0ae-78c94799f834.jpg",
+      "/uploads/1782317893104-9f6b1aa8-7667-49a1-be46-f3ac933c27e3.jpg"
     ],
     "status": "Published",
     "createdBy": "admin",
     "createdAt": "2026-06-18T10:20:00.000Z",
-    "updatedAt": "2026-06-18T10:20:00.000Z"
+    "updatedAt": "2026-06-24T16:18:18.102Z"
   },
   {
     "id": "menagesha-forest-escape",

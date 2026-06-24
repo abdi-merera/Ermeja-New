@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import type { AdminTripForm, GalleryHighlight, Page } from "./types";
 
 export const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "251913181343";
+export const telegramUrl = "https://t.me/ermjahiking";
 export const brandGreen = "bg-[#114F3C]";
 export const yellowButton = "bg-[#F8A900] text-[#114F3C] hover:bg-[#ffc247]";
 export const orangeButton = "bg-[#F54C0D] text-white hover:bg-[#d63f07]";

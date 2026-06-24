@@ -6,11 +6,12 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-dotenv.config();
-
 const app = express();
 const port = process.env.PORT || 5000;
 const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: resolve(__dirname, "..", "..", ".env") });
+dotenv.config();
+
 const dataDir = join(__dirname, "..", "data");
 const uploadDir = join(__dirname, "..", "uploads");
 const supabaseUrl = process.env.SUPABASE_URL || "";

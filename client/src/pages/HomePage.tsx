@@ -11,7 +11,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
       <section className="relative min-h-[88vh] overflow-hidden">
         <img
           className="absolute inset-0 h-full w-full object-cover"
-          src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1800&q=85"
+          src="/hero.jpg"
           alt="Hikers walking through mountain nature"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#09251C]/95 via-[#114F3C]/78 to-black/30" />

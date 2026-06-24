@@ -1,4 +1,4 @@
-import { brandGreen, whatsappNumber } from "../constants";
+import { brandGreen, telegramUrl, whatsappNumber } from "../constants";
 import { Logo } from "./Logo";
 
 export function Footer() {
@@ -22,7 +22,7 @@ export function Footer() {
           <div className="mt-4 flex flex-wrap gap-3">
             {[
               ["Facebook", "https://facebook.com/"],
-              ["Telegram", "https://t.me/"],
+              ["Telegram", telegramUrl],
               ["WhatsApp", `https://wa.me/${whatsappNumber}`],
               ["Instagram", "https://instagram.com/"],
               ["TikTok", "https://www.tiktok.com/"]
