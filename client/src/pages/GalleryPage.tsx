@@ -30,7 +30,7 @@ const galleryStories = [
   },
   {
     title: "Highland routes",
-    location: "Bale",
+    location: "Bale Mountains",
     category: "Trails" as GalleryCategory,
     tone: "Cool air, open paths, and mountain-style walking."
   },
