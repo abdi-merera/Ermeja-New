@@ -7,15 +7,18 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const app = express();
-const port = process.env.PORT || 5000;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: resolve(__dirname, "..", "..", ".env") });
 dotenv.config();
 
+const port = process.env.PORT || 5000;
+const isVercel = process.env.VERCEL === "1";
 const dataDir = join(__dirname, "..", "data");
 const uploadDir = join(__dirname, "..", "uploads");
 const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "";
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseStorageBucket = process.env.SUPABASE_STORAGE_BUCKET || "trip-images";
 const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5174";
 const whatsappNumber = process.env.WHATSAPP_NUMBER || "251913181343";
 const adminEmails = (process.env.ADMIN_EMAILS || "")
@@ -43,6 +46,40 @@ const ensureTrustedSupabaseUrl = (value) => {
 
 const trustedSupabaseUrl = ensureTrustedSupabaseUrl(normalizedSupabaseUrl);
 
+async function uploadImageToSupabaseStorage({ buffer, contentType, fileName }) {
+  if (!trustedSupabaseUrl || !supabaseServiceRoleKey) {
+    return null;
+  }
+
+  const objectPath = `trip-images/${fileName}`;
+  const uploadResponse = await fetch(`${trustedSupabaseUrl}/storage/v1/object/${supabaseStorageBucket}/${objectPath}`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      "Content-Type": contentType,
+      "Cache-Control": "31536000",
+      "x-upsert": "false"
+    },
+    body: buffer
+  });
+
+  if (!uploadResponse.ok) {
+    let message = "Unable to upload image to Supabase Storage.";
+
+    try {
+      const result = await uploadResponse.json();
+      message = result.message || result.error || message;
+    } catch {
+      // Keep the generic message when Supabase returns a non-JSON error.
+    }
+
+    throw new Error(message);
+  }
+
+  return `${trustedSupabaseUrl}/storage/v1/object/public/${supabaseStorageBucket}/${objectPath}`;
+}
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -63,7 +100,12 @@ app.use((_req, res, next) => {
   next();
 });
 app.use(express.json({ limit: "2mb" }));
-mkdirSync(uploadDir, { recursive: true });
+try {
+  mkdirSync(uploadDir, { recursive: true });
+} catch {
+  // Local uploads are a development fallback. Serverless deployments should use
+  // Supabase Storage instead of writing to the runtime filesystem.
+}
 app.use("/uploads", express.static(uploadDir));
 
 const now = new Date().toISOString();
@@ -343,17 +385,25 @@ const defaultGalleryHighlight = {
 };
 
 const ensureDataDir = () => {
-  if (!existsSync(dataDir)) {
-    mkdirSync(dataDir, { recursive: true });
+  try {
+    if (!existsSync(dataDir)) {
+      mkdirSync(dataDir, { recursive: true });
+    }
+    return true;
+  } catch {
+    return false;
   }
 };
 
 const readCollection = (fileName, fallback) => {
-  ensureDataDir();
+  if (!ensureDataDir()) {
+    return fallback;
+  }
+
   const filePath = safeJoin(dataDir, fileName);
 
   if (!existsSync(filePath)) {
-    writeFileSync(filePath, JSON.stringify(fallback, null, 2));
+    writeCollection(fileName, fallback);
     return fallback;
   }
 
@@ -365,8 +415,17 @@ const readCollection = (fileName, fallback) => {
 };
 
 const writeCollection = (fileName, value) => {
-  ensureDataDir();
-  writeFileSync(safeJoin(dataDir, fileName), JSON.stringify(value, null, 2));
+  if (!ensureDataDir()) {
+    return;
+  }
+
+  try {
+    writeFileSync(safeJoin(dataDir, fileName), JSON.stringify(value, null, 2));
+  } catch {
+    // Vercel's serverless filesystem is read-only at runtime. Mutations still
+    // update the in-memory response for this invocation, but should be moved to
+    // a database before production admin editing is relied on.
+  }
 };
 
 let trips = readCollection("trips.json", seedTrips);
@@ -694,7 +753,7 @@ app.post(
   "/api/admin/uploads",
   requireAdmin,
   express.raw({ type: ["image/jpeg", "image/png", "image/webp", "image/gif"], limit: "8mb" }),
-  (req, res) => {
+  async (req, res) => {
     const extensionByType = {
       "image/jpeg": ".jpg",
       "image/png": ".png",
@@ -715,8 +774,25 @@ app.post(
     }
 
     const fileName = `${Date.now()}-${randomUUID()}${extension}`;
-    writeFileSync(safeJoin(uploadDir, fileName), req.body);
-    res.status(201).json({ url: `/uploads/${fileName}` });
+
+    try {
+      const supabaseUrl = await uploadImageToSupabaseStorage({ buffer: req.body, contentType, fileName });
+
+      if (supabaseUrl) {
+        res.status(201).json({ url: supabaseUrl });
+        return;
+      }
+
+      if (isVercel) {
+        res.status(500).json({ message: "Supabase Storage is not configured. Add SUPABASE_SERVICE_ROLE_KEY and SUPABASE_STORAGE_BUCKET in Vercel." });
+        return;
+      }
+
+      writeFileSync(safeJoin(uploadDir, fileName), req.body);
+      res.status(201).json({ url: `/uploads/${fileName}` });
+    } catch (error) {
+      res.status(502).json({ message: error instanceof Error ? error.message : "Unable to upload image." });
+    }
   }
 );
 
@@ -795,6 +871,10 @@ app.delete("/api/admin/trips/:id", requireAdmin, (req, res) => {
   res.status(204).send();
 });
 
-app.listen(port, () => {
-  console.log(`API server running on http://localhost:${port}`);
-});
+if (!isVercel) {
+  app.listen(port, () => {
+    console.log(`API server running on http://localhost:${port}`);
+  });
+}
+
+export default app;
