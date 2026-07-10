@@ -26,7 +26,7 @@ const galleryStories = [
     title: "Group energy",
     location: "Addis day trip",
     category: "Groups" as GalleryCategory,
-    tone: "Shared transport, shared photos, and a friendly trail rhythm."
+    tone: "Shared transport, shared photos, and a friendly trail rhythm. "
   },
   {
     title: "Highland routes",
@@ -38,7 +38,7 @@ const galleryStories = [
     title: "Golden hour stops",
     location: "Entoto",
     category: "Moments" as GalleryCategory,
-    tone: "Short breaks, skyline views, and photo-ready light."
+    tone: "Short breaks, and photo-ready light."
   },
   {
     title: "Wild landscape",
