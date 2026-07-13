@@ -17,13 +17,29 @@ async function parseResponse<T>(response: Response): Promise<T> {
     return undefined as T;
   }
 
-  const result = await response.json();
+  const responseText = await response.text();
+  let result: unknown;
 
-  if (!response.ok) {
-    throw new ApiError(result.message || result.error_description || result.error || "Request failed.");
+  try {
+    result = responseText ? JSON.parse(responseText) : undefined;
+  } catch {
+    if (response.status === 413) {
+      throw new ApiError("The image is too large for the deployed upload service. Choose an image smaller than 4 MB.");
+    }
+
+    if (!response.ok) {
+      throw new ApiError(`Request failed with status ${response.status}.`);
+    }
+
+    throw new ApiError("The server returned an unexpected response.");
   }
 
-  return result;
+  if (!response.ok) {
+    const errorResult = (result || {}) as { message?: string; error_description?: string; error?: string };
+    throw new ApiError(errorResult.message || errorResult.error_description || errorResult.error || "Request failed.");
+  }
+
+  return result as T;
 }
 
 function jsonRequest<T>(url: string, method: string, body: unknown) {
@@ -140,6 +156,12 @@ export function sendContactMessage(form: ContactForm) {
 }
 
 export function uploadTripImage(file: File) {
+  const maximumUploadSize = 4 * 1024 * 1024;
+
+  if (file.size > maximumUploadSize) {
+    throw new ApiError(`This image is ${(file.size / 1024 / 1024).toFixed(1)} MB. Choose an image smaller than 4 MB before uploading.`);
+  }
+
   return fetch("/api/admin/uploads", {
     method: "POST",
     headers: {
