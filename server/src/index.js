@@ -504,6 +504,28 @@ function requireJsonBody(req, res, next) {
   next();
 }
 
+const imageBodyParser = express.raw({
+  type: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+  limit: "4mb"
+});
+
+function parseImageBody(req, res, next) {
+  // Vercel may provide a pre-parsed binary body to the Express function.
+  // Re-reading that consumed request stream causes an HTML 500 response.
+  if (Buffer.isBuffer(req.body)) {
+    next();
+    return;
+  }
+
+  if (req.body instanceof Uint8Array) {
+    req.body = Buffer.from(req.body);
+    next();
+    return;
+  }
+
+  imageBodyParser(req, res, next);
+}
+
 function createRateLimiter({ windowMs, max }) {
   const hits = new Map();
 
@@ -752,7 +774,7 @@ app.patch("/api/admin/messages/:id", requireAdmin, (req, res) => {
 app.post(
   "/api/admin/uploads",
   requireAdmin,
-  express.raw({ type: ["image/jpeg", "image/png", "image/webp", "image/gif"], limit: "8mb" }),
+  parseImageBody,
   async (req, res) => {
     const extensionByType = {
       "image/jpeg": ".jpg",
@@ -869,6 +891,24 @@ app.delete("/api/admin/trips/:id", requireAdmin, (req, res) => {
 
   saveTrips();
   res.status(204).send();
+});
+
+app.use((error, _req, res, next) => {
+  if (res.headersSent) {
+    next(error);
+    return;
+  }
+
+  const isPayloadTooLarge = error?.type === "entity.too.large" || error?.status === 413;
+  const status = isPayloadTooLarge ? 413 : Number(error?.status || error?.statusCode) || 500;
+  const message = isPayloadTooLarge
+    ? "The image is too large for the deployed upload service. Choose an image smaller than 4 MB."
+    : status >= 500
+      ? "The upload service encountered an unexpected error. Check the Vercel function logs for details."
+      : error?.message || "The request could not be processed.";
+
+  console.error("API request failed", error);
+  res.status(status).json({ message });
 });
 
 if (!isVercel) {
