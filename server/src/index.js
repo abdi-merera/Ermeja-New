@@ -19,7 +19,12 @@ const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "";
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const supabaseStorageBucket = process.env.SUPABASE_STORAGE_BUCKET || "trip-images";
-const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5174";
+const configuredAllowedOrigins = (process.env.ALLOWED_ORIGIN || "http://localhost:5174")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+const vercelDeploymentOrigin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+const allowedOrigins = new Set([...configuredAllowedOrigins, vercelDeploymentOrigin].filter(Boolean));
 const whatsappNumber = process.env.WHATSAPP_NUMBER || "251913181343";
 const adminEmails = (process.env.ADMIN_EMAILS || "")
   .split(",")
@@ -83,12 +88,14 @@ async function uploadImageToSupabaseStorage({ buffer, contentType, fileName }) {
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origin === allowedOrigin) {
+      if (!origin || allowedOrigins.has(origin.replace(/\/$/, ""))) {
         callback(null, true);
         return;
       }
 
-      callback(new Error("Origin not allowed by CORS."));
+      const error = new Error("Request origin is not allowed.");
+      error.status = 403;
+      callback(error);
     }
   })
 );
@@ -487,7 +494,7 @@ function isTooLong(value, maxLength) {
 function requireTrustedOrigin(req, res, next) {
   const origin = req.get("origin");
 
-  if (origin && origin !== allowedOrigin) {
+  if (origin && !allowedOrigins.has(origin.replace(/\/$/, ""))) {
     res.status(403).json({ message: "Request origin is not allowed." });
     return;
   }
