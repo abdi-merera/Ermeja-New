@@ -10,6 +10,11 @@
         darkMode: "class",
         theme: {
           extend: {
+            colors: {
+              canvas: "#F2E9D8",
+              surface: "#FFFBF2",
+              sage: "#E7EEE4"
+            },
             fontFamily: {
               sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"]
             }
@@ -18,7 +23,7 @@
       };
     </script>
   </head>
-  <body class="m-0 bg-zinc-950 text-zinc-50">
+  <body class="m-0 bg-canvas text-stone-900 dark:bg-zinc-950 dark:text-zinc-50">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -4,7 +4,7 @@
     "title": "Wenchi Crater Lake & Tourism Village Overnight Trip",
     "destination": "Wenchi Crater Lake",
     "description": "Join us for an incredible two-day, one-night weekend getaway to Wenchi, recognized as one of the world's best tourism villages! Experience scenic hiking, a boat trip, horse riding, natural hot springs, therapeutic mud baths, and swimming. Wrap up the evening with a cozy campfire and a delicious barbecue dinner.",
-    "date": "2026-10-11",
+    "date": "2026-08-10",
     "duration": "Weekend",
     "price": 8500,
     "difficulty": "Easy",
@@ -63,7 +63,7 @@
     "status": "Published",
     "createdBy": "admin",
     "createdAt": "2026-06-17T09:27:40.723Z",
-    "updatedAt": "2026-06-24T15:22:56.806Z"
+    "updatedAt": "2026-08-06T12:24:40.728Z"
   },
   {
     "id": "erta-ale-expedition",
@@ -137,11 +137,11 @@
     "title": "Camping Trip To Langano",
     "destination": "Lake Langano & Shalla National Park",
     "description": "Join us for an amazing two-day, one-night camping getaway to Lake Langano! Explore the breathtaking scenery of Shalla National Park, visit Lake Shalla and Lake Zeway, and enjoy an active hiking experience. The trip includes cozy tent camping, a warm evening campfire, and a delicious barbecue dinner by the lakeside.",
-    "date": "2026-09-20",
+    "date": "2026-08-09",
     "duration": "Weekend",
     "price": 12000,
     "difficulty": "Easy",
-    "availableSeats": 20,
+    "availableSeats": 17,
     "meetingPoint": "Mexico - Wabi Shebele, Addis Ababa",
     "departureTime": "05:30",
     "returnTime": "11:30",
@@ -190,54 +190,7 @@
     "status": "Published",
     "createdBy": "admin",
     "createdAt": "2026-06-18T10:20:00.000Z",
-    "updatedAt": "2026-06-24T16:18:18.102Z"
-  },
-  {
-    "id": "menagesha-forest-escape",
-    "title": "Menagesha Forest Escape",
-    "destination": "Menagesha Suba Forest",
-    "description": "A green forest trail day with shaded climbs, old-growth trees, picnic pauses, and a calmer pace outside the city.",
-    "date": "2026-09-27",
-    "duration": "Day Trip",
-    "price": 2600,
-    "difficulty": "Medium",
-    "availableSeats": 16,
-    "meetingPoint": "Megenagna, Addis Ababa",
-    "departureTime": "06:30",
-    "returnTime": "18:00",
-    "includes": [
-      "Transport",
-      "Guide",
-      "Entrance fee",
-      "Lunch snack"
-    ],
-    "whatToBring": [
-      "Trail shoes",
-      "Rain jacket",
-      "Water bottle",
-      "Small backpack"
-    ],
-    "notIncluded": [
-      "Full lunch",
-      "Personal snacks",
-      "Personal insurance"
-    ],
-    "itinerary": [
-      "Depart Addis Ababa and drive toward Menagesha.",
-      "Begin the forest trail with guided pacing.",
-      "Take a picnic and photo break under the trees.",
-      "Return to Addis after an easy afternoon descent."
-    ],
-    "safetyNotes": "Forest trails can be muddy after rain. Wear shoes with grip and keep water-resistant layers nearby.",
-    "coverImage": "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1400&q=80",
-    "galleryImages": [
-      "https://images.unsplash.com/photo-1473773508845-188df298d2d1?auto=format&fit=crop&w=900&q=80",
-      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=900&q=80"
-    ],
-    "status": "Published",
-    "createdBy": "admin",
-    "createdAt": "2026-06-18T10:20:00.000Z",
-    "updatedAt": "2026-06-18T10:20:00.000Z"
+    "updatedAt": "2026-08-06T12:30:13.995Z"
   },
   {
     "id": "blue-nile-falls-weekend",
@@ -285,6 +238,6 @@
     "status": "Published",
     "createdBy": "admin",
     "createdAt": "2026-06-18T10:20:00.000Z",
-    "updatedAt": "2026-06-18T10:20:00.000Z"
+    "updatedAt": "2026-07-17T13:17:40.510Z"
   }
 ]

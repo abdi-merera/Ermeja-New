@@ -1,12 +1,12 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { defaultGalleryHighlight, destinations, emptyAdminTripForm } from "./constants";
+import { defaultGalleryHighlight, emptyAdminTripForm } from "./constants";
 import { Footer } from "./components/Footer";
 import { Navbar } from "./components/Navbar";
 import { AppRoutes } from "./routes/AppRoutes";
 import { pageFromPath, pagePaths } from "./routes/routeUtils";
 import * as api from "./services/api";
-import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, Page, Trip, TripStatus } from "./types";
+import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, GalleryImage, Page, Trip, TripStatus } from "./types";
 
 export function App() {
   const [page, setPage] = useState<Page>(() => pageFromPath(window.location.pathname));
@@ -87,11 +87,27 @@ export function App() {
     }
   }, [adminSession]);
 
-  const galleryImages = useMemo(
+  const galleryImages = useMemo<GalleryImage[]>(
     () => [
-      ...destinations.map((destination) => destination.image),
-      ...trips.flatMap((trip) => [trip.coverImage, ...trip.galleryImages])
-    ].slice(0, 9),
+      ...trips.flatMap((trip) => [
+        ...(trip.coverImage ? [{
+          id: `${trip.id}-cover`,
+          image: trip.coverImage,
+          title: trip.title,
+          destination: trip.destination,
+          description: trip.description,
+          source: "cover" as const
+        }] : []),
+        ...trip.galleryImages.filter(Boolean).map((image, index) => ({
+          id: `${trip.id}-gallery-${index}`,
+          image,
+          title: trip.title,
+          destination: trip.destination,
+          description: trip.description,
+          source: "gallery" as const
+        }))
+      ])
+    ],
     [trips]
   );
 
@@ -100,14 +116,14 @@ export function App() {
     setSelectedTrip(null);
     setMobileOpen(false);
     window.history.pushState({}, "", pagePaths[target]);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   const chooseTrip = (trip: Trip) => {
     setSelectedTrip(trip);
     setPage("trips");
     window.history.pushState({}, "", `/trips/${trip.id}`);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   async function submitBooking(event: FormEvent<HTMLFormElement>) {
@@ -240,7 +256,7 @@ export function App() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fffaf0] text-stone-900 transition-colors duration-300 dark:bg-[#071711] dark:text-stone-100">
+    <main className="min-h-screen bg-canvas text-stone-900 transition-colors duration-300 dark:bg-[#071711] dark:text-stone-100">
       <Navbar page={page} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} choosePage={choosePage} />
 
       {apiMessage ? (

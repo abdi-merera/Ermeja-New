@@ -6,7 +6,7 @@ import { GalleryPage } from "../pages/GalleryPage";
 import { HomePage } from "../pages/HomePage";
 import { TripDetailPage } from "../pages/TripDetailPage";
 import { TripsPage } from "../pages/TripsPage";
-import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, BookingForm, BookingSubmitHandler, ContactForm, ContactMessage, ContactSubmitHandler, GalleryHighlight, Page, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, BookingForm, BookingSubmitHandler, ContactForm, ContactMessage, ContactSubmitHandler, GalleryHighlight, GalleryImage, Page, Trip, TripStatus } from "../types";
 
 export function AppRoutes({
   page,
@@ -46,7 +46,7 @@ export function AppRoutes({
   trips: Trip[];
   adminTrips: Trip[];
   selectedTrip: Trip | null;
-  galleryImages: string[];
+  galleryImages: GalleryImage[];
   galleryHighlight: GalleryHighlight;
   bookingForm: BookingForm;
   setBookingForm: (form: BookingForm) => void;

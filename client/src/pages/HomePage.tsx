@@ -1,11 +1,24 @@
-import { ArrowRight, CheckCircle2, MessageCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, Flame, MessageCircle } from "lucide-react";
 import { beigePanel, brandGreen, destinations, experienceHighlights, heroStats, orangeButton, testimonials, trustItems, whatsappNumber, yellowButton } from "../constants";
 import { GalleryPreview } from "../components/GalleryPreview";
 import { SectionTitle } from "../components/SectionTitle";
 import { TripCard } from "../components/TripCard";
-import type { Page, Trip } from "../types";
+import type { GalleryImage, Page, Trip } from "../types";
+import { formatPrice } from "../utils";
 
-export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { trips: Trip[]; galleryImages: string[]; choosePage: (page: Page) => void; chooseTrip: (trip: Trip) => void }) {
+export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { trips: Trip[]; galleryImages: GalleryImage[]; choosePage: (page: Page) => void; chooseTrip: (trip: Trip) => void }) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nextTrip = [...trips]
+    .filter((trip) => {
+      const tripDate = new Date(`${trip.date}T00:00:00`);
+      return !Number.isNaN(tripDate.getTime()) && tripDate >= today;
+    })
+    .sort((first, second) => first.date.localeCompare(second.date))[0];
+  const daysUntilNextTrip = nextTrip ? Math.ceil((new Date(`${nextTrip.date}T00:00:00`).getTime() - today.getTime()) / 86_400_000) : null;
+  const hotTrip = nextTrip && daysUntilNextTrip !== null && daysUntilNextTrip <= 5 ? nextTrip : null;
+  const countdown = daysUntilNextTrip === 0 ? "Leaving today" : daysUntilNextTrip === 1 ? "Leaving tomorrow" : `Leaving in ${daysUntilNextTrip} days`;
+
   return (
     <>
       <section className="relative min-h-[88vh] overflow-hidden">
@@ -15,7 +28,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
           alt="Hikers walking through mountain nature"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#09251C]/95 via-[#114F3C]/78 to-black/30" />
-        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#fffaf0] to-transparent dark:from-[#071711]" />
+        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-canvas to-transparent dark:from-[#071711]" />
         <div className="relative mx-auto grid min-h-[88vh] max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_0.82fr] lg:px-8">
           <div className="max-w-3xl pb-8 pt-8">
             <p className="mb-5 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#F8A900] backdrop-blur">
@@ -46,24 +59,33 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
           </div>
 
           <aside className="relative hidden lg:block">
-            <div className="rounded-lg border border-white/20 bg-white/10 p-4 shadow-2xl shadow-black/40 backdrop-blur-md">
-              <img className="h-[430px] w-full rounded-lg object-cover" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=85" alt="Mountain walking route" />
+            <button
+              type="button"
+              disabled={!hotTrip}
+              onClick={() => hotTrip && chooseTrip(hotTrip)}
+              className={`w-full rounded-lg border border-white/20 bg-white/10 p-4 text-left shadow-2xl shadow-black/40 backdrop-blur-md transition ${hotTrip ? "cursor-pointer hover:-translate-y-1 hover:border-[#F8A900]/70" : "cursor-default"}`}
+            >
+              <div className="relative overflow-hidden rounded-lg">
+                <img className={`h-[430px] w-full object-cover transition duration-700 ${hotTrip ? "hover:scale-105" : "opacity-75"}`} src={hotTrip?.coverImage || "/hero.jpg"} alt={hotTrip?.title || "A future Ermija Hiking adventure"} />
+                {hotTrip ? (
+                  <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-[#F54C0D] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white shadow-lg">
+                    <Flame className="h-4 w-4" /> Hot trip
+                  </span>
+                ) : null}
+              </div>
               <div className="mt-4 grid grid-cols-[1fr_auto] items-end gap-4">
                 <div>
-                  <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Featured route</p>
-                  <h2 className="mt-2 text-2xl font-black text-white">Wenchi Day Trip</h2>
-                  <p className="mt-2 text-sm leading-6 text-white/75">A clean, photo-rich trip poster style that keeps every booking detail visible.</p>
+                  <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">{hotTrip ? countdown : "Next adventure"}</p>
+                  <h2 className="mt-2 text-2xl font-black text-white">{hotTrip?.title || "Something memorable is taking shape"}</h2>
+                  <p className="mt-2 text-sm leading-6 text-white/75">{hotTrip ? `${hotTrip.destination} / ${hotTrip.duration} / ${hotTrip.difficulty}` : "No trip is departing in the next five days. New dates and routes will appear here as soon as they are published."}</p>
                 </div>
-                <div className="rounded-lg bg-[#F8A900] px-4 py-3 text-center text-[#114F3C]">
-                  <p className="text-xs font-black uppercase">From</p>
-                  <p className="text-xl font-black">ETB 3,200</p>
-                </div>
+                {hotTrip ? <div className="rounded-lg bg-[#F8A900] px-4 py-3 text-center text-[#114F3C]"><p className="text-xs font-black uppercase">From</p><p className="text-xl font-black">{formatPrice(hotTrip.price)}</p></div> : null}
               </div>
-            </div>
-            <div className="absolute -bottom-7 -left-7 rounded-lg bg-white p-5 shadow-xl dark:bg-[#10241C] dark:shadow-black/30">
-              <p className="text-sm font-black text-[#114F3C]">Package clarity</p>
+            </button>
+            <div className="relative mt-3 ml-6 mr-6 rounded-lg border border-[#114F3C]/10 bg-surface p-4 shadow-xl dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/30">
+              <p className="text-sm font-black text-[#114F3C]">{hotTrip ? "Why it is hot" : "Planning board"}</p>
               <div className="mt-3 space-y-2 text-sm font-semibold text-stone-700 dark:text-stone-300">
-                {["Date and price", "Seats available", "WhatsApp booking"].map((item) => (
+                {(hotTrip ? [countdown, `${hotTrip.availableSeats} seats available`, "Tap to view trip"] : ["Fresh dates coming", "New routes being planned", "Browse available trips"]).map((item) => (
                   <p key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-[#9EC26D]" />
                     {item}
@@ -103,7 +125,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
           <SectionTitle eyebrow="Experience" title="Built to make booking feel easy" text="The website gives visitors enough confidence to choose a route, understand the package, and contact Ermija without confusion." />
           <div className="grid gap-5 md:grid-cols-3">
             {experienceHighlights.map(({ title, text, Icon }) => (
-              <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+              <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#FCE4B4] text-[#F54C0D]">
                   <Icon className="h-6 w-6" />
                 </span>
@@ -120,7 +142,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
           <SectionTitle eyebrow="Destinations" title="Popular places to explore" />
           <div className="grid gap-6 md:grid-cols-3">
             {destinations.map((destination) => (
-              <article key={destination.name} className="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-[#10241C] dark:shadow-black/20">
+              <article key={destination.name} className="overflow-hidden rounded-lg border border-[#114F3C]/10 bg-surface shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <img className="h-56 w-full object-cover" src={destination.image} alt={destination.name} />
                 <div className={`${beigePanel} p-5 dark:bg-[#162C22]`}>
                   <h3 className="text-2xl font-black text-[#114F3C]">{destination.name}</h3>
@@ -139,7 +161,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
           <SectionTitle eyebrow="Traveler trust" title="Designed around what guests need before booking" />
           <div className="grid gap-5 md:grid-cols-3">
             {testimonials.map((testimonial) => (
-              <article key={testimonial.name} className="rounded-lg bg-white p-6 shadow-sm dark:bg-[#10241C] dark:shadow-black/20">
+              <article key={testimonial.name} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <p className="text-sm leading-7 text-stone-700 dark:text-stone-300">"{testimonial.text}"</p>
                 <div className="mt-6 flex items-center gap-3 border-t border-stone-100 pt-4 dark:border-white/10">
                   <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#114F3C] text-sm font-black text-[#F8A900]">

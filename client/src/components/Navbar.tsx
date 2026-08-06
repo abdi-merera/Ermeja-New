@@ -22,7 +22,7 @@ export function Navbar({
   return (
     <header className={`sticky top-0 z-40 ${brandGreen} border-b border-white/10 shadow-lg shadow-[#114F3C]/20`}>
       <div className="flex w-full items-center justify-start px-4 py-4 sm:px-6 lg:px-8">
-        <Logo onClick={() => choosePage("home")} />
+        <Logo onClick={() => choosePage("home")} onLongPress={() => choosePage("admin")} />
         <FootstepTrail />
         <nav className="ml-auto hidden items-center gap-1 lg:flex">
           {navItems.map((item) => (
@@ -86,16 +86,16 @@ export function Navbar({
 
 function FootstepTrail() {
   const steps = [
-    { left: 0, top: 38, src: "/foot.svg" },
-    { left: 54, top: 38, src: "/foot-left.svg" },
-    { left: 108, top: 38, src: "/foot.svg" },
-    { left: 162, top: 38, src: "/foot-left.svg" },
-    { left: 216, top: 38, src: "/foot.svg" },
-    { left: 270, top: 38, src: "/foot-left.svg" }
+    { left: 0, mobileLeft: 0, top: 38, mobileTop: 42, src: "/foot.svg" },
+    { left: 54, mobileLeft: 20, top: 38, mobileTop: 42, src: "/foot-left.svg" },
+    { left: 108, mobileLeft: 40, top: 38, mobileTop: 42, src: "/foot.svg" },
+    { left: 162, mobileLeft: 60, top: 38, mobileTop: 42, src: "/foot-left.svg" },
+    { left: 216, mobileLeft: 80, top: 38, mobileTop: 42, src: "/foot.svg" },
+    { left: 270, mobileLeft: 100, top: 38, mobileTop: 42, src: "/foot-left.svg" }
   ];
 
   return (
-    <div className="ermija-footstep-trail relative ml-5 hidden h-14 w-96 sm:block" aria-hidden="true">
+    <div className="ermija-footstep-trail relative ml-2 h-14 w-32 shrink-0 sm:ml-5 sm:w-96" aria-hidden="true">
       <style>
         {`
           @keyframes ermija-footstep {
@@ -119,9 +119,16 @@ function FootstepTrail() {
             animation: ermija-footstep 39s ease-in-out infinite;
             animation-delay: var(--step-delay);
             animation-fill-mode: both;
-            left: var(--step-left);
-            top: var(--step-top);
+            left: var(--step-mobile-left);
+            top: var(--step-mobile-top);
             transform-origin: center;
+          }
+
+          @media (min-width: 640px) {
+            .ermija-footstep-trail .footstep {
+              left: var(--step-left);
+              top: var(--step-top);
+            }
           }
         `}
       </style>
@@ -130,12 +137,14 @@ function FootstepTrail() {
           key={`${step.left}-${step.top}`}
           src={step.src}
           alt=""
-          className="footstep h-5 w-10 object-contain"
+          className="footstep h-4 w-8 object-contain sm:h-5 sm:w-10"
           style={
             {
               "--step-delay": `${index * 1.55}s`,
               "--step-left": `${step.left}px`,
+              "--step-mobile-left": `${step.mobileLeft}px`,
               "--step-top": `${step.top}px`,
+              "--step-mobile-top": `${step.mobileTop}px`,
               "--step-rotate": "0deg",
               filter: "brightness(0) invert(1)"
             } as CSSProperties

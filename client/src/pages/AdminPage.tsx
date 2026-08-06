@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Edit3, ImagePlus, LogIn, Mail, MessageCircle, Phone, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
+import { CalendarDays, CheckCircle2, Edit3, ImagePlus, LayoutDashboard, LogIn, LogOut, Mail, MessageCircle, Mountain, Phone, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
 import { orangeButton, whatsappNumber, yellowButton } from "../constants";
 import { uploadTripImage } from "../services/api";
 import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, ContactMessage, GalleryHighlight, Trip, TripStatus } from "../types";
@@ -9,13 +9,13 @@ const tripFilters = ["All", "Published", "Draft"] as const;
 const bookingStatuses = ["New", "Confirmed", "Cancelled"];
 const messageStatuses = ["New", "Replied"];
 const adminSections = [
-  { id: "trips", label: "Trip handling", text: "Create, edit, publish, and remove packages." },
-  { id: "gallery", label: "Gallery & media", text: "Review cover and gallery images used across trips." },
-  { id: "operations", label: "Admin activities", text: "Manage booking requests and contact messages." }
+  { id: "trips", label: "Trips", text: "Create and manage packages.", icon: Mountain },
+  { id: "gallery", label: "Media", text: "Organize gallery images.", icon: ImagePlus },
+  { id: "operations", label: "Operations", text: "Bookings and messages.", icon: LayoutDashboard }
 ] as const;
 
 const inputClass =
-  "rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-semibold text-stone-900 outline-none transition focus:border-[#114F3C] dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-stone-500";
+  "rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-stone-900 outline-none transition focus:border-[#114F3C] focus:ring-4 focus:ring-[#114F3C]/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-stone-500";
 
 function tripToForm(trip: Trip): AdminTripForm {
   return {
@@ -91,6 +91,7 @@ export function AdminPage({
   const [messageQuery, setMessageQuery] = useState("");
   const [messageFilter, setMessageFilter] = useState("All");
   const [activeSection, setActiveSection] = useState<(typeof adminSections)[number]["id"]>("trips");
+  const [creatingTrip, setCreatingTrip] = useState(false);
 
   const filteredTrips = useMemo(
     () =>
@@ -191,70 +192,68 @@ export function AdminPage({
   }
 
   return (
-    <section className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-5 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+    <section className="min-h-screen bg-canvas px-4 py-6 transition-colors dark:bg-[#071711] sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto max-w-[1440px]">
+        <header className="mb-6 overflow-hidden rounded-2xl bg-[#114F3C] p-6 text-white shadow-xl shadow-[#114F3C]/10 sm:p-7">
+          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#F54C0D]">Admin portal</p>
-            <h1 className="mt-2 text-3xl font-black leading-tight text-[#114F3C] dark:text-[#F8A900]">Manage trips, bookings, and messages</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-700 dark:text-stone-300">Keep packages fresh and follow up with interested guests.</p>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#F8A900]">Ermija administration</p>
+            <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">Operations dashboard</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">Manage trips, media and customer activity from one workspace.</p>
           </div>
-          <div className="rounded-lg bg-white p-3 shadow-sm dark:bg-[#10241C]">
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">Signed in</p>
-            <p className="mt-1 text-sm font-black text-[#114F3C] dark:text-[#F8A900]">{adminEmail}</p>
-            <button type="button" onClick={logoutAdmin} className="mt-2 rounded-lg bg-stone-100 px-3 py-2 text-sm font-black text-[#114F3C] transition hover:bg-stone-200 dark:bg-white/10 dark:text-white">
-              Log out
+          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/10 p-3 backdrop-blur">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#F8A900] font-black text-[#114F3C]">{adminEmail.slice(0, 1).toUpperCase()}</div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-white/60">Signed in as</p>
+              <p className="truncate text-sm font-black">{adminEmail}</p>
+            </div>
+            <button type="button" onClick={logoutAdmin} className="grid h-10 w-10 place-items-center rounded-lg bg-white/10 text-white transition hover:bg-white/20" aria-label="Log out">
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
+          </div>
+        </header>
+
+        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <AdminStat label="Total trips" value={trips.length} icon={<Mountain className="h-5 w-5" />} />
+          <AdminStat label="Published" value={trips.filter((trip) => trip.status === "Published").length} icon={<CheckCircle2 className="h-5 w-5" />} />
+          <AdminStat label="Confirmed" value={confirmedBookings} icon={<Users className="h-5 w-5" />} />
+          <AdminStat label="New messages" value={unrepliedMessages} icon={<Mail className="h-5 w-5" />} />
         </div>
 
-        <div className="mb-5 grid gap-3 md:grid-cols-4">
-          <AdminStat label="Trips" value={trips.length} />
-          <AdminStat label="Published" value={trips.filter((trip) => trip.status === "Published").length} />
-          <AdminStat label="Confirmed bookings" value={confirmedBookings} />
-          <AdminStat label="New messages" value={unrepliedMessages} />
-        </div>
-
-        <div className="mb-5 grid gap-3 lg:grid-cols-3">
-          {adminSections.map((section) => (
+        <nav className="mb-6 flex gap-2 overflow-x-auto rounded-xl border border-[#114F3C]/10 bg-surface p-2 shadow-sm dark:border-white/10 dark:bg-[#10241C]">
+          {adminSections.map((section) => {
+            const Icon = section.icon;
+            return (
             <button
               key={section.id}
               type="button"
               onClick={() => setActiveSection(section.id)}
-              className={`rounded-lg border p-4 text-left transition ${
+              className={`flex min-w-44 flex-1 items-center gap-3 rounded-lg px-4 py-3 text-left transition ${
                 activeSection === section.id
-                  ? "border-[#F8A900] bg-[#114F3C] text-white shadow-xl shadow-[#114F3C]/15"
-                  : "border-[#114F3C]/10 bg-white text-stone-700 hover:border-[#F8A900]/60 dark:border-white/10 dark:bg-[#10241C] dark:text-stone-300"
+                  ? "bg-[#114F3C] text-white shadow-md shadow-[#114F3C]/15"
+                  : "text-stone-600 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-white/5"
               }`}
             >
-              <p className={`text-xs font-black uppercase tracking-[0.18em] ${activeSection === section.id ? "text-[#F8A900]" : "text-[#F54C0D]"}`}>{section.label}</p>
-              <p className="mt-2 text-sm font-semibold leading-5">{section.text}</p>
+              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${activeSection === section.id ? "bg-white/10 text-[#F8A900]" : "bg-stone-100 text-[#114F3C] dark:bg-white/10 dark:text-[#F8A900]"}`}><Icon className="h-5 w-5" /></span>
+              <span><span className="block text-sm font-black">{section.label}</span><span className={`mt-0.5 block text-xs font-semibold ${activeSection === section.id ? "text-white/65" : "text-stone-400"}`}>{section.text}</span></span>
             </button>
-          ))}
-        </div>
+          );})}
+        </nav>
 
         {activeSection === "trips" ? (
-          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="space-y-6">
-              <TripForm form={form} setForm={setForm} onSubmit={submitTrip} title="Add upcoming trip" actionLabel="Save Trip" actionIcon={<Plus className="h-5 w-5" />} />
-              <div className="rounded-lg border-2 border-dashed border-[#114F3C]/20 bg-white p-4 text-sm text-stone-700 transition-colors duration-300 dark:border-white/15 dark:bg-[#10241C] dark:text-stone-300">
-                <ImagePlus className="mb-2 h-5 w-5 text-[#F54C0D]" />
-                Upload a cover image and gallery images from your computer, or paste hosted image URLs directly into the fields.
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="rounded-lg bg-white p-4 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
+          <div className="space-y-4">
+              <div className="rounded-xl border border-[#114F3C]/10 bg-surface p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-[#F54C0D]">Trip inventory</p>
                     <h2 className="mt-1 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">Search and manage packages</h2>
                   </div>
-                  <select className={inputClass} value={tripFilter} onChange={(event) => setTripFilter(event.target.value as (typeof tripFilters)[number])}>
+                  <div className="flex gap-2"><select className={inputClass} value={tripFilter} onChange={(event) => setTripFilter(event.target.value as (typeof tripFilters)[number])}>
                     {tripFilters.map((filter) => (
                       <option key={filter}>{filter}</option>
                     ))}
-                  </select>
+                  </select><button type="button" onClick={() => setCreatingTrip(true)} className={`inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-black ${orangeButton}`}><Plus className="h-4 w-4" /> New trip</button></div>
                 </div>
                 <label className="relative mt-5 block">
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
@@ -262,12 +261,13 @@ export function AdminPage({
                 </label>
               </div>
 
-              {filteredTrips.map((trip) => (
-                <TripAdminCard key={trip.id} trip={trip} onEdit={beginEdit} onDelete={deleteAdminTrip} onStatusChange={updateTripStatus} />
-              ))}
-
-              {!filteredTrips.length ? <EmptyAdminState text="No trips match the current search." /> : null}
-            </div>
+              {filteredTrips.length ? (
+                <div className="grid gap-4 xl:grid-cols-2">
+                  {filteredTrips.map((trip) => (
+                    <TripAdminCard key={trip.id} trip={trip} onEdit={beginEdit} onDelete={deleteAdminTrip} onStatusChange={updateTripStatus} />
+                  ))}
+                </div>
+              ) : <EmptyAdminState text="No trips match the current search." />}
           </div>
         ) : null}
 
@@ -386,15 +386,27 @@ export function AdminPage({
           </div>
         </div>
       ) : null}
+
+      {creatingTrip ? (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 px-4 py-8 backdrop-blur-sm">
+          <div className="mx-auto max-w-5xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-[#10241C]">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div><p className="text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]">New package</p><h2 className="mt-2 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">Create an upcoming trip</h2></div>
+              <button type="button" onClick={() => setCreatingTrip(false)} className="rounded-lg bg-stone-100 p-3 text-[#114F3C] transition hover:bg-stone-200 dark:bg-white/10 dark:text-white" aria-label="Close new trip form"><X className="h-5 w-5" /></button>
+            </div>
+            <TripForm form={form} setForm={setForm} onSubmit={submitTrip} title="Trip details" actionLabel="Save Trip" actionIcon={<Plus className="h-5 w-5" />} />
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-function AdminStat({ label, value }: { label: string; value: number }) {
+function AdminStat({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
-      <p className="text-sm font-bold text-stone-500 dark:text-stone-400">{label}</p>
-      <p className="mt-1 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{value}</p>
+    <div className="flex items-center gap-3 rounded-xl border border-[#114F3C]/10 bg-surface p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#FCE4B4] text-[#114F3C]">{icon}</span>
+      <div><p className="text-xs font-bold text-stone-500 dark:text-stone-400">{label}</p><p className="mt-0.5 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{value}</p></div>
     </div>
   );
 }
@@ -603,7 +615,7 @@ function GalleryHighlightEditor({ highlight, onSave }: { highlight: GalleryHighl
 
 function FormSection({ title, text, children }: { title: string; text: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-[#114F3C]/10 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/5">
+    <section className="rounded-xl border border-stone-200 bg-stone-50/70 p-4 dark:border-white/10 dark:bg-white/5">
       <div className="mb-4">
         <h3 className="text-base font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h3>
         <p className="mt-1 text-sm leading-5 text-stone-600 dark:text-stone-300">{text}</p>
@@ -743,8 +755,8 @@ function TripForm({
   };
 
   return (
-    <form noValidate className="rounded-lg bg-white p-4 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20" onSubmit={handleSubmit}>
-      <div className="grid gap-4 lg:grid-cols-[1fr_0.38fr]">
+    <form noValidate className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-5" onSubmit={handleSubmit}>
+      <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
           <h2 className="text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h2>
           <FormSection title="Basics" text="Name the package and describe why guests should join.">
@@ -834,7 +846,7 @@ function TripForm({
           </FormSection>
         </div>
 
-        <aside className="rounded-lg bg-stone-50 p-3 dark:bg-white/5">
+        <aside className="h-fit rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/5 lg:sticky lg:top-4">
           {Object.keys(fieldErrors).length ? (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
               Fix the highlighted fields before saving.
@@ -914,7 +926,7 @@ function TripForm({
 
 function TripAdminCard({ trip, onEdit, onDelete, onStatusChange }: { trip: Trip; onEdit: (trip: Trip) => void; onDelete: (trip: Trip) => void; onStatusChange: (trip: Trip, status: TripStatus) => void }) {
   return (
-    <article className="overflow-hidden rounded-lg bg-white shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
+    <article className="overflow-hidden rounded-xl border border-[#114F3C]/10 bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
       <div className="grid gap-4 p-4 sm:grid-cols-[140px_1fr]">
         <img className="h-32 w-full rounded-lg object-cover sm:h-full" src={trip.coverImage} alt={trip.title} />
         <div>
@@ -961,7 +973,7 @@ function TripAdminCard({ trip, onEdit, onDelete, onStatusChange }: { trip: Trip;
 
 function AdminInbox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg bg-white p-6 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
+    <section className="rounded-xl border border-[#114F3C]/10 bg-surface p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-6">
       <h2 className="text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h2>
       <div className="mt-5 space-y-4">{children}</div>
     </section>

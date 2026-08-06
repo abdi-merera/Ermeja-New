@@ -513,7 +513,7 @@ function requireJsonBody(req, res, next) {
 
 const imageBodyParser = express.raw({
   type: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-  limit: "4mb"
+  limit: "6mb"
 });
 
 function parseImageBody(req, res, next) {
@@ -601,6 +601,10 @@ const requireAdmin = async (req, res, next) => {
     res.status(503).json({ message: "Unable to verify admin session." });
   }
 };
+
+app.get("/", (_req, res) => {
+  res.redirect(configuredAllowedOrigins[0] || "http://localhost:5174");
+});
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -909,7 +913,7 @@ app.use((error, _req, res, next) => {
   const isPayloadTooLarge = error?.type === "entity.too.large" || error?.status === 413;
   const status = isPayloadTooLarge ? 413 : Number(error?.status || error?.statusCode) || 500;
   const message = isPayloadTooLarge
-    ? "The image is too large for the deployed upload service. Choose an image smaller than 4 MB."
+    ? "The image is too large for the deployed upload service. Choose an image smaller than 6 MB."
     : status >= 500
       ? "The upload service encountered an unexpected error. Check the Vercel function logs for details."
       : error?.message || "The request could not be processed.";

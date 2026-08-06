@@ -6,7 +6,15 @@ export function TripCard({ trip, onSelect }: { trip: Trip; onSelect: (trip: Trip
   return (
     <article
       onClick={() => onSelect(trip)}
-      className="group cursor-pointer overflow-hidden rounded-[1.5rem] border border-[#114F3C]/5 bg-white shadow-sm transition duration-300 hover:-translate-y-2 hover:border-[#F8A900]/45 hover:shadow-2xl hover:shadow-[#114F3C]/15 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20"
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect(trip);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.5rem] border border-[#114F3C]/10 bg-surface shadow-sm outline-none transition duration-300 hover:-translate-y-2 hover:border-[#F8A900]/45 hover:shadow-2xl hover:shadow-[#114F3C]/15 focus-visible:ring-4 focus-visible:ring-[#F8A900]/50 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20"
     >
       <div className="relative h-56 overflow-hidden bg-[#FCE4B4]">
         <img className="h-full w-full object-cover transition duration-500 group-hover:scale-105" src={trip.coverImage} alt={trip.destination} />
@@ -20,8 +28,8 @@ export function TripCard({ trip, onSelect }: { trip: Trip; onSelect: (trip: Trip
         </span>
       </div>
 
-      <div className="p-6">
-        <h3 className="text-2xl font-black leading-tight text-[#1e2a2f] dark:text-[#F8A900]">{trip.title}</h3>
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="line-clamp-3 min-h-[5.4rem] text-2xl font-black leading-tight text-[#1e2a2f] dark:text-[#F8A900]">{trip.title}</h3>
         <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-stone-500 dark:text-stone-300">
           <MapPin className="h-4 w-4 text-[#F8A900]" />
           {trip.destination}
@@ -39,7 +47,7 @@ export function TripCard({ trip, onSelect }: { trip: Trip; onSelect: (trip: Trip
           </span>
         </div>
 
-        <div className="mt-5 flex items-center justify-between border-t border-stone-100 pt-4 dark:border-white/10">
+        <div className="mt-auto flex items-center justify-between border-t border-stone-100 pt-4 dark:border-white/10">
           <div>
             <p className="text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatPrice(trip.price)}</p>
             <p className="text-xs font-semibold text-stone-500 dark:text-stone-400">per person</p>

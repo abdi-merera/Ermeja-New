@@ -1,6 +1,7 @@
 import { yellowButton } from "../constants";
+import type { GalleryImage } from "../types";
 
-export function GalleryPreview({ images, onOpen }: { images: string[]; onOpen: () => void }) {
+export function GalleryPreview({ images, onOpen }: { images: GalleryImage[]; onOpen: () => void }) {
   return (
     <section className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -14,12 +15,12 @@ export function GalleryPreview({ images, onOpen }: { images: string[]; onOpen: (
           </button>
         </div>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {images.slice(0, 8).map((image, index) => (
+          {images.slice(0, 8).map((item, index) => (
             <img
-              key={image}
+              key={item.id}
               className={`w-full rounded-lg object-cover shadow-sm ${index === 0 ? "col-span-2 h-72 md:row-span-2 md:h-full" : "h-40 md:h-52"}`}
-              src={image}
-              alt="Ermija hiking gallery"
+              src={item.image}
+              alt={`${item.title} in ${item.destination}`}
             />
           ))}
         </div>

@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "booking-1786019413995",
+    "tripId": "entoto-sunrise-walk",
+    "customerName": "Aman Aman",
+    "phone": "0910225566",
+    "numberOfPeople": 3,
+    "message": "We need to book the trip to Wonchi for Two person",
+    "status": "New",
+    "createdAt": "2026-08-06T12:30:13.995Z"
+  }
+]

@@ -1,70 +1,7 @@
-import { CSSProperties, useMemo, useState } from "react";
-import { Camera, ChevronRight, Film, Heart, Image, Instagram, MapPin, Play, Sparkles, Users } from "lucide-react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Film, Heart, Images, Instagram, MapPin, Play } from "lucide-react";
 import { defaultGalleryHighlight, orangeButton, whatsappNumber, yellowButton } from "../constants";
-import type { GalleryHighlight } from "../types";
-
-type GalleryCategory = "All" | "Destinations" | "Groups" | "Trails" | "Moments";
-
-const categories: GalleryCategory[] = ["All", "Destinations", "Groups", "Trails", "Moments"];
-
-const categoryIcons = {
-  All: Sparkles,
-  Destinations: MapPin,
-  Groups: Users,
-  Trails: Image,
-  Moments: Camera
-};
-
-const galleryStories = [
-  {
-    title: "Crater lake calm",
-    location: "Wenchi",
-    category: "Destinations" as GalleryCategory,
-    tone: "Lake views, green ridges, and slow scenic walking."
-  },
-  {
-    title: "Group energy",
-    location: "Addis day trip",
-    category: "Groups" as GalleryCategory,
-    tone: "Shared transport, shared photos, and a friendly trail rhythm. "
-  },
-  {
-    title: "Highland routes",
-    location: "Bale Mountains",
-    category: "Trails" as GalleryCategory,
-    tone: "Cool air, open paths, and mountain-style walking."
-  },
-  {
-    title: "Golden hour stops",
-    location: "Entoto",
-    category: "Moments" as GalleryCategory,
-    tone: "Short breaks, and photo-ready light."
-  },
-  {
-    title: "Wild landscape",
-    location: "Danakil",
-    category: "Destinations" as GalleryCategory,
-    tone: "A dramatic destination for bold multi-day explorers."
-  },
-  {
-    title: "Trail friendship",
-    location: "Community walks",
-    category: "Groups" as GalleryCategory,
-    tone: "The people you walk with become part of the memory."
-  },
-  {
-    title: "Forest sections",
-    location: "Menagesha",
-    category: "Trails" as GalleryCategory,
-    tone: "Shade, texture, fresh air, and quiet movement."
-  },
-  {
-    title: "After-walk photos",
-    location: "Trip moments",
-    category: "Moments" as GalleryCategory,
-    tone: "The proof that the day was worth stepping out for."
-  }
-];
+import type { GalleryHighlight, GalleryImage } from "../types";
 
 const splitClipPaths = [
   "polygon(50% 50%,calc(50%*var(--_i,0)) calc(120%*var(--_i,0)),0 calc(100%*var(--_i,0)),0 0,100% 0,100% calc(100%*var(--_i,0)),calc(100% - 50%*var(--_i,0)) calc(120%*var(--_i,0)))",
@@ -95,7 +32,7 @@ function CircularSplitGallery({ images, activeImage, setActiveImage }: { images:
           <img
             key={`${image}-${index}`}
             src={image}
-            alt={galleryStories[index]?.title || "Ermija hiking visual story"}
+            alt="Ermija hiking visual story"
             className="col-start-1 row-start-1 aspect-square w-full cursor-pointer object-cover shadow-2xl shadow-black/25"
             style={
               {
@@ -125,25 +62,33 @@ function CircularSplitGallery({ images, activeImage, setActiveImage }: { images:
   );
 }
 
-export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { images: string[]; highlight?: GalleryHighlight }) {
-  const [activeCategory, setActiveCategory] = useState<GalleryCategory>("All");
+export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { images: GalleryImage[]; highlight?: GalleryHighlight }) {
+  const [activeDestination, setActiveDestination] = useState<string | null>(null);
   const [activeSplitImage, setActiveSplitImage] = useState(0);
   const splitHighlights = highlight.items.length === 4 ? highlight.items : defaultGalleryHighlight.items;
 
-  const enrichedImages = useMemo(
-    () =>
-      galleryStories.map((story, index) => ({
-        ...story,
-        image: images[index % Math.max(images.length, 1)] || "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1200&q=85"
-      })),
+  const destinationGroups = useMemo(
+    () => Array.from(new Set(images.map((item) => item.destination).filter(Boolean))).map((destination) => ({
+      destination,
+      images: images.filter((item) => item.destination === destination)
+    })),
     [images]
   );
+  const selectedImages = activeDestination ? images.filter((item) => item.destination === activeDestination) : [];
+  const featured = images[0];
 
-  const featured = enrichedImages[0];
-  const filteredImages = activeCategory === "All" ? enrichedImages : enrichedImages.filter((item) => item.category === activeCategory);
+  useEffect(() => {
+    if (activeDestination && !destinationGroups.some((group) => group.destination === activeDestination)) {
+      setActiveDestination(null);
+    }
+  }, [activeDestination, destinationGroups]);
+
+  if (!featured) {
+    return <section className="px-4 py-24 text-center text-lg font-bold">No gallery images are available yet.</section>;
+  }
 
   return (
-    <section className="bg-[#fffaf0] transition-colors duration-300 dark:bg-[#071711]">
+    <section className="bg-canvas transition-colors duration-300 dark:bg-[#071711]">
       <div className="relative overflow-hidden bg-[#114F3C] px-4 py-14 text-white sm:px-6 lg:px-8">
         <div className="absolute inset-0 opacity-25">
           <img className="h-full w-full object-cover" src={featured.image} alt={featured.title} />
@@ -160,8 +105,8 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
             </p>
             <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
               {[
-                ["9+", "Photo stories"],
-                ["4", "Gallery moods"],
+                [String(images.length), "Photo stories"],
+                [String(destinationGroups.length), "Destinations"],
                 ["1 tap", "Book on WhatsApp"]
               ].map(([value, label]) => (
                 <div key={label} className="rounded-lg border border-white/15 bg-white/10 p-4 backdrop-blur">
@@ -173,16 +118,16 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {enrichedImages.slice(0, 6).map((item, index) => (
+            {destinationGroups.slice(0, 6).map((group, index) => (
               <article
-                key={item.title}
+                key={group.destination}
                 className={`group relative overflow-hidden rounded-lg border border-white/15 bg-white/10 shadow-2xl shadow-black/20 ${index === 0 ? "col-span-2 row-span-2 min-h-80" : "min-h-40"}`}
               >
-                <img className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" src={item.image} alt={item.title} />
+                <img className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" src={group.images[0].image} alt={group.destination} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#F8A900]">{item.category}</p>
-                  <h2 className={`${index === 0 ? "text-2xl" : "text-base"} mt-1 font-black text-white`}>{item.title}</h2>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#F8A900]">{group.images.length} {group.images.length === 1 ? "photo" : "photos"}</p>
+                  <h2 className={`${index === 0 ? "text-2xl" : "text-base"} mt-1 font-black text-white`}>{group.destination}</h2>
                 </div>
               </article>
             ))}
@@ -191,57 +136,59 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {categories.map((category) => {
-            const Icon = categoryIcons[category];
-            return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${
-                  activeCategory === category ? "bg-[#114F3C] text-white shadow-lg shadow-[#114F3C]/20" : "bg-white text-[#114F3C] hover:bg-[#FCE4B4] dark:bg-[#10241C] dark:text-[#F8A900] dark:hover:bg-white/10"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {category}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {filteredImages.map((item, index) => (
-            <article
-              key={item.title}
-              className={`group overflow-hidden rounded-lg bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#114F3C]/12 dark:bg-[#10241C] dark:shadow-black/20 ${
-                index === 0 && activeCategory === "All" ? "md:col-span-2" : ""
-              }`}
-            >
-              <div className={`relative ${index === 0 && activeCategory === "All" ? "h-96" : "h-72"} overflow-hidden`}>
-                <img className="h-full w-full object-cover transition duration-500 group-hover:scale-105" src={item.image} alt={item.title} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute left-4 top-4 rounded-full bg-[#F8A900] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-[#114F3C]">
-                  {item.category}
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <p className="flex items-center gap-2 text-sm font-bold text-white/80">
-                    <MapPin className="h-4 w-4 text-[#F8A900]" />
-                    {item.location}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-black">{item.title}</h2>
-                </div>
-              </div>
-              <div className="p-5">
-                <p className="text-sm leading-6 text-stone-700 dark:text-stone-300">{item.tone}</p>
-                <button type="button" className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#F54C0D]">
-                  View feeling
-                  <ChevronRight className="h-4 w-4" />
+        {activeDestination ? (
+          <section>
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <button type="button" onClick={() => setActiveDestination(null)} className="inline-flex items-center gap-2 text-sm font-black text-[#F54C0D] transition hover:text-[#114F3C] dark:hover:text-[#F8A900]">
+                  <ArrowLeft className="h-4 w-4" /> All destinations
                 </button>
+                <p className="mt-5 flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]"><MapPin className="h-4 w-4" /> Destination album</p>
+                <h2 className="mt-2 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">{activeDestination}</h2>
               </div>
-            </article>
-          ))}
-        </div>
+              <p className="text-sm font-bold text-stone-600 dark:text-stone-300">{selectedImages.length} {selectedImages.length === 1 ? "photo" : "photos"}</p>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+              {selectedImages.map((item, index) => (
+                <figure key={item.id} className={`group overflow-hidden rounded-xl bg-stone-200 shadow-sm ${index === 0 ? "col-span-2 row-span-2" : ""}`}>
+                  <img className={`h-full min-h-52 w-full object-cover transition duration-500 group-hover:scale-105 ${index === 0 ? "md:min-h-[430px]" : "md:min-h-64"}`} src={item.image} alt={`${activeDestination} trip photo ${index + 1}`} />
+                </figure>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section>
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Browse by place</p>
+              <h2 className="mt-2 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">Choose a destination</h2>
+              <p className="mt-3 max-w-2xl text-base leading-7 text-stone-600 dark:text-stone-300">Open a destination to see every photo from its trips in one clean album.</p>
+            </div>
+
+            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {destinationGroups.map((group, index) => (
+                <button key={group.destination} type="button" onClick={() => setActiveDestination(group.destination)} className={`group relative min-h-80 overflow-hidden rounded-2xl bg-[#114F3C] text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${index === 0 ? "md:col-span-2" : ""}`}>
+                  <span className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 bg-[#114F3C]">
+                    {group.images.slice(0, 4).map((item, imageIndex) => (
+                      <img
+                        key={item.id}
+                        className={`h-full min-h-0 w-full object-cover transition duration-700 group-hover:scale-[1.03] ${group.images.length === 1 ? "col-span-2 row-span-2" : group.images.length === 2 ? "row-span-2" : imageIndex === 0 && group.images.length === 3 ? "row-span-2" : ""}`}
+                        src={item.image}
+                        alt={`${group.destination} preview ${imageIndex + 1}`}
+                      />
+                    ))}
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/5 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <p className="flex items-center gap-2 text-sm font-bold text-[#F8A900]"><Images className="h-4 w-4" /> {group.images.length} {group.images.length === 1 ? "photo" : "photos"}</p>
+                    <h3 className="mt-2 text-3xl font-black">{group.destination}</h3>
+                    <p className="mt-2 text-sm font-bold text-white/70">View all photos</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mt-12 overflow-hidden rounded-lg bg-[#114F3C] p-6 text-white shadow-2xl shadow-[#114F3C]/15 sm:p-8">
           <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1fr]">
@@ -285,10 +232,10 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
           ))}
         </section>
 
-        <section className="mt-12 overflow-hidden rounded-lg bg-white shadow-xl shadow-[#114F3C]/10 transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
+        <section className="mt-12 overflow-hidden rounded-lg border border-[#114F3C]/10 bg-surface shadow-xl shadow-[#114F3C]/10 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
           <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
             <div className="relative min-h-80">
-              <img className="absolute inset-0 h-full w-full object-cover" src={enrichedImages[2]?.image || featured.image} alt="Trail memory" />
+              <img className="absolute inset-0 h-full w-full object-cover" src={images[2]?.image || featured.image} alt="Trail memory" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
                 <Heart className="h-8 w-8 text-[#F8A900]" />

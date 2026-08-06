@@ -19,7 +19,7 @@ const planningSteps = [
 
 export function ContactPage({ contactForm, setContactForm, submitContact }: { contactForm: ContactForm; setContactForm: (form: ContactForm) => void; submitContact: ContactSubmitHandler }) {
   return (
-    <section className="bg-[#fffaf0] transition-colors duration-300 dark:bg-[#071711]">
+    <section className="bg-canvas transition-colors duration-300 dark:bg-[#071711]">
       <div className="relative overflow-hidden bg-[#114F3C] px-4 py-16 text-white sm:px-6 lg:px-8">
         <img className="absolute inset-0 h-full w-full object-cover opacity-30" src={contactHeroImage} alt="Guided hiking path in Ethiopia" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#061B15] via-[#114F3C]/90 to-[#114F3C]/40" />
@@ -56,7 +56,7 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <section className="-mt-24 grid gap-5 md:grid-cols-3">
+        <section className="grid gap-5 md:grid-cols-3">
           {contactCards.map(({ title, text, value, Icon }) => (
             <ContactCard key={title} title={title} text={text} value={value} Icon={Icon} />
           ))}
@@ -90,7 +90,7 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
           </aside>
 
           <div>
-            <form className="rounded-lg bg-white p-6 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20 sm:p-8" onSubmit={submitContact}>
+            <form className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-8" onSubmit={submitContact}>
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Send inquiry</p>
@@ -167,7 +167,7 @@ function HeroStat({ value, label, Icon }: { value: string; label: string; Icon: 
 
 function ContactCard({ title, text, value, Icon }: { title: string; text: string; value: string; Icon: LucideIcon }) {
   return (
-    <article className="rounded-lg border border-[#114F3C]/10 bg-white p-6 shadow-xl shadow-[#114F3C]/10 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+    <article className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-xl shadow-[#114F3C]/10 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
       <Icon className="h-9 w-9 text-[#F54C0D]" />
       <h2 className="mt-4 text-2xl font-black text-[#114F3C]">{title}</h2>
       <p className="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-300">{text}</p>

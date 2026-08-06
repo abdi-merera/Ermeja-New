@@ -85,6 +85,15 @@ export type GalleryHighlight = {
   items: GalleryHighlightItem[];
 };
 
+export type GalleryImage = {
+  id: string;
+  image: string;
+  title: string;
+  destination: string;
+  description: string;
+  source: "destination" | "cover" | "gallery";
+};
+
 export type AdminTripForm = {
   title: string;
   destination: string;

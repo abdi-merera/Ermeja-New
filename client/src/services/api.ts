@@ -24,7 +24,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
     result = responseText ? JSON.parse(responseText) : undefined;
   } catch {
     if (response.status === 413) {
-      throw new ApiError("The image is too large for the deployed upload service. Choose an image smaller than 4 MB.");
+      throw new ApiError("The image is too large for the deployed upload service. Choose an image smaller than 6 MB.");
     }
 
     if (!response.ok) {
@@ -156,10 +156,10 @@ export function sendContactMessage(form: ContactForm) {
 }
 
 export function uploadTripImage(file: File) {
-  const maximumUploadSize = 4 * 1024 * 1024;
+  const maximumUploadSize = 6 * 1024 * 1024;
 
   if (file.size > maximumUploadSize) {
-    throw new ApiError(`This image is ${(file.size / 1024 / 1024).toFixed(1)} MB. Choose an image smaller than 4 MB before uploading.`);
+    throw new ApiError(`This image is ${(file.size / 1024 / 1024).toFixed(1)} MB. Choose an image smaller than 6 MB before uploading.`);
   }
 
   return fetch("/api/admin/uploads", {

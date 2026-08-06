@@ -42,7 +42,7 @@ export function TripDetailPage({
   const galleryImages = [trip.coverImage, ...trip.galleryImages].filter(Boolean).slice(0, 5);
 
   return (
-    <section className="bg-[#fffaf0] pb-24 transition-colors duration-300 dark:bg-[#071711] lg:pb-0">
+    <section className="bg-canvas pb-24 transition-colors duration-300 dark:bg-[#071711] lg:pb-0">
       <TripHero trip={trip} galleryImages={galleryImages} onBack={onBack} />
 
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:px-8">
@@ -149,10 +149,10 @@ function RouteSnapshot({ trip }: { trip: Trip }) {
   ];
 
   return (
-    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C]">
+    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C]">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {facts.map(({ label, value, Icon }) => (
-          <div key={label} className="rounded-2xl bg-stone-50 p-4 dark:bg-white/5">
+          <div key={label} className="rounded-2xl bg-sage p-4 dark:bg-white/5">
             <Icon className="h-5 w-5 text-[#F54C0D]" />
             <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">{label}</p>
             <p className="mt-1 text-base font-black text-[#114F3C] dark:text-[#F8A900]">{value}</p>
@@ -165,7 +165,7 @@ function RouteSnapshot({ trip }: { trip: Trip }) {
 
 function ItinerarySection({ trip }: { trip: Trip }) {
   return (
-    <section className="rounded-[1.5rem] bg-white p-6 shadow-sm transition-colors duration-300 dark:bg-[#10241C] sm:p-8">
+    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] sm:p-8">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Route plan</p>
@@ -176,7 +176,7 @@ function ItinerarySection({ trip }: { trip: Trip }) {
 
       <div className="mt-8 grid gap-4">
         {trip.itinerary.map((item, index) => (
-          <article key={item} className="grid gap-4 rounded-2xl border border-stone-100 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/5 sm:grid-cols-[76px_1fr]">
+          <article key={item} className="grid gap-4 rounded-2xl border border-[#114F3C]/10 bg-sage p-4 dark:border-white/10 dark:bg-white/5 sm:grid-cols-[76px_1fr]">
             <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#114F3C] text-sm font-black text-[#F8A900]">{String(index + 1).padStart(2, "0")}</span>
             <div>
               <h3 className="text-lg font-black text-[#114F3C] dark:text-white">Step {index + 1}</h3>
@@ -221,7 +221,7 @@ function BookingPanel({
   submitBooking: BookingSubmitHandler;
 }) {
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-[#114F3C]/10 bg-white shadow-2xl shadow-[#114F3C]/12 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/30">
+    <section className="overflow-hidden rounded-[1.5rem] border border-[#114F3C]/10 bg-surface shadow-2xl shadow-[#114F3C]/12 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/30">
       <div className="bg-[#114F3C] p-6 text-white">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Book this trip</p>
         <div className="mt-4 flex items-end justify-between gap-4">
@@ -265,7 +265,7 @@ function InfoPanel({ title, icon, items }: { title: string; icon: "check" | "min
   const iconColor = icon === "minus" ? "text-[#F54C0D]" : "text-[#9EC26D]";
 
   return (
-    <section className="rounded-[1.5rem] bg-white p-6 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
+    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
       <h3 className="text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h3>
       <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 dark:text-stone-300">
         {(items.length ? items : ["Details will be shared before departure."]).map((item) => (

@@ -125,7 +125,7 @@ export function AboutPage() {
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {processSteps.map((item) => (
-              <article key={item.step} className="rounded-lg border border-[#114F3C]/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+              <article key={item.step} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <p className="text-sm font-black text-[#F54C0D]">{item.step}</p>
                 <h3 className="mt-3 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{item.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-stone-700 dark:text-stone-300">{item.text}</p>
@@ -138,7 +138,7 @@ export function AboutPage() {
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-4">
           {trustItems.map(({ title, text, Icon }) => (
-            <article key={title} className="rounded-lg bg-white p-6 shadow-sm dark:bg-[#10241C] dark:shadow-black/20">
+            <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
               <Icon className="h-7 w-7 text-[#F54C0D]" />
               <h3 className="mt-5 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-stone-700 dark:text-stone-300">{text}</p>

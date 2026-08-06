@@ -14,7 +14,7 @@ export function DetailGrid({ trip }: { trip: Trip }) {
   return (
     <div className="mt-6 grid gap-5 md:grid-cols-2">
       {blocks.map((block) => (
-        <section key={block.title} className="rounded-lg bg-white p-5 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
+        <section key={block.title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
           <h3 className="text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{block.title}</h3>
           <ul className="mt-4 space-y-3 text-sm leading-6 text-stone-700 dark:text-stone-300">
             {block.items.map((item) => (
