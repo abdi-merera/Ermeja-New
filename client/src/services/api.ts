@@ -155,7 +155,21 @@ type TripRow = { id: string; payload: Trip };
 type HighlightRow = { payload: GalleryHighlight };
 
 function unwrapTrips(rows: TripRow[]) {
-  return rows.map((row) => ({ ...row.payload, id: row.id }));
+  const preferredOrder = [
+    "Wenchi Crater Lake & Tourism Village Overnight Trip",
+    "Overnight Trip to Doho Lodge & Benuna Village with Ermja Hiking",
+    "Camping Trip To Langano",
+    "Blue Nile Falls Weekend"
+  ];
+  const rank = new Map(preferredOrder.map((title, index) => [title.toLowerCase(), index]));
+
+  return rows
+    .map((row) => ({ ...row.payload, id: row.id }))
+    .sort((left, right) => {
+      const leftRank = rank.get(left.title.toLowerCase()) ?? preferredOrder.length;
+      const rightRank = rank.get(right.title.toLowerCase()) ?? preferredOrder.length;
+      return leftRank - rightRank || left.date.localeCompare(right.date);
+    });
 }
 
 export function getTrips() {
