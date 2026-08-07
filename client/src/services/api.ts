@@ -104,6 +104,8 @@ function tripPayload(form: AdminTripForm) {
 
   return {
     ...form,
+    price: Number(form.price),
+    availableSeats: Number(form.availableSeats),
     includes: splitCommaList(form.includes),
     whatToBring: splitCommaList(form.whatToBring),
     notIncluded: splitCommaList(form.notIncluded),
@@ -131,28 +133,93 @@ function trustedSupabaseProjectUrl() {
   }
 }
 
+function supabaseHeaders(admin = false, json = false) {
+  if (!supabaseAnonKey) {
+    throw new ApiError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+  }
+
+  const headers: Record<string, string> = {
+    apikey: supabaseAnonKey,
+    Authorization: `Bearer ${admin ? requireAdminToken() : supabaseAnonKey}`
+  };
+
+  if (json) headers["Content-Type"] = "application/json";
+  return headers;
+}
+
+function databaseUrl(path: string) {
+  return `${trustedSupabaseProjectUrl()}/rest/v1/${path}`;
+}
+
+type TripRow = { id: string; payload: Trip };
+type HighlightRow = { payload: GalleryHighlight };
+
+function unwrapTrips(rows: TripRow[]) {
+  return rows.map((row) => ({ ...row.payload, id: row.id }));
+}
+
 export function getTrips() {
-  return fetch("/api/trips").then((response) => parseResponse<Trip[]>(response));
+  return fetch(databaseUrl("ermija_trips?select=id,payload&status=eq.Published&order=date.asc"), {
+    headers: supabaseHeaders()
+  }).then((response) => parseResponse<TripRow[]>(response)).then(unwrapTrips);
 }
 
 export function getGalleryHighlight() {
-  return fetch("/api/gallery-highlight").then((response) => parseResponse<GalleryHighlight>(response));
+  return fetch(databaseUrl("ermija_site_settings?select=payload&key=eq.gallery-highlight&limit=1"), {
+    headers: supabaseHeaders()
+  }).then((response) => parseResponse<HighlightRow[]>(response)).then((rows) => {
+    if (!rows[0]) throw new ApiError("Gallery highlight is not configured.");
+    return rows[0].payload;
+  });
 }
 
 export function updateGalleryHighlight(highlight: GalleryHighlight) {
-  return adminJsonRequest<GalleryHighlight>("/api/admin/gallery-highlight", "PATCH", highlight);
+  return fetch(databaseUrl("ermija_site_settings?key=eq.gallery-highlight"), {
+    method: "PATCH",
+    headers: { ...supabaseHeaders(true, true), Prefer: "return=representation" },
+    body: JSON.stringify({ payload: highlight, updated_at: new Date().toISOString() })
+  }).then((response) => parseResponse<HighlightRow[]>(response)).then((rows) => rows[0].payload);
 }
 
 export function getAdminTrips() {
-  return adminFetch<Trip[]>("/api/admin/trips");
+  return fetch(databaseUrl("ermija_trips?select=id,payload&order=date.asc"), {
+    headers: supabaseHeaders(true)
+  }).then((response) => parseResponse<TripRow[]>(response)).then(unwrapTrips);
 }
 
 export function createBooking(form: BookingForm, tripId: string) {
-  return jsonRequest<{ booking: Booking; whatsappUrl: string }>("/api/bookings", "POST", { ...form, tripId });
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  const booking = {
+    id,
+    trip_id: tripId,
+    customer_name: form.customerName.trim(),
+    phone: form.phone.trim(),
+    number_of_people: Number(form.numberOfPeople),
+    message: form.message.trim(),
+    status: "New",
+    created_at: createdAt
+  };
+  return fetch(databaseUrl("ermija_bookings"), {
+    method: "POST",
+    headers: supabaseHeaders(false, true),
+    body: JSON.stringify(booking)
+  }).then((response) => parseResponse<void>(response)).then(() => ({
+    booking: { ...form, id, tripId, numberOfPeople: Number(form.numberOfPeople), status: "New", createdAt },
+    whatsappUrl: `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || "251913181343"}`
+  }));
 }
 
 export function sendContactMessage(form: ContactForm) {
-  return jsonRequest<ContactMessage>("/api/contact", "POST", form);
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  return fetch(databaseUrl("ermija_contact_messages"), {
+    method: "POST",
+    headers: supabaseHeaders(false, true),
+    body: JSON.stringify({ ...form, id, status: "New", created_at: createdAt })
+  }).then((response) => parseResponse<void>(response)).then(() => ({
+    ...form, id, status: "New", createdAt
+  }));
 }
 
 export function uploadTripImage(file: File) {
@@ -162,46 +229,96 @@ export function uploadTripImage(file: File) {
     throw new ApiError(`This image is ${(file.size / 1024 / 1024).toFixed(1)} MB. Choose an image smaller than 6 MB before uploading.`);
   }
 
-  return fetch("/api/admin/uploads", {
+  const extension = file.name.split(".").pop()?.toLowerCase() || file.type.split("/").pop() || "jpg";
+  const objectPath = `trip-images/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+  return fetch(`${trustedSupabaseProjectUrl()}/storage/v1/object/trip-images/${objectPath}`, {
     method: "POST",
     headers: {
       "Content-Type": file.type,
-      Authorization: `Bearer ${requireAdminToken()}`
+      ...supabaseHeaders(true),
+      "x-upsert": "false"
     },
     body: file
-  }).then((response) => parseResponse<{ url: string }>(response));
+  }).then((response) => parseResponse<unknown>(response)).then(() => ({
+    url: `${trustedSupabaseProjectUrl()}/storage/v1/object/public/trip-images/${objectPath}`
+  }));
 }
 
 export function createTrip(form: AdminTripForm) {
-  return adminJsonRequest<Trip>("/api/admin/trips", "POST", tripPayload(form));
+  const base = form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const id = `${base}-${Date.now()}`;
+  const payload = { ...tripPayload(form), id } as Trip;
+  return fetch(databaseUrl("ermija_trips"), {
+    method: "POST",
+    headers: { ...supabaseHeaders(true, true), Prefer: "return=representation" },
+    body: JSON.stringify({ id, status: payload.status, date: payload.date, payload })
+  }).then((response) => parseResponse<TripRow[]>(response)).then((rows) => unwrapTrips(rows)[0]);
 }
 
 export function updateTrip(trip: Trip, form: AdminTripForm) {
-  return adminJsonRequest<Trip>(`/api/admin/trips/${trip.id}`, "PATCH", tripPayload(form));
+  const payload = { ...trip, ...tripPayload(form), id: trip.id } as Trip;
+  return updateTripRow(trip.id, payload);
 }
 
 export function updateTripStatus(trip: Trip, status: TripStatus) {
-  return adminJsonRequest<Trip>(`/api/admin/trips/${trip.id}`, "PATCH", { status });
+  return updateTripRow(trip.id, { ...trip, status });
+}
+
+function updateTripRow(id: string, payload: Trip) {
+  return fetch(databaseUrl(`ermija_trips?id=eq.${encodeURIComponent(id)}`), {
+    method: "PATCH",
+    headers: { ...supabaseHeaders(true, true), Prefer: "return=representation" },
+    body: JSON.stringify({ status: payload.status, date: payload.date, payload, updated_at: new Date().toISOString() })
+  }).then((response) => parseResponse<TripRow[]>(response)).then((rows) => unwrapTrips(rows)[0]);
 }
 
 export function deleteTrip(trip: Trip) {
-  return adminFetch<void>(`/api/admin/trips/${trip.id}`, { method: "DELETE" });
+  return fetch(databaseUrl(`ermija_trips?id=eq.${encodeURIComponent(trip.id)}`), {
+    method: "DELETE", headers: supabaseHeaders(true)
+  }).then((response) => parseResponse<void>(response));
 }
 
 export function getBookings() {
-  return adminFetch<Booking[]>("/api/admin/bookings");
+  return fetch(databaseUrl("ermija_bookings?select=*&order=created_at.desc"), { headers: supabaseHeaders(true) })
+    .then((response) => parseResponse<Array<Record<string, unknown>>>(response))
+    .then((rows) => rows.map(bookingFromRow));
 }
 
 export function updateBookingStatus(booking: Booking, status: string) {
-  return adminJsonRequest<Booking>(`/api/admin/bookings/${booking.id}`, "PATCH", { status });
+  return fetch(databaseUrl(`ermija_bookings?id=eq.${encodeURIComponent(booking.id)}`), {
+    method: "PATCH",
+    headers: { ...supabaseHeaders(true, true), Prefer: "return=representation" },
+    body: JSON.stringify({ status, updated_at: new Date().toISOString() })
+  }).then((response) => parseResponse<Array<Record<string, unknown>>>(response)).then((rows) => bookingFromRow(rows[0]));
 }
 
 export function getMessages() {
-  return adminFetch<ContactMessage[]>("/api/admin/messages");
+  return fetch(databaseUrl("ermija_contact_messages?select=*&order=created_at.desc"), { headers: supabaseHeaders(true) })
+    .then((response) => parseResponse<Array<Record<string, unknown>>>(response))
+    .then((rows) => rows.map(messageFromRow));
 }
 
 export function updateMessageStatus(message: ContactMessage, status: string) {
-  return adminJsonRequest<ContactMessage>(`/api/admin/messages/${message.id}`, "PATCH", { status });
+  return fetch(databaseUrl(`ermija_contact_messages?id=eq.${encodeURIComponent(message.id)}`), {
+    method: "PATCH",
+    headers: { ...supabaseHeaders(true, true), Prefer: "return=representation" },
+    body: JSON.stringify({ status, updated_at: new Date().toISOString() })
+  }).then((response) => parseResponse<Array<Record<string, unknown>>>(response)).then((rows) => messageFromRow(rows[0]));
+}
+
+function bookingFromRow(row: Record<string, unknown>): Booking {
+  return {
+    id: String(row.id), tripId: String(row.trip_id), customerName: String(row.customer_name),
+    phone: String(row.phone), numberOfPeople: Number(row.number_of_people), message: String(row.message || ""),
+    status: String(row.status), createdAt: String(row.created_at)
+  };
+}
+
+function messageFromRow(row: Record<string, unknown>): ContactMessage {
+  return {
+    id: String(row.id), name: String(row.name), phone: String(row.phone), email: String(row.email || ""),
+    message: String(row.message), status: String(row.status), createdAt: String(row.created_at)
+  };
 }
 
 export function getSavedAdminSession() {
