@@ -149,6 +149,17 @@ export function TripsPage({ trips, chooseTrip }: { trips: Trip[]; chooseTrip: (t
             </div>
           )}
 
+          <section className="mt-8 grid gap-5 rounded-[1.5rem] border border-[#F8A900]/40 bg-[#FCE4B4] p-6 text-[#114F3C] shadow-lg dark:bg-[#10241C] dark:text-white sm:grid-cols-[1fr_auto] sm:items-center">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]">Private & group trips</p>
+              <h3 className="mt-2 text-2xl font-black">Choose your own date, destination and group size.</h3>
+              <p className="mt-2 text-sm leading-6 opacity-80">Tell us what you have in mind. We will plan the route and confirm details and payment proof through WhatsApp.</p>
+            </div>
+            <a className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-black transition ${orangeButton}`} href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Ermija Hiking, I would like to request a private/group trip. Preferred destination/date/group size: ")}`} target="_blank" rel="noreferrer">
+              <MessageCircle className="h-5 w-5" /> Request a private trip
+            </a>
+          </section>
+
           <section className="mt-8 flex flex-col justify-between gap-5 rounded-[1.5rem] bg-[#114F3C] p-6 text-white shadow-xl shadow-[#114F3C]/15 sm:flex-row sm:items-center">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Not sure which trip fits?</p>

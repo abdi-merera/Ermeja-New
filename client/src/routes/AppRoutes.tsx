@@ -98,7 +98,7 @@ export function AppRoutes({
   }
 
   if (page === "gallery") {
-    return <GalleryPage images={galleryImages} highlight={galleryHighlight} />;
+    return <GalleryPage images={galleryImages} trips={trips} chooseTrip={chooseTrip} highlight={galleryHighlight} />;
   }
 
   if (page === "about") {

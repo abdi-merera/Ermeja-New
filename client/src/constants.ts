@@ -12,17 +12,17 @@ export const beigePanel = "bg-[#FCE4B4]";
 export const destinations = [
   {
     name: "Wenchi",
-    text: "Crater lake walks, calm water views, and a perfect day escape from Addis.",
+    text: "Immerse yourself in the breathtaking beauty of an extinct volcanic crater, featuring a serene alpine lake, lush mountain ridges, and soothing hot springs. Hike or ride horseback down to the shore, take a tranquil boat trip across the water to visit the historic 13th-century island monastery, and experience one of Ethiopia's premier eco-tourism villages.",
     image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"
   },
   {
-    name: "Danakil",
-    text: "Salt flats, volcanic terrain, and one of Ethiopia's most unforgettable landscapes.",
+    name: "Awash Doho Lodge & Beynuna Village",
+    text: "Escape to a tropical palm oasis nestled on the edge of Awash National Park. Unwind in therapeutic natural thermal hot spring pools, explore stunning waterfalls, and spot wild baboons and birdlife. Cap off the experience with an immersive cultural walk through Beynuna Village and relaxing evening campfires under the stars.",
     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"
   },
   {
-    name: "Bale",
-    text: "Highland air, forest trails, moorland views, and wildlife-rich mountain routes.",
+    name: "Bale Mountains",
+    text: "Journey into a wild, high-altitude sanctuary famous for its Afro-alpine plateaus, ancient cloud forests, and dramatic mountain peaks. Trek across the vast Sanetti Plateau—home to the endangered Ethiopian wolf and endemic mountain nyala—and venture into the mysterious subterranean limestone caverns of Sof Omar Cave.",
     image: "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80"
   }
 ];
@@ -80,8 +80,10 @@ export const emptyAdminTripForm: AdminTripForm = {
   price: "",
   difficulty: "Easy",
   availableSeats: "",
+  hotLeadDays: "5",
   meetingPoint: "",
   departureTime: "",
+  returnDate: "",
   returnTime: "",
   includes: "Transport, Guide, Entrance fee",
   whatToBring: "Water bottle, Comfortable shoes, Light jacket",

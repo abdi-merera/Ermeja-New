@@ -1,7 +1,7 @@
-import { CSSProperties, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Film, Heart, Images, Instagram, MapPin, Play } from "lucide-react";
+import { CSSProperties, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Film, Heart, Images, Instagram, MapPin, Play, X } from "lucide-react";
 import { defaultGalleryHighlight, orangeButton, whatsappNumber, yellowButton } from "../constants";
-import type { GalleryHighlight, GalleryImage } from "../types";
+import type { GalleryHighlight, GalleryImage, Trip } from "../types";
 
 const splitClipPaths = [
   "polygon(50% 50%,calc(50%*var(--_i,0)) calc(120%*var(--_i,0)),0 calc(100%*var(--_i,0)),0 0,100% 0,100% calc(100%*var(--_i,0)),calc(100% - 50%*var(--_i,0)) calc(120%*var(--_i,0)))",
@@ -62,26 +62,49 @@ function CircularSplitGallery({ images, activeImage, setActiveImage }: { images:
   );
 }
 
-export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { images: GalleryImage[]; highlight?: GalleryHighlight }) {
+export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGalleryHighlight }: { images: GalleryImage[]; trips: Trip[]; chooseTrip: (trip: Trip) => void; highlight?: GalleryHighlight }) {
   const [activeDestination, setActiveDestination] = useState<string | null>(null);
   const [activeSplitImage, setActiveSplitImage] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
   const splitHighlights = highlight.items.length === 4 ? highlight.items : defaultGalleryHighlight.items;
 
   const destinationGroups = useMemo(
     () => Array.from(new Set(images.map((item) => item.destination).filter(Boolean))).map((destination) => ({
       destination,
-      images: images.filter((item) => item.destination === destination)
+      images: images.filter((item) => item.destination === destination).sort((a, b) => Number(b.source === "cover") - Number(a.source === "cover"))
     })),
     [images]
   );
   const selectedImages = activeDestination ? images.filter((item) => item.destination === activeDestination) : [];
   const featured = images[0];
+  const selectedTrip = trips.find((trip) => selectedImages.some((image) => image.tripId === trip.id));
+  const moveLightbox = (direction: number) => setLightboxIndex((current) => current === null || !selectedImages.length ? current : (current + direction + selectedImages.length) % selectedImages.length);
 
   useEffect(() => {
     if (activeDestination && !destinationGroups.some((group) => group.destination === activeDestination)) {
       setActiveDestination(null);
     }
   }, [activeDestination, destinationGroups]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLightboxIndex(null);
+      if (event.key === "ArrowLeft") moveLightbox(-1);
+      if (event.key === "ArrowRight") moveLightbox(1);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", onKeyDown); };
+  }, [lightboxIndex, selectedImages.length]);
+
+  const handleTouchEnd = (event: TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const distance = event.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(distance) > 45) moveLightbox(distance > 0 ? -1 : 1);
+    touchStartX.current = null;
+  };
 
   if (!featured) {
     return <section className="px-4 py-24 text-center text-lg font-bold">No gallery images are available yet.</section>;
@@ -123,7 +146,7 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
                 key={group.destination}
                 className={`group relative overflow-hidden rounded-lg border border-white/15 bg-white/10 shadow-2xl shadow-black/20 ${index === 0 ? "col-span-2 row-span-2 min-h-80" : "min-h-40"}`}
               >
-                <img className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" src={group.images[0].image} alt={group.destination} />
+                <img loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" src={group.images[0].image} alt={group.destination} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-[#F8A900]">{group.images.length} {group.images.length === 1 ? "photo" : "photos"}</p>
@@ -149,11 +172,13 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
               <p className="text-sm font-bold text-stone-600 dark:text-stone-300">{selectedImages.length} {selectedImages.length === 1 ? "photo" : "photos"}</p>
             </div>
 
+            {selectedTrip ? <button type="button" onClick={() => chooseTrip(selectedTrip)} className={`mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black ${yellowButton}`}>View trip details <ExternalLink className="h-4 w-4" /></button> : null}
+
             <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {selectedImages.map((item, index) => (
-                <figure key={item.id} className={`group overflow-hidden rounded-xl bg-stone-200 shadow-sm ${index === 0 ? "col-span-2 row-span-2" : ""}`}>
-                  <img className={`h-full min-h-52 w-full object-cover transition duration-500 group-hover:scale-105 ${index === 0 ? "md:min-h-[430px]" : "md:min-h-64"}`} src={item.image} alt={`${activeDestination} trip photo ${index + 1}`} />
-                </figure>
+                <button type="button" onClick={() => setLightboxIndex(index)} key={item.id} className={`group overflow-hidden rounded-xl bg-stone-200 text-left shadow-sm ${index === 0 ? "col-span-2 row-span-2" : ""}`} aria-label={`Open photo ${index + 1} of ${selectedImages.length}`}>
+                  <img loading="lazy" decoding="async" className={`h-full min-h-52 w-full object-cover transition duration-500 group-hover:scale-105 ${index === 0 ? "md:min-h-[430px]" : "md:min-h-64"}`} src={item.image} alt={`${activeDestination} trip photo ${index + 1}`} />
+                </button>
               ))}
             </div>
           </section>
@@ -174,6 +199,8 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
                         key={item.id}
                         className={`h-full min-h-0 w-full object-cover transition duration-700 group-hover:scale-[1.03] ${group.images.length === 1 ? "col-span-2 row-span-2" : group.images.length === 2 ? "row-span-2" : imageIndex === 0 && group.images.length === 3 ? "row-span-2" : ""}`}
                         src={item.image}
+                        loading="lazy"
+                        decoding="async"
                         alt={`${group.destination} preview ${imageIndex + 1}`}
                       />
                     ))}
@@ -260,6 +287,22 @@ export function GalleryPage({ images, highlight = defaultGalleryHighlight }: { i
           </div>
         </section>
       </div>
+
+      {lightboxIndex !== null && selectedImages[lightboxIndex] ? (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-black/95 text-white" role="dialog" aria-modal="true" aria-label={`${activeDestination} photo viewer`} onTouchStart={(event) => { touchStartX.current = event.touches[0].clientX; }} onTouchEnd={handleTouchEnd}>
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
+            <p className="font-black">{activeDestination} <span className="ml-3 text-white/65">{lightboxIndex + 1} / {selectedImages.length}</span></p>
+            <button type="button" onClick={() => setLightboxIndex(null)} className="rounded-full bg-white/10 p-3 hover:bg-white/20" aria-label="Close photo viewer"><X /></button>
+          </div>
+          <div className="relative flex min-h-0 flex-1 items-center justify-center px-14 py-4">
+            <img src={selectedImages[lightboxIndex].image} alt={`${activeDestination} photo ${lightboxIndex + 1}`} className="max-h-full max-w-full object-contain" />
+            {selectedImages.length > 1 ? <><button type="button" onClick={() => moveLightbox(-1)} className="absolute left-2 rounded-full bg-white/15 p-3 hover:bg-white/25 sm:left-6" aria-label="Previous photo"><ChevronLeft className="h-7 w-7" /></button><button type="button" onClick={() => moveLightbox(1)} className="absolute right-2 rounded-full bg-white/15 p-3 hover:bg-white/25 sm:right-6" aria-label="Next photo"><ChevronRight className="h-7 w-7" /></button></> : null}
+          </div>
+          <div className="flex gap-2 overflow-x-auto px-4 pb-4 sm:px-6">
+            {selectedImages.map((image, index) => <button key={image.id} type="button" onClick={() => setLightboxIndex(index)} className={`h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 ${index === lightboxIndex ? "border-[#F8A900]" : "border-transparent opacity-60"}`}><img loading="lazy" decoding="async" src={image.image} alt="" className="h-full w-full object-cover" /></button>)}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

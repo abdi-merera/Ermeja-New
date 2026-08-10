@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2, Flame, MessageCircle } from "lucide-react";
-import { beigePanel, brandGreen, destinations, experienceHighlights, heroStats, orangeButton, testimonials, trustItems, whatsappNumber, yellowButton } from "../constants";
+import { beigePanel, brandGreen, destinations, experienceHighlights, heroStats, orangeButton, trustItems, whatsappNumber, yellowButton } from "../constants";
 import { GalleryPreview } from "../components/GalleryPreview";
 import { SectionTitle } from "../components/SectionTitle";
 import { TripCard } from "../components/TripCard";
@@ -9,15 +9,16 @@ import { formatPrice } from "../utils";
 export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { trips: Trip[]; galleryImages: GalleryImage[]; choosePage: (page: Page) => void; chooseTrip: (trip: Trip) => void }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const nextTrip = [...trips]
+  const upcomingTrips = [...trips]
     .filter((trip) => {
       const tripDate = new Date(`${trip.date}T00:00:00`);
       return !Number.isNaN(tripDate.getTime()) && tripDate >= today;
     })
-    .sort((first, second) => first.date.localeCompare(second.date))[0];
-  const daysUntilNextTrip = nextTrip ? Math.ceil((new Date(`${nextTrip.date}T00:00:00`).getTime() - today.getTime()) / 86_400_000) : null;
-  const hotTrip = nextTrip && daysUntilNextTrip !== null && daysUntilNextTrip <= 5 ? nextTrip : null;
-  const countdown = daysUntilNextTrip === 0 ? "Leaving today" : daysUntilNextTrip === 1 ? "Leaving tomorrow" : `Leaving in ${daysUntilNextTrip} days`;
+    .sort((first, second) => first.date.localeCompare(second.date));
+  const daysUntil = (trip: Trip) => Math.ceil((new Date(`${trip.date}T00:00:00`).getTime() - today.getTime()) / 86_400_000);
+  const hotTrip = upcomingTrips.find((trip) => daysUntil(trip) <= (trip.hotLeadDays ?? 5)) || null;
+  const daysUntilHotTrip = hotTrip ? daysUntil(hotTrip) : null;
+  const countdown = daysUntilHotTrip === 0 ? "Leaving today" : daysUntilHotTrip === 1 ? "Leaving tomorrow" : `Leaving in ${daysUntilHotTrip} days`;
 
   return (
     <>
@@ -142,9 +143,9 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
           <SectionTitle eyebrow="Destinations" title="Popular places to explore" />
           <div className="grid gap-6 md:grid-cols-3">
             {destinations.map((destination) => (
-              <article key={destination.name} className="overflow-hidden rounded-lg border border-[#114F3C]/10 bg-surface shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+              <article key={destination.name} className="flex h-full flex-col overflow-hidden rounded-lg border border-[#114F3C]/10 bg-surface shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <img className="h-56 w-full object-cover" src={destination.image} alt={destination.name} />
-                <div className={`${beigePanel} p-5 dark:bg-[#162C22]`}>
+                <div className={`${beigePanel} flex-1 p-5 dark:bg-[#162C22]`}>
                   <h3 className="text-2xl font-black text-[#114F3C]">{destination.name}</h3>
                   <p className="mt-3 text-sm leading-6 text-stone-700 dark:text-stone-300">{destination.text}</p>
                 </div>
@@ -158,22 +159,15 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <SectionTitle eyebrow="Traveler trust" title="Designed around what guests need before booking" />
+          <SectionTitle eyebrow="Guest stories" title="See experiences shared by the Ermija community" />
           <div className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <article key={testimonial.name} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
-                <p className="text-sm leading-7 text-stone-700 dark:text-stone-300">"{testimonial.text}"</p>
-                <div className="mt-6 flex items-center gap-3 border-t border-stone-100 pt-4 dark:border-white/10">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#114F3C] text-sm font-black text-[#F8A900]">
-                    {testimonial.name.slice(0, 1)}
-                  </div>
-                  <div>
-                    <p className="font-black text-[#114F3C] dark:text-[#F8A900]">{testimonial.name}</p>
-                    <p className="text-sm text-stone-500 dark:text-stone-400">{testimonial.role}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
+            {[
+              ["Instagram", "Trip photos, tagged guests and comments from recent walks.", "https://www.instagram.com/ermja__hiking?igsh=a3pneGhxNnJ5ejQ0&utm_source=qr"],
+              ["Facebook", "Community posts and public feedback connected to Ermija Hiking.", "https://www.facebook.com/share/1jlnaqcqen/?mibextid=wwxifr"],
+              ["Linktree", "Open Ermija Hiking's verified social channels in one place.", "https://linktr.ee/ermja_hiking"]
+            ].map(([name, text, url]) => <a key={name} href={url} target="_blank" rel="noreferrer" className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#10241C]">
+              <p className="text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{name}</p><p className="mt-3 text-sm leading-7 text-stone-700 dark:text-stone-300">{text}</p><p className="mt-5 text-sm font-black text-[#F54C0D]">View guest posts →</p>
+            </a>)}
           </div>
         </div>
       </section>

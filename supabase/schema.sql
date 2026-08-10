@@ -47,6 +47,43 @@ create table if not exists public.ermija_bookings (
 );
 alter table public.ermija_bookings add column if not exists status text not null default 'New';
 
+-- Confirms/cancels a booking and changes seats exactly once. Run this updated
+-- schema in the SQL editor after deploying the matching client code.
+create or replace function public.update_ermija_booking_status(p_booking_id uuid, p_status text)
+returns public.ermija_bookings
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  booking_row public.ermija_bookings;
+  trip_row public.ermija_trips;
+  seats integer;
+begin
+  if not public.is_ermija_admin() then raise exception 'Admin access required'; end if;
+  if p_status not in ('New', 'Confirmed', 'Cancelled') then raise exception 'Invalid booking status'; end if;
+
+  select * into booking_row from public.ermija_bookings where id = p_booking_id for update;
+  if not found then raise exception 'Booking not found'; end if;
+  select * into trip_row from public.ermija_trips where id = booking_row.trip_id for update;
+  if not found then raise exception 'Trip not found'; end if;
+  seats := greatest(coalesce((trip_row.payload ->> 'availableSeats')::integer, 0), 0);
+
+  if booking_row.status <> 'Confirmed' and p_status = 'Confirmed' then
+    if seats < booking_row.number_of_people then raise exception 'Not enough seats available'; end if;
+    update public.ermija_trips set payload = jsonb_set(payload, '{availableSeats}', to_jsonb(seats - booking_row.number_of_people)), updated_at = now() where id = trip_row.id;
+  elsif booking_row.status = 'Confirmed' and p_status <> 'Confirmed' then
+    update public.ermija_trips set payload = jsonb_set(payload, '{availableSeats}', to_jsonb(seats + booking_row.number_of_people)), updated_at = now() where id = trip_row.id;
+  end if;
+
+  update public.ermija_bookings set status = p_status, updated_at = now() where id = p_booking_id returning * into booking_row;
+  return booking_row;
+end;
+$$;
+
+revoke all on function public.update_ermija_booking_status(uuid, text) from public;
+grant execute on function public.update_ermija_booking_status(uuid, text) to authenticated;
+
 create table if not exists public.ermija_contact_messages (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(name) between 2 and 100),

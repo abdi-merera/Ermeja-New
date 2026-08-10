@@ -13,8 +13,10 @@ export type Trip = {
   price: number;
   difficulty: string;
   availableSeats: number;
+  hotLeadDays?: number;
   meetingPoint: string;
   departureTime: string;
+  returnDate?: string;
   returnTime: string;
   includes: string[];
   whatToBring: string[];
@@ -87,6 +89,7 @@ export type GalleryHighlight = {
 
 export type GalleryImage = {
   id: string;
+  tripId: string;
   image: string;
   title: string;
   destination: string;
@@ -102,8 +105,10 @@ export type AdminTripForm = {
   price: string;
   difficulty: string;
   availableSeats: string;
+  hotLeadDays: string;
   meetingPoint: string;
   departureTime: string;
+  returnDate: string;
   returnTime: string;
   includes: string;
   whatToBring: string;

@@ -1,9 +1,17 @@
 import { CheckCircle2 } from "lucide-react";
 import type { Trip } from "../types";
+import { formatDate } from "../utils";
 
 export function DetailGrid({ trip }: { trip: Trip }) {
   const blocks = [
-    { title: "Meeting point", items: [trip.meetingPoint, `Departure: ${trip.departureTime}`, `Return: ${trip.returnTime}`] },
+    {
+      title: "Meeting point",
+      items: [
+        trip.meetingPoint,
+        `Departure: ${trip.departureTime}`,
+        ...(trip.duration !== "Day Trip" ? [`Return: ${trip.returnDate ? formatDate(trip.returnDate) : "To be announced"}${trip.returnTime ? ` at ${trip.returnTime}` : ""}`] : [])
+      ]
+    },
     { title: "Included", items: trip.includes },
     { title: "What to bring", items: trip.whatToBring },
     { title: "Not included", items: trip.notIncluded },

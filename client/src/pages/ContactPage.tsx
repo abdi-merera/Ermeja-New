@@ -2,6 +2,7 @@ import { CalendarCheck, CheckCircle2, Clock, Mail, MapPin, MessageCircle, Phone,
 import type { LucideIcon } from "lucide-react";
 import { brandGreen, orangeButton, whatsappNumber, yellowButton } from "../constants";
 import type { ContactForm, ContactSubmitHandler } from "../types";
+import contactImage from "../../../public/Sof Oumer.jpg";
 
 const contactHeroImage = "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=85";
 
@@ -41,7 +42,7 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
 
           <div className="rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/25 backdrop-blur">
             <div className="overflow-hidden rounded-lg">
-              <img className="h-80 w-full object-cover" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1100&q=85" alt="Mountain view for trip planning" />
+              <img className="h-80 w-full object-cover" src={contactImage} alt="Sof Omar cave destination in Ethiopia" />
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {["Private groups", "Weekend packages", "Company outings", "Route advice"].map((item) => (

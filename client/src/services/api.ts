@@ -106,6 +106,8 @@ function tripPayload(form: AdminTripForm) {
     ...form,
     price: Number(form.price),
     availableSeats: Number(form.availableSeats),
+    hotLeadDays: Number(form.hotLeadDays || 5),
+    returnDate: form.duration === "Day Trip" ? "" : form.returnDate,
     includes: splitCommaList(form.includes),
     whatToBring: splitCommaList(form.whatToBring),
     notIncluded: splitCommaList(form.notIncluded),
@@ -299,11 +301,11 @@ export function getBookings() {
 }
 
 export function updateBookingStatus(booking: Booking, status: string) {
-  return fetch(databaseUrl(`ermija_bookings?id=eq.${encodeURIComponent(booking.id)}`), {
-    method: "PATCH",
+  return fetch(databaseUrl("rpc/update_ermija_booking_status"), {
+    method: "POST",
     headers: { ...supabaseHeaders(true, true), Prefer: "return=representation" },
-    body: JSON.stringify({ status, updated_at: new Date().toISOString() })
-  }).then((response) => parseResponse<Array<Record<string, unknown>>>(response)).then((rows) => bookingFromRow(rows[0]));
+    body: JSON.stringify({ p_booking_id: booking.id, p_status: status })
+  }).then((response) => parseResponse<Record<string, unknown>>(response)).then(bookingFromRow);
 }
 
 export function getMessages() {

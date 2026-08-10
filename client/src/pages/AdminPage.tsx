@@ -18,6 +18,9 @@ const inputClass =
   "rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-stone-900 outline-none transition focus:border-[#114F3C] focus:ring-4 focus:ring-[#114F3C]/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-stone-500";
 
 function tripToForm(trip: Trip): AdminTripForm {
+  const defaultReturnDate = new Date(`${trip.date}T00:00:00`);
+  defaultReturnDate.setDate(defaultReturnDate.getDate() + 1);
+
   return {
     title: trip.title,
     destination: trip.destination,
@@ -26,8 +29,10 @@ function tripToForm(trip: Trip): AdminTripForm {
     price: String(trip.price),
     difficulty: trip.difficulty,
     availableSeats: String(trip.availableSeats),
+    hotLeadDays: String(trip.hotLeadDays ?? 5),
     meetingPoint: trip.meetingPoint,
     departureTime: trip.departureTime,
+    returnDate: trip.duration === "Day Trip" ? "" : (trip.returnDate || defaultReturnDate.toISOString().slice(0, 10)),
     returnTime: trip.returnTime,
     includes: trip.includes.join(", "),
     whatToBring: trip.whatToBring.join(", "),
@@ -430,9 +435,18 @@ function BookingAdminCard({
   onStatusChange: (status: string) => void;
 }) {
   const total = trip ? trip.price * booking.numberOfPeople : 0;
-  const whatsappUrl = `https://wa.me/${booking.phone.replace(/\D/g, "") || whatsappNumber}?text=${encodeURIComponent(
-    `Hello ${booking.customerName}, this is Ermija Hiking about your booking for ${trip?.title || booking.tripId}.`
-  )}`;
+  const phoneDigits = booking.phone.replace(/\D/g, "");
+  const whatsappPhone = phoneDigits.startsWith("251") ? phoneDigits : phoneDigits.startsWith("0") ? `251${phoneDigits.slice(1)}` : phoneDigits.length === 9 ? `251${phoneDigits}` : (phoneDigits || whatsappNumber);
+  const tripName = trip?.title || booking.tripId;
+  const tripDate = trip ? formatDate(trip.date) : "the selected date";
+  const whatsappUrl = (status?: string) => {
+    const message = status === "Confirmed"
+      ? `Hello ${booking.customerName}, your booking for ${tripName} on ${tripDate} is confirmed for ${booking.numberOfPeople} ${booking.numberOfPeople === 1 ? "person" : "people"}${total ? ` (${formatPrice(total)})` : ""}. Please reply so we can finalize payment and meeting details.`
+      : status === "Cancelled"
+        ? `Hello ${booking.customerName}, regarding your booking for ${tripName} on ${tripDate}: unfortunately, this request has been cancelled. Please reply if you would like another date or a different trip.`
+        : `Hello ${booking.customerName}, this is Ermija Hiking about your booking for ${tripName}.`;
+    return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
+  };
 
   return (
     <article className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
@@ -466,10 +480,21 @@ function BookingAdminCard({
             <p className="font-black text-[#114F3C] dark:text-[#F8A900]">{total ? formatPrice(total) : "Value unavailable"}</p>
           </div>
           <p className="mt-3 rounded-lg bg-stone-50 p-3 text-sm leading-6 text-stone-700 dark:bg-black/15 dark:text-stone-300">{booking.message || "No guest message."}</p>
-          <a className={`mt-3 inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${orangeButton}`} href={whatsappUrl}>
-            <MessageCircle className="h-4 w-4" />
-            WhatsApp guest
-          </a>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {booking.status !== "Confirmed" ? (
+              <a className="inline-flex items-center gap-2 rounded-lg bg-[#114F3C] px-4 py-3 text-sm font-black text-white transition hover:bg-[#0b392b]" href={whatsappUrl("Confirmed")} target="_blank" rel="noreferrer" onClick={() => onStatusChange("Confirmed")}>
+                <CheckCircle2 className="h-4 w-4" /> Confirm & notify
+              </a>
+            ) : null}
+            {booking.status !== "Cancelled" ? (
+              <a className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700" href={whatsappUrl("Cancelled")} target="_blank" rel="noreferrer" onClick={() => onStatusChange("Cancelled")}>
+                <X className="h-4 w-4" /> Cancel & notify
+              </a>
+            ) : null}
+            <a className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${orangeButton}`} href={whatsappUrl()} target="_blank" rel="noreferrer">
+              <MessageCircle className="h-4 w-4" /> Message guest
+            </a>
+          </div>
         </div>
       </div>
     </article>
@@ -664,6 +689,7 @@ function TripForm({
     const errors: Record<string, string> = {};
     const price = Number(form.price);
     const seats = Number(form.availableSeats);
+    const hotLeadDays = Number(form.hotLeadDays);
     const itinerarySteps = form.itinerary
       .split(/\r?\n/)
       .map((item) => item.trim())
@@ -687,6 +713,18 @@ function TripForm({
 
     if (!Number.isInteger(seats) || seats <= 0) {
       errors.availableSeats = "Seats must be a positive whole number.";
+    }
+
+    if (!Number.isInteger(hotLeadDays) || hotLeadDays < 1 || hotLeadDays > 365) {
+      errors.hotLeadDays = "Choose a whole number between 1 and 365 days.";
+    }
+
+    if (form.duration !== "Day Trip" && !form.returnDate) {
+      errors.returnDate = "Choose the return day for this overnight trip.";
+    }
+
+    if (form.duration !== "Day Trip" && form.returnDate && form.date && form.returnDate <= form.date) {
+      errors.returnDate = "Return day must be after the departure day.";
     }
 
     if (form.status === "Published" && !form.coverImage.trim()) {
@@ -779,7 +817,7 @@ function TripForm({
                 <input required type="date" className={`${inputClass} w-full`} value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} />
               </FieldLabel>
               <FieldLabel label="Duration">
-                <select className={`${inputClass} w-full`} value={form.duration} onChange={(event) => setForm({ ...form, duration: event.target.value })}>
+                <select className={`${inputClass} w-full`} value={form.duration} onChange={(event) => setForm({ ...form, duration: event.target.value, returnDate: event.target.value === "Day Trip" ? "" : form.returnDate })}>
                   <option>Day Trip</option>
                   <option>Weekend</option>
                   <option>Multi-day</option>
@@ -790,6 +828,9 @@ function TripForm({
               </FieldLabel>
               <FieldLabel label="Available seats" error={fieldErrors.availableSeats}>
                 <input required type="number" className={`${inputClass} w-full`} placeholder="18" value={form.availableSeats} onChange={(event) => setForm({ ...form, availableSeats: event.target.value })} />
+              </FieldLabel>
+              <FieldLabel label="Hot trip starts" hint="Days before departure" error={fieldErrors.hotLeadDays}>
+                <input required type="number" min="1" max="365" step="1" className={`${inputClass} w-full`} placeholder="5" value={form.hotLeadDays} onChange={(event) => setForm({ ...form, hotLeadDays: event.target.value })} />
               </FieldLabel>
               <FieldLabel label="Difficulty">
                 <select className={`${inputClass} w-full`} value={form.difficulty} onChange={(event) => setForm({ ...form, difficulty: event.target.value })}>
@@ -807,14 +848,19 @@ function TripForm({
               <FieldLabel label="Meeting point">
                 <input className={`${inputClass} w-full`} placeholder="Mexico Square, Addis Ababa" value={form.meetingPoint} onChange={(event) => setForm({ ...form, meetingPoint: event.target.value })} />
               </FieldLabel>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FieldLabel label="Departure">
-                  <input className={`${inputClass} w-full`} placeholder="06:00" value={form.departureTime} onChange={(event) => setForm({ ...form, departureTime: event.target.value })} />
-                </FieldLabel>
-                <FieldLabel label="Return">
-                  <input className={`${inputClass} w-full`} placeholder="19:30" value={form.returnTime} onChange={(event) => setForm({ ...form, returnTime: event.target.value })} />
-                </FieldLabel>
-              </div>
+              <FieldLabel label="Departure time">
+                <input type="time" className={`${inputClass} w-full`} value={form.departureTime} onChange={(event) => setForm({ ...form, departureTime: event.target.value })} />
+              </FieldLabel>
+              {form.duration !== "Day Trip" ? (
+                <div className="grid gap-4 sm:col-span-2 sm:grid-cols-2">
+                  <FieldLabel label="Return day" error={fieldErrors.returnDate}>
+                    <input required type="date" min={form.date || undefined} className={`${inputClass} w-full`} value={form.returnDate} onChange={(event) => setForm({ ...form, returnDate: event.target.value })} />
+                  </FieldLabel>
+                  <FieldLabel label="Return time">
+                    <input type="time" className={`${inputClass} w-full`} value={form.returnTime} onChange={(event) => setForm({ ...form, returnTime: event.target.value })} />
+                  </FieldLabel>
+                </div>
+              ) : null}
             </div>
           </FormSection>
 
@@ -837,7 +883,7 @@ function TripForm({
           </FormSection>
 
           <FormSection title="Media URLs" text="Upload from the side panel or paste hosted URLs manually.">
-            <FieldLabel label="Cover image URL" error={fieldErrors.coverImage}>
+            <FieldLabel label="Cover image / destination album cover URL" error={fieldErrors.coverImage}>
               <input className={`${inputClass} w-full`} placeholder="/uploads/photo.jpg or https://..." value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })} />
             </FieldLabel>
             <FieldLabel label="Gallery image URLs" hint="Comma separated">

@@ -141,11 +141,12 @@ function TripHero({ trip, galleryImages, onBack }: { trip: Trip; galleryImages: 
 }
 
 function RouteSnapshot({ trip }: { trip: Trip }) {
+  const returnDetails = trip.returnDate ? `${formatDate(trip.returnDate)}${trip.returnTime ? `, ${trip.returnTime}` : ""}` : (trip.returnTime || "To be announced");
   const facts = [
     { label: "Duration", value: trip.duration, Icon: Clock },
     { label: "Difficulty", value: trip.difficulty, Icon: Gauge },
     { label: "Open seats", value: `${trip.availableSeats} left`, Icon: Users },
-    { label: "Return", value: trip.returnTime, Icon: Compass }
+    { label: trip.duration === "Day Trip" ? "Departure" : "Return", value: trip.duration === "Day Trip" ? trip.departureTime : returnDetails, Icon: Compass }
   ];
 
   return (

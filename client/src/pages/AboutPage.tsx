@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2, Compass, HeartHandshake, Map, MessageCircle, Mountain, ShieldCheck, Users } from "lucide-react";
 import { brandGreen, orangeButton, trustItems, whatsappNumber, yellowButton } from "../constants";
+import aboutImage from "../../../public/Horses.WEBP";
 
 const storyStats = [
   { value: "Local", label: "Guides and route knowledge" },
@@ -64,7 +65,7 @@ export function AboutPage() {
           </div>
 
           <aside className="rounded-lg border border-white/15 bg-white/10 p-4 shadow-2xl shadow-black/35 backdrop-blur">
-            <img className="h-[420px] w-full rounded-lg object-cover" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=85" alt="Mountain walking route" />
+            <img className="h-[420px] w-full rounded-lg object-cover" src={aboutImage} alt="Horses on an Ermija Hiking route" />
             <div className="mt-4 grid grid-cols-3 gap-3">
               {storyStats.map((stat) => (
                 <div key={stat.label} className="rounded-lg bg-white/10 p-4">
