@@ -202,7 +202,7 @@ export function AdminPage({
         <div className="mx-auto max-w-md rounded-lg bg-white p-8 shadow-sm transition-colors duration-300 dark:bg-[#10241C] dark:shadow-black/20">
           <LogIn className="h-10 w-10 text-[#F54C0D]" />
           <h1 className="mt-5 text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Admin login</h1>
-          <p className="mt-3 text-sm leading-6 text-stone-700 dark:text-stone-300">Sign in with the approved Supabase admin account to manage trips, bookings, uploads, and messages.</p>
+          <p className="mt-3 text-sm leading-6 text-stone-700 dark:text-stone-300">Sign in with your admin account.</p>
           <form className="mt-6 space-y-4" onSubmit={submitLogin}>
             <input
               required
