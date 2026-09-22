@@ -43,6 +43,16 @@ export type ContactForm = {
   message: string;
 };
 
+export type PrivateTripRequest = {
+  name: string;
+  phone: string;
+  email: string;
+  destination: string;
+  preferredDate: string;
+  groupSize: string;
+  notes: string;
+};
+
 export type AdminLoginForm = {
   email: string;
   password: string;
@@ -121,6 +131,6 @@ export type AdminTripForm = {
   status: TripStatus;
 };
 
-export type BookingSubmitHandler = (event: FormEvent<HTMLFormElement>) => void;
+export type BookingSubmitHandler = (event: FormEvent<HTMLFormElement>) => Promise<boolean>;
 export type ContactSubmitHandler = (event: FormEvent<HTMLFormElement>) => void;
 export type AdminTripSubmitHandler = (event: FormEvent<HTMLFormElement>) => void;

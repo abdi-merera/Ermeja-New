@@ -1,4 +1,4 @@
-import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, GalleryImage, Trip, TripStatus } from "../types";
 import { splitCommaList } from "../utils";
 
 const adminSessionKey = "ermija-admin-session";
@@ -378,4 +378,26 @@ export async function loginAdmin(form: AdminLoginForm) {
 
 export function logoutAdmin() {
   window.localStorage.removeItem(adminSessionKey);
+}
+
+// Separate rows prevent one admin's upload from replacing another's photos.
+export function getStandaloneGalleryImages() {
+  return fetch(databaseUrl("ermija_site_settings?select=payload&key=like.gallery-photo.*&order=updated_at.desc"), {
+    headers: supabaseHeaders()
+  }).then((response) => parseResponse<{ payload: GalleryImage }[]>(response))
+    .then((rows) => rows.map((row) => row.payload));
+}
+
+export function saveStandaloneGalleryImage(photo: GalleryImage) {
+  return fetch(databaseUrl("ermija_site_settings?on_conflict=key"), {
+    method: "POST",
+    headers: { ...supabaseHeaders(true, true), Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify({ key: `gallery-photo.${photo.id}`, payload: photo, updated_at: new Date().toISOString() })
+  }).then((response) => parseResponse<{ payload: GalleryImage }[]>(response)).then((rows) => rows[0].payload);
+}
+
+export function removeStandaloneGalleryImage(id: string) {
+  return fetch(databaseUrl(`ermija_site_settings?key=eq.${encodeURIComponent(`gallery-photo.${id}`)}`), {
+    method: "DELETE", headers: supabaseHeaders(true)
+  }).then((response) => parseResponse<void>(response));
 }

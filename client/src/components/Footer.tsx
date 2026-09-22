@@ -23,7 +23,7 @@ export function Footer() {
           <h3 className="font-black text-[#F8A900]">Contact</h3>
           <div className="mt-4 space-y-3 text-sm text-white/75">
             <p className="flex items-center gap-3"><Phone className="h-4 w-4 text-[#F8A900]" /> +251 913 181 343</p>
-            <p className="flex items-center gap-3"><Mail className="h-4 w-4 text-[#F8A900]" /> hello@ermijahiking.com</p>
+            <p className="flex items-center gap-3"><Mail className="h-4 w-4 text-[#F8A900]" /> <a href="mailto:ermjahiking@gmail.com" className="hover:text-white hover:underline">ermjahiking@gmail.com</a></p>
             <p className="flex items-center gap-3"><MapPin className="h-4 w-4 text-[#F8A900]" /> Addis Ababa, Ethiopia</p>
           </div>
         </div>

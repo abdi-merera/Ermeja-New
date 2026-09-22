@@ -13,17 +13,17 @@ export const destinations = [
   {
     name: "Wenchi",
     text: "Immerse yourself in the breathtaking beauty of an extinct volcanic crater, featuring a serene alpine lake, lush mountain ridges, and soothing hot springs. Hike or ride horseback down to the shore, take a tranquil boat trip across the water to visit the historic 13th-century island monastery, and experience one of Ethiopia's premier eco-tourism villages.",
-    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"
+    image: "/Wenchi.jpg"
   },
   {
     name: "Awash Doho Lodge & Beynuna Village",
     text: "Escape to a tropical palm oasis nestled on the edge of Awash National Park. Unwind in therapeutic natural thermal hot spring pools, explore stunning waterfalls, and spot wild baboons and birdlife. Cap off the experience with an immersive cultural walk through Beynuna Village and relaxing evening campfires under the stars.",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"
+    image: "/Doho.JPG"
   },
   {
     name: "Bale Mountains",
     text: "Journey into a wild, high-altitude sanctuary famous for its Afro-alpine plateaus, ancient cloud forests, and dramatic mountain peaks. Trek across the vast Sanetti Plateau—home to the endangered Ethiopian wolf and endemic mountain nyala—and venture into the mysterious subterranean limestone caverns of Sof Omar Cave.",
-    image: "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80"
+    image: "/Bale.jpg"
   }
 ];
 
@@ -49,9 +49,9 @@ export const heroStats = [
 ];
 
 export const experienceHighlights: { title: string; text: string; Icon: LucideIcon }[] = [
-  { title: "Poster-ready trips", text: "Every package is presented with clear date, price, difficulty, seats, and inclusions.", Icon: Star },
-  { title: "Visual-first planning", text: "Destination photography and galleries help guests picture the route before booking.", Icon: Camera },
-  { title: "Simple journey flow", text: "Visitors can move from discovery to trip detail to WhatsApp confirmation in a few taps.", Icon: Map }
+  { title: "Know before you go", text: "Check dates, prices, walking difficulty, and what is included before choosing your trip.", Icon: Star },
+  { title: "Find your kind of adventure", text: "Explore photos of the places you could visit and find inspiration for your next walk.", Icon: Camera },
+  { title: "Talk to our team", text: "Ask us about a route, check availability, or arrange your booking on WhatsApp.", Icon: Map }
 ];
 
 export const testimonials = [
@@ -97,26 +97,26 @@ export const emptyAdminTripForm: AdminTripForm = {
 };
 
 export const defaultGalleryHighlight: GalleryHighlight = {
-  eyebrow: "Interactive highlight",
+  eyebrow: "Along the trail",
   items: [
     {
-      title: "Destination view",
-      text: "The first frame sets the location: crater rim, lake edge, mountain road, or volcanic landscape.",
+      title: "Views worth the walk",
+      text: "Take in wide horizons and discover somewhere new.",
       image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"
     },
     {
-      title: "Route texture",
-      text: "The second frame shows what the walk feels like underfoot, from forest paths to open highland tracks.",
+      title: "Follow the trail",
+      text: "Enjoy the changing scenery as you explore on foot.",
       image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
     },
     {
-      title: "Group rhythm",
-      text: "The third frame captures people moving together, sharing breaks, photos, and the pace of the day.",
+      title: "Better together",
+      text: "Share the walk, swap stories, and make time for a photo along the way.",
       image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"
     },
     {
-      title: "After-walk memory",
-      text: "The fourth frame is the emotional close: the view, the light, and the moment guests remember later.",
+      title: "Bring home a memory",
+      text: "A new place, a shared moment, and a story to take home.",
       image: "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=900&q=80"
     }
   ]

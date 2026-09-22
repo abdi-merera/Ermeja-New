@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+const source = readFileSync(new URL("./src/bookingRules.ts", import.meta.url), "utf8");
+const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
+const { bookingUnavailable } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`);
+const now = new Date("2026-09-22T12:00:00Z");
+const trip = { status: "Published", date: "2026-09-22", availableSeats: 4 };
+assert.equal(bookingUnavailable(trip, now), "", "A departure today remains available");
+assert.match(bookingUnavailable({ ...trip, date: "2026-09-21" }, now), /departed/);
+assert.match(bookingUnavailable({ ...trip, availableSeats: 0 }, now), /sold out/);
+assert.match(bookingUnavailable({ ...trip, availableSeats: -1 }, now), /sold out/);
+assert.match(bookingUnavailable({ ...trip, status: "Draft" }, now), /not open/);
+assert.match(bookingUnavailable(trip, new Date("2026-09-22T21:00:00Z")), /departed/, "Midnight in Ethiopia closes yesterday's trip");
+assert.equal(bookingUnavailable(trip, new Date("2026-09-22T20:59:59Z")), "");
+console.log("Passed 7 booking eligibility checks.");

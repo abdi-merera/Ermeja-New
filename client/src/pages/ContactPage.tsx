@@ -9,7 +9,7 @@ const contactHeroImage = "https://images.unsplash.com/photo-1500530855697-b586d8
 const contactCards = [
   { title: "WhatsApp", text: "Fastest way to confirm seats, ask for prices, or plan a group trip.", value: "+251 913 181 343", Icon: MessageCircle },
   { title: "Phone", text: "Call when you need quick timing, meeting point, or package details.", value: "+251 913 181 343", Icon: Phone },
-  { title: "Email", text: "Best for company outings, school groups, and detailed private requests.", value: "hello@ermijahiking.com", Icon: Mail }
+  { title: "Email", text: "Best for company outings, school groups, and detailed private requests.", value: "Ermjahiking@gmail.com", Icon: Mail }
 ];
 
 const planningSteps = [
@@ -34,9 +34,9 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
               Ask about an upcoming package, request a private group walk, or confirm the details you need before booking.
             </p>
             <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
-              <HeroStat value="Same day" label="Reply window" Icon={Clock} />
+              <HeroStat value="Get in touch" label="Ask our team" Icon={Clock} />
               <HeroStat value="Group" label="Trip planning" Icon={Users} />
-              <HeroStat value="WhatsApp" label="Booking flow" Icon={MessageCircle} />
+              <HeroStat value="WhatsApp" label="Trip enquiries" Icon={MessageCircle} />
             </div>
           </div>
 

@@ -6,7 +6,7 @@ import { GalleryPage } from "../pages/GalleryPage";
 import { HomePage } from "../pages/HomePage";
 import { TripDetailPage } from "../pages/TripDetailPage";
 import { TripsPage } from "../pages/TripsPage";
-import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, BookingForm, BookingSubmitHandler, ContactForm, ContactMessage, ContactSubmitHandler, GalleryHighlight, GalleryImage, Page, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, BookingForm, BookingSubmitHandler, ContactForm, ContactMessage, ContactSubmitHandler, GalleryHighlight, GalleryImage, Page, PrivateTripRequest, Trip, TripStatus } from "../types";
 
 export function AppRoutes({
   page,
@@ -14,6 +14,8 @@ export function AppRoutes({
   adminTrips,
   selectedTrip,
   galleryImages,
+  standalonePhotos,
+  onStandalonePhotosChange,
   galleryHighlight,
   bookingForm,
   setBookingForm,
@@ -21,6 +23,7 @@ export function AppRoutes({
   contactForm,
   setContactForm,
   submitContact,
+  submitPrivateTripRequest,
   adminLoggedIn,
   adminEmail,
   adminLoginForm,
@@ -47,6 +50,8 @@ export function AppRoutes({
   adminTrips: Trip[];
   selectedTrip: Trip | null;
   galleryImages: GalleryImage[];
+  standalonePhotos: GalleryImage[];
+  onStandalonePhotosChange: (photos: GalleryImage[]) => void;
   galleryHighlight: GalleryHighlight;
   bookingForm: BookingForm;
   setBookingForm: (form: BookingForm) => void;
@@ -54,6 +59,7 @@ export function AppRoutes({
   contactForm: ContactForm;
   setContactForm: (form: ContactForm) => void;
   submitContact: ContactSubmitHandler;
+  submitPrivateTripRequest: (request: PrivateTripRequest) => Promise<boolean>;
   adminLoggedIn: boolean;
   adminEmail: string;
   adminLoginForm: AdminLoginForm;
@@ -66,7 +72,7 @@ export function AppRoutes({
   updateTripStatus: (trip: Trip, status: TripStatus) => void;
   updateAdminTrip: (trip: Trip, form: AdminTripForm) => void;
   deleteAdminTrip: (trip: Trip) => void;
-  updateBookingStatus: (booking: Booking, status: string) => void;
+  updateBookingStatus: (booking: Booking, status: string) => Promise<boolean>;
   updateMessageStatus: (message: ContactMessage, status: string) => void;
   updateGalleryHighlight: (highlight: GalleryHighlight) => void;
   bookings: Booking[];
@@ -80,7 +86,7 @@ export function AppRoutes({
   }
 
   if (page === "trips" && !selectedTrip) {
-    return <TripsPage trips={trips} chooseTrip={chooseTrip} />;
+    return <TripsPage trips={trips} chooseTrip={chooseTrip} submitPrivateTripRequest={submitPrivateTripRequest} />;
   }
 
   if (page === "trips" && selectedTrip) {
@@ -129,6 +135,8 @@ export function AppRoutes({
         updateMessageStatus={updateMessageStatus}
         bookings={bookings}
         messages={messages}
+        standalonePhotos={standalonePhotos}
+        onStandalonePhotosChange={onStandalonePhotosChange}
         galleryHighlight={galleryHighlight}
         updateGalleryHighlight={updateGalleryHighlight}
       />

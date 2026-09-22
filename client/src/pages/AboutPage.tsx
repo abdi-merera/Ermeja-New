@@ -11,17 +11,17 @@ const storyStats = [
 const principles = [
   {
     title: "Walk with purpose",
-    text: "Every trip is shaped around the route, the timing, the people joining, and the feeling guests should leave with.",
+    text: "Make time for fresh air, new scenery, and shared moments along the trail.",
     Icon: Mountain
   },
   {
-    title: "Show Ethiopia clearly",
-    text: "The brand puts Ethiopian nature, culture, language, and local knowledge at the center of the experience.",
+    title: "Explore with local guides",
+    text: "Discover the landscapes and communities along the way with guides who know the area.",
     Icon: Compass
   },
   {
     title: "Make joining simple",
-    text: "Guests should understand the price, date, difficulty, seats, what to bring, and how to confirm without confusion.",
+    text: "Find the date, price, difficulty, and packing information in each trip listing. Ask us if you need help choosing.",
     Icon: CheckCircle2
   }
 ];
@@ -48,9 +48,9 @@ export function AboutPage() {
             <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#F8A900] backdrop-blur">
               About Ermija Hiking
             </p>
-            <h1 className="mt-6 text-5xl font-black leading-tight sm:text-6xl lg:text-7xl">Walk Ethiopia with clarity, care, and local rhythm.</h1>
+            <h1 className="mt-6 text-5xl font-black leading-tight sm:text-6xl lg:text-7xl">Discover Ethiopia, one walk at a time.</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/84">
-              Ermija means walk in Amharic. The company brings people together for guided outdoor experiences across Ethiopia's lakes, mountains, forests, highlands, and cultural routes.
+              Ermija means walk in Amharic. We bring people together for guided outdoor experiences across Ethiopia's lakes, mountains, forests, highlands, and cultural routes.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a className={`inline-flex items-center gap-2 rounded-lg px-6 py-4 text-base font-black transition ${yellowButton}`} href={`https://wa.me/${whatsappNumber}`}>
@@ -82,14 +82,14 @@ export function AboutPage() {
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.78fr_1fr]">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">The story</p>
-            <h2 className="mt-3 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">A walking brand rooted in Ethiopian discovery.</h2>
+            <h2 className="mt-3 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">Step outside. Discover more of Ethiopia.</h2>
           </div>
           <div className="grid gap-5 text-base leading-8 text-stone-700 dark:text-stone-300">
             <p>
               Ermija Hiking is built around a simple idea: people should be able to step out of the city, join a clear plan, and experience Ethiopia with guides who understand the routes, the timing, and the local context.
             </p>
             <p>
-              The visual identity combines movement, exploration, and Ethiopian cultural cues. The service experience follows the same direction: direct, practical, welcoming, and easy to understand before a guest ever books.
+              Whether you are joining your first hike or planning an outing with friends, we can help you choose a route and prepare for the day. Bring your curiosity and enjoy the journey together.
             </p>
           </div>
         </div>
@@ -99,7 +99,7 @@ export function AboutPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 max-w-2xl">
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F8A900]">What guides us</p>
-            <h2 className="mt-3 text-4xl font-black">The experience should feel organized before it feels adventurous.</h2>
+            <h2 className="mt-3 text-4xl font-black">Good company. Local knowledge. Memorable walks.</h2>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             {principles.map(({ title, text, Icon }) => (
@@ -118,10 +118,10 @@ export function AboutPage() {
           <div className="mb-8 grid gap-5 lg:grid-cols-[0.7fr_1fr]">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">How trips are shaped</p>
-              <h2 className="mt-3 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">A simple operating rhythm for every route.</h2>
+              <h2 className="mt-3 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">From choosing a route to hitting the trail.</h2>
             </div>
             <p className="text-base leading-8 text-stone-700 dark:text-stone-300">
-              Guests should know where to meet, what the route feels like, what is included, how hard the walk is, and what happens next. The website and admin system are built around that clarity.
+              Check your trip details for the meeting point, walking difficulty, and what to pack. Our team can answer your questions and help you prepare before departure.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">

@@ -1,3 +1,4 @@
+import { bookingUnavailable } from "./bookingRules";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AlertCircle, CheckCircle2, X } from "lucide-react";
 import { defaultGalleryHighlight, emptyAdminTripForm } from "./constants";
@@ -6,7 +7,7 @@ import { Navbar } from "./components/Navbar";
 import { AppRoutes } from "./routes/AppRoutes";
 import { pageFromPath, pagePaths } from "./routes/routeUtils";
 import * as api from "./services/api";
-import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, GalleryImage, Page, Trip, TripStatus } from "./types";
+import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, GalleryImage, Page, PrivateTripRequest, Trip, TripStatus } from "./types";
 
 export function App() {
   const [page, setPage] = useState<Page>(() => pageFromPath(window.location.pathname));
@@ -24,6 +25,7 @@ export function App() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [galleryHighlight, setGalleryHighlight] = useState<GalleryHighlight>(defaultGalleryHighlight);
+  const [standalonePhotos, setStandalonePhotos] = useState<GalleryImage[]>([]);
   const [apiMessage, setApiMessage] = useState("");
   const [bookingForm, setBookingForm] = useState<BookingForm>({ customerName: "", phone: "", numberOfPeople: "1", message: "" });
   const [contactForm, setContactForm] = useState<ContactForm>({ name: "", phone: "", email: "", message: "" });
@@ -56,7 +58,8 @@ export function App() {
   }
 
   useEffect(() => {
-    loadTrips().catch(() => setApiMessage("Unable to load trips. Make sure the backend is running."));
+    loadTrips().catch(() => setApiMessage("Unable to load trips. Please refresh the page or try again shortly."));
+    api.getStandaloneGalleryImages().then(setStandalonePhotos).catch(() => setApiMessage("Unable to load gallery photos."));
     api.getGalleryHighlight().then(setGalleryHighlight).catch(() => setGalleryHighlight(defaultGalleryHighlight));
   }, []);
 
@@ -95,6 +98,7 @@ export function App() {
 
   const galleryImages = useMemo<GalleryImage[]>(
     () => [
+      ...standalonePhotos,
       ...trips.flatMap((trip) => [
         ...(trip.coverImage ? [{
           id: `${trip.id}-cover`,
@@ -116,7 +120,7 @@ export function App() {
         }))
       ])
     ],
-    [trips]
+    [trips, standalonePhotos]
   );
 
   useEffect(() => {
@@ -154,22 +158,26 @@ export function App() {
   async function submitBooking(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!selectedTrip) {
-      return;
-    }
+    if (!selectedTrip) return false;
 
     try {
-      const result = await api.createBooking(bookingForm, selectedTrip.id);
-      setApiMessage("Booking received. Please confirm on WhatsApp.");
+      const latestTrips = await api.getTrips();
+      const latestTrip = latestTrips.find((trip) => trip.id === selectedTrip.id);
+      if (!latestTrip) throw new Error("This trip is no longer available.");
+      setSelectedTrip(latestTrip);
+      const unavailable = bookingUnavailable(latestTrip);
+      if (unavailable) throw new Error(unavailable);
+      const people = Number(bookingForm.numberOfPeople);
+      if (!Number.isInteger(people) || people < 1 || people > Math.min(100, latestTrip.availableSeats)) throw new Error("Choose a group size within the available seats.");
+      if (bookingForm.customerName.trim().length < 2 || bookingForm.phone.trim().length < 7) throw new Error("Enter your full name and a valid contact number.");
+      await api.createBooking(bookingForm, selectedTrip.id);
+      setApiMessage("Booking request received. Your seats are not confirmed yet; our team will contact you.");
       setBookingForm({ customerName: "", phone: "", numberOfPeople: "1", message: "" });
-      await loadTrips();
-      if (adminSession) {
-        await loadAdminData();
-      }
-      window.open(result.whatsappUrl, "_blank", "noopener,noreferrer");
+      if (adminSession) loadAdminData().catch(() => {});
+      return true;
     } catch (error) {
-      setApiMessage(error instanceof Error ? error.message : "Booking failed.");
-      return;
+      setApiMessage(`Booking request failed: ${error instanceof Error ? error.message : "Please try again."}`);
+      return false;
     }
   }
 
@@ -186,6 +194,20 @@ export function App() {
     } catch (error) {
       setApiMessage(error instanceof Error ? error.message : "Message failed.");
       return;
+    }
+  }
+
+  async function submitPrivateTripRequest(request: PrivateTripRequest) {
+    const summary = `PRIVATE/GROUP TRIP REQUEST\nDestination: ${request.destination || "Flexible"}\nPreferred date: ${request.preferredDate || "Flexible"}\nGroup size: ${request.groupSize}\nNotes: ${request.notes || "None"}`;
+    try {
+      await api.sendContactMessage({ name: request.name, phone: request.phone, email: request.email, message: summary });
+      setApiMessage("Private trip request saved. Complete the conversation on WhatsApp.");
+      if (adminSession) await loadAdminData();
+      window.open(`https://wa.me/251913181343?text=${encodeURIComponent(`Hello Ermija Hiking, I submitted this private/group trip request:\n${summary}\nName: ${request.name}\nPhone: ${request.phone}`)}`, "_blank", "noopener,noreferrer");
+      return true;
+    } catch (error) {
+      setApiMessage(error instanceof Error ? error.message : "Private trip request failed.");
+      return false;
     }
   }
 
@@ -233,14 +255,21 @@ export function App() {
     }
   }
 
-  async function updateBookingStatus(booking: Booking, status: string) {
+  async function updateBookingStatus(booking: Booking, status: string): Promise<boolean> {
     try {
-      await api.updateBookingStatus(booking, status);
-      setApiMessage(`${booking.customerName}'s booking marked ${status.toLowerCase()}. WhatsApp is ready for you to review and send.`);
-      await Promise.all([loadAdminData(), loadTrips()]);
+      const saved = await api.updateBookingStatus(booking, status);
+      setBookings((current) => current.map((item) => item.id === saved.id ? saved : item));
+      setApiMessage(`${booking.customerName}'s booking marked ${status.toLowerCase()}. The guest has not been notified yet.`);
     } catch (error) {
-      setApiMessage(error instanceof Error ? error.message : "Booking status was not updated.");
+      setApiMessage(`Booking status was not updated: ${error instanceof Error ? error.message : "Please try again."}`);
+      return false;
     }
+    try {
+      await Promise.all([loadAdminData(), loadTrips()]);
+    } catch {
+      setApiMessage("Booking status saved, but unable to refresh the dashboard. Refresh before making another change.");
+    }
+    return true;
   }
 
   async function updateMessageStatus(message: ContactMessage, status: string) {
@@ -318,6 +347,8 @@ export function App() {
         trips={trips}
         adminTrips={adminTrips}
         selectedTrip={selectedTrip}
+        standalonePhotos={standalonePhotos}
+        onStandalonePhotosChange={setStandalonePhotos}
         galleryImages={galleryImages}
         galleryHighlight={galleryHighlight}
         bookingForm={bookingForm}
@@ -326,6 +357,7 @@ export function App() {
         contactForm={contactForm}
         setContactForm={setContactForm}
         submitContact={submitContact}
+        submitPrivateTripRequest={submitPrivateTripRequest}
         adminLoggedIn={Boolean(adminSession)}
         adminEmail={adminSession?.email || ""}
         adminLoginForm={adminLoginForm}

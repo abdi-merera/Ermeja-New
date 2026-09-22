@@ -1,3 +1,4 @@
+import "./GalleryPage.css";
 import { CSSProperties, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Film, Heart, Images, Instagram, MapPin, Play, X } from "lucide-react";
 import { defaultGalleryHighlight, orangeButton, whatsappNumber, yellowButton } from "../constants";
@@ -66,6 +67,9 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
   const [activeDestination, setActiveDestination] = useState<string | null>(null);
   const [activeSplitImage, setActiveSplitImage] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [showPhotoGrid, setShowPhotoGrid] = useState(false);
+  const wheelStageRef = useRef<HTMLDivElement>(null);
+  const viewerRef = useRef<HTMLDialogElement>(null);
   const touchStartX = useRef<number | null>(null);
   const splitHighlights = highlight.items.length === 4 ? highlight.items : defaultGalleryHighlight.items;
 
@@ -87,17 +91,41 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
     }
   }, [activeDestination, destinationGroups]);
 
+  const viewerOpen = lightboxIndex !== null && Boolean(selectedImages[lightboxIndex]);
   useEffect(() => {
-    if (lightboxIndex === null) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLightboxIndex(null);
-      if (event.key === "ArrowLeft") moveLightbox(-1);
-      if (event.key === "ArrowRight") moveLightbox(1);
-    };
+    if (!viewerOpen) return;
+    const dialog = viewerRef.current;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    dialog?.showModal();
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-    return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", onKeyDown); };
-  }, [lightboxIndex, selectedImages.length]);
+    return () => { dialog?.close(); document.body.style.overflow = previousOverflow; previousFocus?.focus(); };
+  }, [viewerOpen]);
+
+  useEffect(() => {
+    const stage = wheelStageRef.current;
+    if (!stage || !viewerOpen || showPhotoGrid || selectedImages.length < 2) return;
+    let amount = 0;
+    let lastMove = 0;
+    let lastWheel = 0;
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey) return;
+      event.preventDefault();
+      const now = Date.now();
+      if (now - lastWheel > 180) amount = 0;
+      lastWheel = now;
+      if (now - lastMove < 420) return;
+      const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+      amount += delta * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 600 : 1);
+      if (Math.abs(amount) >= 45) {
+        const direction = amount > 0 ? 1 : -1;
+        setLightboxIndex((current) => current === null ? null : (current + direction + selectedImages.length) % selectedImages.length);
+        amount = 0; lastMove = now;
+      }
+    };
+    stage.addEventListener("wheel", onWheel, { passive: false });
+    return () => stage.removeEventListener("wheel", onWheel);
+  }, [viewerOpen, showPhotoGrid, selectedImages.length]);
 
   const handleTouchEnd = (event: TouchEvent) => {
     if (touchStartX.current === null) return;
@@ -124,7 +152,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
             </p>
             <h1 className="mt-5 text-5xl font-black leading-tight sm:text-6xl">See the walk before you book it</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
-              A gallery should make visitors picture themselves on the trail. This page highlights destinations, groups, route details, and the small moments that make a hiking trip feel real.
+              Explore landscapes, shared adventures, and memorable moments from the trail. Find a place you would love to visit next.
             </p>
             <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
               {[
@@ -174,10 +202,11 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
 
             {selectedTrip ? <button type="button" onClick={() => chooseTrip(selectedTrip)} className={`mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black ${yellowButton}`}>View trip details <ExternalLink className="h-4 w-4" /></button> : null}
 
-            <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {selectedImages.map((item, index) => (
-                <button type="button" onClick={() => setLightboxIndex(index)} key={item.id} className={`group overflow-hidden rounded-xl bg-stone-200 text-left shadow-sm ${index === 0 ? "col-span-2 row-span-2" : ""}`} aria-label={`Open photo ${index + 1} of ${selectedImages.length}`}>
-                  <img loading="lazy" decoding="async" className={`h-full min-h-52 w-full object-cover transition duration-500 group-hover:scale-105 ${index === 0 ? "md:min-h-[430px]" : "md:min-h-64"}`} src={item.image} alt={`${activeDestination} trip photo ${index + 1}`} />
+                <button type="button" onClick={() => { setLightboxIndex(index); setShowPhotoGrid(false); }} key={item.id} className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-stone-200 shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F8A900]" aria-label={`Open photo ${index + 1} of ${selectedImages.length}`}>
+                  <img loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" src={item.image} alt={item.title || `${activeDestination} photo ${index + 1}`} />
+                  <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-1 text-xs font-semibold text-white">{index + 1}</span>
                 </button>
               ))}
             </div>
@@ -246,9 +275,9 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
 
         <section className="mt-12 grid gap-5 lg:grid-cols-[1fr_1fr_1fr]">
           {[
-            { title: "Instagram reels", text: "Short clips for trails, group arrivals, food stops, and destination reveals.", Icon: Instagram },
-            { title: "TikTok trail moments", text: "Vertical videos that show movement, mood, people, and the route energy.", Icon: Film },
-            { title: "Trip teaser clips", text: "Use quick edits before each upcoming trip to help guests decide faster.", Icon: Play }
+            { title: "Instagram reels", text: "See trail views, group adventures, and memorable stops from our walks.", Icon: Instagram },
+            { title: "TikTok trail moments", text: "Enjoy a glimpse of life on the trail with our hiking community.", Icon: Film },
+            { title: "A glimpse of the adventure", text: "Discover new places and find inspiration for your next outing.", Icon: Play }
           ].map(({ title, text, Icon }) => (
             <article key={title} className="relative overflow-hidden rounded-lg border border-[#114F3C]/10 bg-[#114F3C] p-6 text-white shadow-sm">
               <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-full bg-[#F8A900]/20" />
@@ -266,14 +295,14 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
                 <Heart className="h-8 w-8 text-[#F8A900]" />
-                <h2 className="mt-4 text-3xl font-black">Photos make the decision emotional.</h2>
+                <h2 className="mt-4 text-3xl font-black">Make memories beyond the city.</h2>
               </div>
             </div>
             <div className="p-8 sm:p-10">
-              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#F54C0D]">Gallery goal</p>
-              <h2 className="mt-3 text-4xl font-black text-[#114F3C]">Turn browsing into confidence.</h2>
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#F54C0D]">Your next adventure</p>
+              <h2 className="mt-3 text-4xl font-black text-[#114F3C]">Ready to join us?</h2>
               <p className="mt-5 text-base leading-8 text-stone-700 dark:text-stone-300">
-                The gallery is built to show more than scenery. It shows people, movement, route personality, and the feeling of joining Ermija Hiking before a customer sends a booking message.
+                Choose an upcoming trip or tell us which destination caught your eye. We can help you find a walk for your group.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a className={`rounded-lg px-5 py-4 text-sm font-black transition ${orangeButton}`} href={`https://wa.me/${whatsappNumber}`}>
@@ -289,19 +318,51 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
       </div>
 
       {lightboxIndex !== null && selectedImages[lightboxIndex] ? (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-black/95 text-white" role="dialog" aria-modal="true" aria-label={`${activeDestination} photo viewer`} onTouchStart={(event) => { touchStartX.current = event.touches[0].clientX; }} onTouchEnd={handleTouchEnd}>
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
-            <p className="font-black">{activeDestination} <span className="ml-3 text-white/65">{lightboxIndex + 1} / {selectedImages.length}</span></p>
-            <button type="button" onClick={() => setLightboxIndex(null)} className="rounded-full bg-white/10 p-3 hover:bg-white/20" aria-label="Close photo viewer"><X /></button>
+        <dialog ref={viewerRef} onCancel={() => setLightboxIndex(null)} onKeyDown={(event) => {
+          if (event.key === "ArrowLeft") { event.preventDefault(); moveLightbox(-1); }
+          if (event.key === "ArrowRight") { event.preventDefault(); moveLightbox(1); }
+        }} aria-label={`${activeDestination} photo viewer`} className="fixed inset-0 m-0 h-[100dvh] max-h-none w-full max-w-none overflow-hidden border-0 bg-[#071711] p-0 text-white backdrop:bg-black/80">
+          <div className="flex h-full min-h-0 flex-col">
+            <header className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-6">
+              <div className="min-w-0"><p className="truncate font-bold">{activeDestination}</p><p className="mt-1 text-xs text-white/60" aria-live="polite">Photo {lightboxIndex + 1} of {selectedImages.length}</p></div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button type="button" aria-pressed={showPhotoGrid} onClick={() => setShowPhotoGrid(!showPhotoGrid)} className="inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-2 text-sm hover:bg-white/10"><Images className="h-4 w-4" />{showPhotoGrid ? "View photo" : "All photos"}</button>
+                <button autoFocus type="button" onClick={() => setLightboxIndex(null)} className="rounded-full bg-white/10 p-3 hover:bg-white/20" aria-label="Close photo viewer"><X className="h-5 w-5" /></button>
+              </div>
+            </header>
+            <div className={`grid min-h-0 flex-1 ${showPhotoGrid ? "grid-cols-1" : "grid-cols-1"}`}>
+              {!showPhotoGrid ? <div className="flex min-h-0 min-w-0 flex-col">
+                <div ref={wheelStageRef} className="album-wheel" aria-roledescription="carousel" aria-label="Album photos" onTouchStart={(event) => { touchStartX.current = event.touches[0].clientX; }} onTouchEnd={handleTouchEnd}>
+                  <div className="album-wheel-glow" aria-hidden="true" />
+                  {selectedImages.map((photo, index) => {
+                    let offset = index - lightboxIndex;
+                    if (offset > selectedImages.length / 2) offset -= selectedImages.length;
+                    if (offset < -selectedImages.length / 2) offset += selectedImages.length;
+                    const distance = Math.abs(offset);
+                    const angle = offset * 28;
+                    return <button key={photo.id} type="button" tabIndex={distance <= 1 ? 0 : -1} aria-hidden={distance > 2 ? true : undefined} aria-label={`View photo ${index + 1} of ${selectedImages.length}`} aria-current={offset === 0 ? "true" : undefined} onClick={() => setLightboxIndex(index)} className="album-wheel-card" style={{
+                      "--angle": `${angle}deg`,
+                      "--scale": offset === 0 ? 1 : 0.9,
+                      "--blur": `${Math.min(distance * 2, 6)}px`,
+                      "--gray": Math.min(distance * 0.65, 1),
+                      opacity: distance > 2 ? 0 : offset === 0 ? 1 : distance === 1 ? 0.55 : 0.16,
+                      zIndex: 10 - Math.min(distance, 10),
+                      pointerEvents: distance > 2 ? "none" : "auto"
+                    } as CSSProperties}><img src={photo.image} loading={distance < 2 ? "eager" : "lazy"} alt={photo.title || `${activeDestination} photo ${index + 1}`} /></button>;
+                  })}
+                  {selectedImages.length > 1 ? <div className="album-wheel-controls"><button type="button" onClick={() => moveLightbox(-1)} aria-label="Previous photo"><ChevronLeft /></button><span aria-hidden="true">{String(lightboxIndex + 1).padStart(2, "0")} / {selectedImages.length}</span><button type="button" onClick={() => moveLightbox(1)} aria-label="Next photo"><ChevronRight /></button></div> : null}
+                </div>
+                <footer className="shrink-0 px-4 pb-4 text-center text-xs text-white/60">Scroll, swipe, or use the arrows to explore your album.</footer>
+              </div> : null}
+              <aside aria-label="Album photos" className={`${showPhotoGrid ? "block" : "hidden"} min-h-0 overflow-y-auto overscroll-contain border-l border-white/10 bg-white/[0.03] p-4`}>
+                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-white/60">Explore the album / {selectedImages.length} photos</p>
+                <div className={`grid gap-2 ${showPhotoGrid ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" : "grid-cols-2"}`}>
+                  {selectedImages.map((photo, index) => <button key={photo.id} type="button" aria-label={`View photo ${index + 1}`} aria-current={index === lightboxIndex ? "true" : undefined} onClick={() => { setLightboxIndex(index); setShowPhotoGrid(false); }} className={`relative aspect-[4/3] overflow-hidden rounded-lg border-2 transition hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${index === lightboxIndex ? "border-[#F8A900]" : "border-transparent opacity-70"}`}><img loading="lazy" src={photo.image} alt="" className="h-full w-full object-cover" /><span className="absolute bottom-1 right-1 rounded bg-black/60 px-1.5 text-xs">{index + 1}</span></button>)}
+                </div>
+              </aside>
+            </div>
           </div>
-          <div className="relative flex min-h-0 flex-1 items-center justify-center px-14 py-4">
-            <img src={selectedImages[lightboxIndex].image} alt={`${activeDestination} photo ${lightboxIndex + 1}`} className="max-h-full max-w-full object-contain" />
-            {selectedImages.length > 1 ? <><button type="button" onClick={() => moveLightbox(-1)} className="absolute left-2 rounded-full bg-white/15 p-3 hover:bg-white/25 sm:left-6" aria-label="Previous photo"><ChevronLeft className="h-7 w-7" /></button><button type="button" onClick={() => moveLightbox(1)} className="absolute right-2 rounded-full bg-white/15 p-3 hover:bg-white/25 sm:right-6" aria-label="Next photo"><ChevronRight className="h-7 w-7" /></button></> : null}
-          </div>
-          <div className="flex gap-2 overflow-x-auto px-4 pb-4 sm:px-6">
-            {selectedImages.map((image, index) => <button key={image.id} type="button" onClick={() => setLightboxIndex(index)} className={`h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 ${index === lightboxIndex ? "border-[#F8A900]" : "border-transparent opacity-60"}`}><img loading="lazy" decoding="async" src={image.image} alt="" className="h-full w-full object-cover" /></button>)}
-          </div>
-        </div>
+        </dialog>
       ) : null}
     </section>
   );

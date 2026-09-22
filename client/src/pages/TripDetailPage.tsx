@@ -1,3 +1,5 @@
+import { useRef, useState } from "react";
+import { bookingUnavailable } from "../bookingRules";
 import {
   ArrowLeft,
   CalendarDays,
@@ -48,8 +50,12 @@ export function TripDetailPage({
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:px-8">
         <main className="min-w-0 space-y-8">
           <RouteSnapshot trip={trip} />
+          <section className="rounded-xl border border-[#114F3C]/15 bg-surface p-5 dark:border-white/15 dark:bg-[#10241C]">
+            <h2 className="text-xl font-bold text-[#114F3C] dark:text-[#F8A900]">Meeting point and times</h2>
+            <dl className="mt-4 grid gap-4 sm:grid-cols-2"><div><dt className="text-sm text-stone-500 dark:text-stone-400">Meet at</dt><dd className="font-semibold">{trip.meetingPoint || "Our team will confirm the meeting point."}</dd></div><div><dt className="text-sm text-stone-500 dark:text-stone-400">Departure</dt><dd className="font-semibold">{formatDate(trip.date)} / {trip.departureTime || "Time to be confirmed"}</dd></div><div><dt className="text-sm text-stone-500 dark:text-stone-400">Return</dt><dd className="font-semibold">{trip.returnDate ? formatDate(trip.returnDate) : formatDate(trip.date)} / {trip.returnTime || "Time to be confirmed"}</dd></div></dl>
+          </section>
           <ItinerarySection trip={trip} />
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 xl:grid-cols-3">
             <InfoPanel title="Included" icon="check" items={trip.includes} />
             <InfoPanel title="Not included" icon="minus" items={trip.notIncluded} />
             <InfoPanel title="What to bring" icon="spark" items={trip.whatToBring} />
@@ -58,7 +64,7 @@ export function TripDetailPage({
         </main>
 
         <aside className="lg:sticky lg:top-24 lg:h-fit">
-          <BookingPanel trip={trip} bookingForm={bookingForm} setBookingForm={setBookingForm} submitBooking={submitBooking} />
+          <BookingPanel key={trip.id} trip={trip} bookingForm={bookingForm} setBookingForm={setBookingForm} submitBooking={submitBooking} />
         </aside>
       </div>
 
@@ -94,29 +100,31 @@ function TripHero({ trip, galleryImages, onBack }: { trip: Trip; galleryImages: 
       <img className="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" src={trip.coverImage} alt={trip.destination} />
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(115deg,#071711_0%,rgba(7,23,17,0.95)_38%,rgba(17,79,60,0.7)_100%)]" />
 
-      <div className="mx-auto grid min-h-[660px] max-w-7xl items-center gap-10 lg:grid-cols-[0.94fr_1.06fr]">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.94fr_1.06fr]">
         <div>
           <button type="button" onClick={onBack} className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white backdrop-blur transition hover:bg-white/20">
             <ArrowLeft className="h-4 w-4" />
             Back to trips
           </button>
 
-          <div className="mt-12">
+          <div className="mt-6">
             <p className="inline-flex rounded-full bg-[#F8A900] px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#114F3C]">
               {trip.destination}
             </p>
-            <h1 className="mt-5 max-w-4xl text-5xl font-black leading-[0.98] sm:text-6xl lg:text-7xl">{trip.title}</h1>
+            <h1 className="mt-5 max-w-4xl text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">{trip.title}</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/78">{trip.description}</p>
           </div>
 
           <div className="mt-9 grid max-w-3xl gap-3 sm:grid-cols-2">
             <HeroFact Icon={CalendarDays} label="Trip date" value={formatDate(trip.date)} />
-            <HeroFact Icon={Ticket} label="Price" value={formatPrice(trip.price)} />
+            <HeroFact Icon={Ticket} label="Per person" value={formatPrice(trip.price)} />
+            <HeroFact Icon={Gauge} label="Difficulty" value={trip.difficulty} />
+            <HeroFact Icon={Users} label="Availability" value={bookingUnavailable(trip) ? "Booking closed" : `${trip.availableSeats} seats`} />
           </div>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[1fr_180px]">
-          <div className="relative min-h-[500px] overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 shadow-2xl shadow-black/35">
+          <div className="relative min-h-[260px] lg:min-h-[380px] overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 shadow-2xl shadow-black/35">
             <img className="absolute inset-0 h-full w-full object-cover" src={trip.coverImage} alt={trip.title} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
             <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -145,7 +153,7 @@ function RouteSnapshot({ trip }: { trip: Trip }) {
   const facts = [
     { label: "Duration", value: trip.duration, Icon: Clock },
     { label: "Difficulty", value: trip.difficulty, Icon: Gauge },
-    { label: "Open seats", value: `${trip.availableSeats} left`, Icon: Users },
+    { label: "Open seats", value: bookingUnavailable(trip) ? "Booking closed" : `${trip.availableSeats} left`, Icon: Users },
     { label: trip.duration === "Day Trip" ? "Departure" : "Return", value: trip.duration === "Day Trip" ? trip.departureTime : returnDetails, Icon: Compass }
   ];
 
@@ -221,8 +229,13 @@ function BookingPanel({
   setBookingForm: (form: BookingForm) => void;
   submitBooking: BookingSubmitHandler;
 }) {
+  const [pending, setPending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const submitting = useRef(false);
+  const unavailable = bookingUnavailable(trip);
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-[#114F3C]/10 bg-surface shadow-2xl shadow-[#114F3C]/12 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/30">
+    <section id="booking" className="scroll-mt-28 overflow-hidden rounded-[1.5rem] border border-[#114F3C]/10 bg-surface shadow-2xl shadow-[#114F3C]/12 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/30">
       <div className="bg-[#114F3C] p-6 text-white">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Book this trip</p>
         <div className="mt-4 flex items-end justify-between gap-4">
@@ -230,23 +243,34 @@ function BookingPanel({
             <h2 className="text-4xl font-black">{formatPrice(trip.price)}</h2>
             <p className="mt-1 text-sm font-bold text-white/60">per person</p>
           </div>
-          <p className="rounded-lg bg-white/12 px-3 py-2 text-sm font-black text-white">{trip.availableSeats} seats</p>
+          <p className="rounded-lg bg-white/12 px-3 py-2 text-sm font-black text-white">{unavailable ? "Booking closed" : `${trip.availableSeats} seats`}</p>
         </div>
       </div>
 
-      <form className="space-y-3 p-5" onSubmit={submitBooking}>
-        <input required className={inputClass} placeholder="Full name" value={bookingForm.customerName} onChange={(event) => setBookingForm({ ...bookingForm, customerName: event.target.value })} />
-        <input required className={inputClass} placeholder="Phone / WhatsApp" value={bookingForm.phone} onChange={(event) => setBookingForm({ ...bookingForm, phone: event.target.value })} />
-        <input required min="1" max={trip.availableSeats} type="number" className={inputClass} placeholder="Number of people" value={bookingForm.numberOfPeople} onChange={(event) => setBookingForm({ ...bookingForm, numberOfPeople: event.target.value })} />
-        <textarea className={`${inputClass} min-h-28`} placeholder="Message" value={bookingForm.message} onChange={(event) => setBookingForm({ ...bookingForm, message: event.target.value })} />
+      {unavailable ? <p role="status" className="p-5 text-sm leading-6">{unavailable}</p> : sent ? <div role="status" className="p-5"><h3 className="font-bold">Request received</h3><p className="mt-2 text-sm leading-6">Your seats are not confirmed yet. Our team will contact you to confirm availability and arrangements.</p><a className="mt-4 inline-block font-bold text-[#F54C0D] underline" href={`https://wa.me/${whatsappNumber}`}>Contact us on WhatsApp</a></div> : <form className="space-y-3 p-5" onSubmit={async (event) => {
+        event.preventDefault();
+        if (submitting.current) return;
+        submitting.current = true; setPending(true); setFailed(false);
+        try { const saved = await submitBooking(event); setSent(saved); setFailed(!saved); }
+        catch { setFailed(true); }
+        finally { submitting.current = false; setPending(false); }
+      }}>
+        <fieldset disabled={pending} className="space-y-3 disabled:opacity-60">
+        <label className="block text-sm font-semibold">Full name<span className="mt-1 block"><input minLength={2} maxLength={100} autoComplete="name" required className={inputClass} placeholder="Full name" value={bookingForm.customerName} onChange={(event) => setBookingForm({ ...bookingForm, customerName: event.target.value })} /></span></label>
+        <label className="block text-sm font-semibold">Phone / WhatsApp<span className="mt-1 block"><input type="tel" minLength={7} maxLength={30} autoComplete="tel" required className={inputClass} placeholder="Phone / WhatsApp" value={bookingForm.phone} onChange={(event) => setBookingForm({ ...bookingForm, phone: event.target.value })} /></span></label>
+        <label className="block text-sm font-semibold">Number of people<span className="mt-1 block"><input required min="1" max={Math.min(100, trip.availableSeats)} step="1" type="number" className={inputClass} placeholder="Number of people" value={bookingForm.numberOfPeople} onChange={(event) => setBookingForm({ ...bookingForm, numberOfPeople: event.target.value })} /></span></label>
+        <label className="block text-sm font-semibold">Message (optional)<span className="mt-1 block"><textarea maxLength={1000} className={`${inputClass} min-h-28`} placeholder="Message" value={bookingForm.message} onChange={(event) => setBookingForm({ ...bookingForm, message: event.target.value })} /></span></label>
         <button type="submit" className={`w-full rounded-lg px-5 py-4 text-base font-black transition ${yellowButton}`}>
-          Send Booking
+          {pending ? "Sending request..." : "Request a booking"}
         </button>
+        <p className="text-xs leading-5 text-stone-600 dark:text-stone-300">Sending a request does not confirm your seats. Our team will contact you to confirm availability and booking details.</p>
         <a className={`flex items-center justify-center gap-2 rounded-lg px-5 py-4 text-base font-black transition ${orangeButton}`} href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Ermija Hiking, I want to book ${trip.title}.`)}`}>
           <MessageCircle className="h-5 w-5" />
           WhatsApp Now
         </a>
-      </form>
+        </fieldset>
+        {failed ? <p role="alert" className="text-sm text-red-600 dark:text-red-300">Your request could not be confirmed as received. Check the notification for details before trying again.</p> : null}
+      </form>}
     </section>
   );
 }
@@ -288,9 +312,9 @@ function MobileBookingBar({ trip }: { trip: Trip }) {
           <p className="truncate text-sm font-black text-[#114F3C] dark:text-[#F8A900]">{trip.title}</p>
           <p className="text-xs font-bold text-stone-500 dark:text-stone-400">{formatPrice(trip.price)} per person</p>
         </div>
-        <a className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${orangeButton}`} href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello Ermija Hiking, I want to book ${trip.title}.`)}`}>
+        <a className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${orangeButton}`} href="#booking">
           <MessageCircle className="h-4 w-4" />
-          WhatsApp
+          {bookingUnavailable(trip) ? "Availability" : "Request a booking"}
         </a>
       </div>
     </div>

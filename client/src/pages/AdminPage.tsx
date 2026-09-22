@@ -1,8 +1,9 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { CalendarDays, CheckCircle2, Edit3, ImagePlus, LayoutDashboard, LogIn, LogOut, Mail, MessageCircle, Mountain, Phone, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
+import { StandaloneGalleryEditor } from "../components/StandaloneGalleryEditor";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { CalendarDays, CheckCircle2, Edit3, ImagePlus, LogIn, LogOut, Mail, MessageCircle, Mountain, Phone, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
 import { orangeButton, whatsappNumber, yellowButton } from "../constants";
 import { uploadTripImage } from "../services/api";
-import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, ContactMessage, GalleryHighlight, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, ContactMessage, GalleryHighlight, GalleryImage, Trip, TripStatus } from "../types";
 import { formatDate, formatPrice, splitCommaList } from "../utils";
 
 const tripFilters = ["All", "Published", "Draft"] as const;
@@ -10,12 +11,13 @@ const bookingStatuses = ["New", "Confirmed", "Cancelled"];
 const messageStatuses = ["New", "Replied"];
 const adminSections = [
   { id: "trips", label: "Trips", text: "Create and manage packages.", icon: Mountain },
-  { id: "gallery", label: "Media", text: "Organize gallery images.", icon: ImagePlus },
-  { id: "operations", label: "Operations", text: "Bookings and messages.", icon: LayoutDashboard }
+  { id: "bookings", label: "Bookings", text: "Review and confirm requests", icon: Users },
+  { id: "messages", label: "Messages", text: "Read and reply to guests", icon: Mail },
+  { id: "gallery", label: "Gallery", text: "Manage photos and highlights", icon: ImagePlus }
 ] as const;
 
 const inputClass =
-  "rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-stone-900 outline-none transition focus:border-[#114F3C] focus:ring-4 focus:ring-[#114F3C]/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-stone-500";
+  "rounded-lg border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-stone-900 outline-none transition focus:border-[#114F3C] focus:ring-4 focus:ring-[#114F3C]/10 dark:border-white/10 dark:bg-[#183329] dark:text-white dark:placeholder:text-stone-400 dark:[color-scheme:dark]";
 
 function tripToForm(trip: Trip): AdminTripForm {
   const defaultReturnDate = new Date(`${trip.date}T00:00:00`);
@@ -62,6 +64,8 @@ export function AdminPage({
   deleteAdminTrip,
   updateBookingStatus,
   updateMessageStatus,
+  standalonePhotos,
+  onStandalonePhotosChange,
   galleryHighlight,
   updateGalleryHighlight,
   bookings,
@@ -80,8 +84,10 @@ export function AdminPage({
   updateTripStatus: (trip: Trip, status: TripStatus) => void;
   updateAdminTrip: (trip: Trip, form: AdminTripForm) => void;
   deleteAdminTrip: (trip: Trip) => void;
-  updateBookingStatus: (booking: Booking, status: string) => void;
+  updateBookingStatus: (booking: Booking, status: string) => Promise<boolean>;
   updateMessageStatus: (message: ContactMessage, status: string) => void;
+  standalonePhotos: GalleryImage[];
+  onStandalonePhotosChange: (photos: GalleryImage[]) => void;
   galleryHighlight: GalleryHighlight;
   updateGalleryHighlight: (highlight: GalleryHighlight) => void;
   bookings: Booking[];
@@ -91,6 +97,7 @@ export function AdminPage({
   const [tripFilter, setTripFilter] = useState<(typeof tripFilters)[number]>("All");
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [editForm, setEditForm] = useState<AdminTripForm | null>(null);
+  const [bookingPage, setBookingPage] = useState(1);
   const [bookingQuery, setBookingQuery] = useState("");
   const [bookingFilter, setBookingFilter] = useState("All");
   const [messageQuery, setMessageQuery] = useState("");
@@ -111,11 +118,6 @@ export function AdminPage({
 
   const confirmedBookings = bookings.filter((booking) => booking.status === "Confirmed").length;
   const unrepliedMessages = messages.filter((message) => message.status === "New").length;
-  const bookingValue = bookings.reduce((total, booking) => {
-    const trip = trips.find((item) => item.id === booking.tripId);
-    return total + (trip ? trip.price * booking.numberOfPeople : 0);
-  }, 0);
-
   const filteredBookings = useMemo(
     () =>
       bookings.filter((booking) => {
@@ -127,6 +129,10 @@ export function AdminPage({
       }),
     [bookingFilter, bookingQuery, bookings, trips]
   );
+
+  const bookingPageCount = Math.max(1, Math.ceil(filteredBookings.length / 20));
+  const currentBookingPage = Math.min(bookingPage, bookingPageCount);
+  const visibleBookings = filteredBookings.slice((currentBookingPage - 1) * 20, currentBookingPage * 20);
 
   const filteredMessages = useMemo(
     () =>
@@ -147,6 +153,33 @@ export function AdminPage({
       })),
     [trips]
   );
+
+  const sectionStats = {
+    trips: [
+      { label: "Total trips", value: trips.length, icon: Mountain },
+      { label: "Published trips", value: trips.filter((trip) => trip.status === "Published").length, icon: CheckCircle2 },
+      { label: "Draft trips", value: trips.filter((trip) => trip.status === "Draft").length, icon: Edit3 },
+      { label: "Available seats (published)", value: trips.filter((trip) => trip.status === "Published").reduce((total, trip) => total + trip.availableSeats, 0), icon: Users }
+    ],
+    bookings: [
+      { label: "Total bookings", value: bookings.length, icon: Users },
+      { label: "New bookings", value: bookings.filter((booking) => booking.status === "New").length, icon: CalendarDays },
+      { label: "Confirmed bookings", value: confirmedBookings, icon: CheckCircle2 },
+      { label: "Cancelled bookings", value: bookings.filter((booking) => booking.status === "Cancelled").length, icon: X }
+    ],
+    messages: [
+      { label: "Total messages", value: messages.length, icon: Mail },
+      { label: "Awaiting reply", value: unrepliedMessages, icon: MessageCircle },
+      { label: "Replied messages", value: messages.filter((message) => message.status === "Replied").length, icon: CheckCircle2 },
+      { label: "Unique phone numbers", value: new Set(messages.map((message) => message.phone.trim()).filter(Boolean)).size, icon: Phone }
+    ],
+    gallery: [
+      { label: "Trips with media", value: mediaTrips.filter((item) => item.images.length > 0).length, icon: Mountain },
+      { label: "Cover images", value: trips.filter((trip) => trip.coverImage).length, icon: ImagePlus },
+      { label: "Gallery images", value: trips.reduce((total, trip) => total + trip.galleryImages.filter(Boolean).length, 0), icon: ImagePlus },
+      { label: "Independent photos", value: standalonePhotos.length, icon: ImagePlus }
+    ]
+  }[activeSection];
 
   const beginEdit = (trip: Trip) => {
     setEditingTrip(trip);
@@ -199,12 +232,12 @@ export function AdminPage({
   return (
     <section className="min-h-screen bg-canvas px-4 py-6 transition-colors dark:bg-[#071711] sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1440px]">
-        <header className="mb-6 overflow-hidden rounded-2xl bg-[#114F3C] p-6 text-white shadow-xl shadow-[#114F3C]/10 sm:p-7">
+        <header className="mb-4 overflow-hidden rounded-xl bg-[#114F3C] p-4 text-white">
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[#F8A900]">Ermija administration</p>
-            <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">Operations dashboard</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">Manage trips, media and customer activity from one workspace.</p>
+            <h1 className="mt-1 text-2xl font-black leading-tight">Admin dashboard</h1>
+
           </div>
           <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/10 p-3 backdrop-blur">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#F8A900] font-black text-[#114F3C]">{adminEmail.slice(0, 1).toUpperCase()}</div>
@@ -219,32 +252,37 @@ export function AdminPage({
           </div>
         </header>
 
-        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <AdminStat label="Total trips" value={trips.length} icon={<Mountain className="h-5 w-5" />} />
-          <AdminStat label="Published" value={trips.filter((trip) => trip.status === "Published").length} icon={<CheckCircle2 className="h-5 w-5" />} />
-          <AdminStat label="Confirmed" value={confirmedBookings} icon={<Users className="h-5 w-5" />} />
-          <AdminStat label="New messages" value={unrepliedMessages} icon={<Mail className="h-5 w-5" />} />
-        </div>
-
-        <nav className="mb-6 flex gap-2 overflow-x-auto rounded-xl border border-[#114F3C]/10 bg-surface p-2 shadow-sm dark:border-white/10 dark:bg-[#10241C]">
+        <nav aria-label="Admin sections" className="mb-4 grid grid-cols-2 gap-2 rounded-xl border border-stone-200 bg-white p-2 dark:border-white/15 dark:bg-[#10241C] lg:grid-cols-4">
           {adminSections.map((section) => {
             const Icon = section.icon;
+            const selected = activeSection === section.id;
+            const count = section.id === "bookings" ? bookings.filter((booking) => booking.status === "New").length : section.id === "messages" ? unrepliedMessages : null;
             return (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => setActiveSection(section.id)}
-              className={`flex min-w-44 flex-1 items-center gap-3 rounded-lg px-4 py-3 text-left transition ${
-                activeSection === section.id
-                  ? "bg-[#114F3C] text-white shadow-md shadow-[#114F3C]/15"
-                  : "text-stone-600 hover:bg-stone-50 dark:text-stone-300 dark:hover:bg-white/5"
-              }`}
-            >
-              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg ${activeSection === section.id ? "bg-white/10 text-[#F8A900]" : "bg-stone-100 text-[#114F3C] dark:bg-white/10 dark:text-[#F8A900]"}`}><Icon className="h-5 w-5" /></span>
-              <span><span className="block text-sm font-black">{section.label}</span><span className={`mt-0.5 block text-xs font-semibold ${activeSection === section.id ? "text-white/65" : "text-stone-400"}`}>{section.text}</span></span>
-            </button>
-          );})}
+              <button
+                key={section.id}
+                type="button"
+                aria-current={selected ? "page" : undefined}
+                onClick={() => setActiveSection(section.id)}
+                className={`flex min-w-0 items-center gap-3 rounded-xl border-2 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#10241C] sm:px-4 sm:py-2 ${selected ? "border-[#F8A900] bg-[#F8A900] text-[#092F23] shadow-sm" : "border-transparent text-stone-700 hover:border-stone-200 hover:bg-stone-50 dark:text-stone-200 dark:hover:border-white/20 dark:hover:bg-white/5"}`}
+              >
+                <Icon className="hidden h-5 w-5 shrink-0 sm:block" />
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-center gap-2 text-base font-bold">
+                    {section.label}
+                    {count !== null && count > 0 ? <span className={`rounded-full px-2 py-0.5 text-xs ${selected ? "bg-[#114F3C] text-white" : "bg-[#F8A900] text-[#092F23]"}`}>{count} new</span> : null}
+                  </span>
+
+                </span>
+              </button>
+            );
+          })}
         </nav>
+
+        <div aria-label={`${adminSections.find((section) => section.id === activeSection)?.label} summary`} className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {sectionStats.map(({ label, value, icon: Icon }) => (
+            <AdminStat key={label} label={label} value={value} icon={<Icon className="h-5 w-5" />} />
+          ))}
+        </div>
 
         {activeSection === "trips" ? (
           <div className="space-y-4">
@@ -254,7 +292,7 @@ export function AdminPage({
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-[#F54C0D]">Trip inventory</p>
                     <h2 className="mt-1 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">Search and manage packages</h2>
                   </div>
-                  <div className="flex gap-2"><select className={inputClass} value={tripFilter} onChange={(event) => setTripFilter(event.target.value as (typeof tripFilters)[number])}>
+                  <div className="flex gap-2"><select aria-label="Filter trips by status" className={inputClass} value={tripFilter} onChange={(event) => setTripFilter(event.target.value as (typeof tripFilters)[number])}>
                     {tripFilters.map((filter) => (
                       <option key={filter}>{filter}</option>
                     ))}
@@ -278,6 +316,9 @@ export function AdminPage({
 
         {activeSection === "gallery" ? (
           <div className="space-y-6">
+            <AdminInbox title="Independent gallery photos">
+              <StandaloneGalleryEditor photos={standalonePhotos} onChange={onStandalonePhotosChange} />
+            </AdminInbox>
             <AdminInbox title="Circular gallery highlight">
               <GalleryHighlightEditor highlight={galleryHighlight} onSave={updateGalleryHighlight} />
             </AdminInbox>
@@ -318,28 +359,23 @@ export function AdminPage({
           </div>
         ) : null}
 
-        {activeSection === "operations" ? (
-          <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
-            <AdminInbox title="Booking operations">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <MiniStat label="Total requests" value={bookings.length} />
-                <MiniStat label="Confirmed" value={confirmedBookings} />
-                <MiniStat label="Possible value" value={formatPrice(bookingValue)} />
-              </div>
+        {activeSection === "bookings" ? (
+          <div>
+            <AdminInbox title="Bookings">
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <label className="relative flex-1">
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
-                  <input className={`${inputClass} w-full pl-12`} value={bookingQuery} onChange={(event) => setBookingQuery(event.target.value)} placeholder="Search guest, phone, trip..." />
+                  <input className={`${inputClass} w-full pl-12`} value={bookingQuery} onChange={(event) => { setBookingQuery(event.target.value); setBookingPage(1); }} placeholder="Search guest, phone, trip..." />
                 </label>
-                <select className={inputClass} value={bookingFilter} onChange={(event) => setBookingFilter(event.target.value)}>
+                <select aria-label="Filter bookings by status" className={inputClass} value={bookingFilter} onChange={(event) => { setBookingFilter(event.target.value); setBookingPage(1); }}>
                   {["All", ...bookingStatuses].map((status) => (
                     <option key={status}>{status}</option>
                   ))}
                 </select>
               </div>
-              <div className="mt-5 space-y-4">
+              <div className="mt-4 space-y-2">
                 {filteredBookings.length ? (
-                  filteredBookings.map((booking) => {
+                  visibleBookings.map((booking) => {
                     const trip = trips.find((item) => item.id === booking.tripId);
                     return (
                       <BookingAdminCard key={booking.id} booking={booking} trip={trip} onStatusChange={(status) => updateBookingStatus(booking, status)} />
@@ -349,15 +385,28 @@ export function AdminPage({
                   <EmptyAdminState text="No bookings match the current filters." />
                 )}
               </div>
+            {filteredBookings.length > 0 ? <nav aria-label="Booking pages" className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-3 text-sm dark:border-white/15">
+                <p role="status">Showing {(currentBookingPage - 1) * 20 + 1}-{Math.min(currentBookingPage * 20, filteredBookings.length)} of {filteredBookings.length} requests</p>
+                <div className="flex items-center gap-3">
+                  <button type="button" disabled={currentBookingPage === 1} onClick={() => setBookingPage(currentBookingPage - 1)} className="rounded-lg border border-stone-300 px-3 py-2 disabled:opacity-40 dark:border-white/20">Previous</button>
+                  <span>Page {currentBookingPage} of {bookingPageCount}</span>
+                  <button type="button" disabled={currentBookingPage === bookingPageCount} onClick={() => setBookingPage(currentBookingPage + 1)} className="rounded-lg border border-stone-300 px-3 py-2 disabled:opacity-40 dark:border-white/20">Next</button>
+                </div>
+              </nav> : null}
             </AdminInbox>
 
-            <AdminInbox title="Contact inbox">
+          </div>
+        ) : null}
+
+        {activeSection === "messages" ? (
+          <div>
+            <AdminInbox title="Messages">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <label className="relative flex-1">
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
                   <input className={`${inputClass} w-full pl-12`} value={messageQuery} onChange={(event) => setMessageQuery(event.target.value)} placeholder="Search messages..." />
                 </label>
-                <select className={inputClass} value={messageFilter} onChange={(event) => setMessageFilter(event.target.value)}>
+                <select aria-label="Filter messages by status" className={inputClass} value={messageFilter} onChange={(event) => setMessageFilter(event.target.value)}>
                   {["All", ...messageStatuses].map((status) => (
                     <option key={status}>{status}</option>
                   ))}
@@ -432,8 +481,22 @@ function BookingAdminCard({
 }: {
   booking: Booking;
   trip?: Trip;
-  onStatusChange: (status: string) => void;
+  onStatusChange: (status: string) => Promise<boolean>;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState("");
+  const [statusError, setStatusError] = useState("");
+  const statusPending = useRef(false);
+  async function changeStatus(status: string) {
+    if (statusPending.current) return;
+    statusPending.current = true; setSaving(true); setStatusError(""); setNotificationStatus("");
+    try {
+      if (await onStatusChange(status)) setNotificationStatus(status);
+      else setStatusError("Status was not updated. The guest has not been notified.");
+    } catch { setStatusError("Unable to update the booking. Please try again."); }
+    finally { statusPending.current = false; setSaving(false); }
+  }
   const total = trip ? trip.price * booking.numberOfPeople : 0;
   const phoneDigits = booking.phone.replace(/\D/g, "");
   const whatsappPhone = phoneDigits.startsWith("251") ? phoneDigits : phoneDigits.startsWith("0") ? `251${phoneDigits.slice(1)}` : phoneDigits.length === 9 ? `251${phoneDigits}` : (phoneDigits || whatsappNumber);
@@ -449,54 +512,48 @@ function BookingAdminCard({
   };
 
   return (
-    <article className="overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
-      <div className="grid gap-4 p-4 md:grid-cols-[120px_1fr]">
-        {trip ? (
-          <img className="h-32 w-full rounded-lg object-cover md:h-full" src={trip.coverImage} alt={trip.title} />
-        ) : (
-          <div className="grid h-32 place-items-center rounded-lg bg-[#FCE4B4] text-sm font-black text-[#114F3C] md:h-full">Trip</div>
-        )}
-        <div>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-black text-[#114F3C] dark:text-[#F8A900]">{booking.customerName}</h3>
-              <p className="mt-1 text-sm font-semibold text-stone-600 dark:text-stone-300">{trip?.title || booking.tripId}</p>
+    <article className="overflow-hidden rounded-xl border border-[#B5CCBF] bg-[#E7EEE4] shadow-sm dark:border-white/15 dark:bg-white/5">
+      <div className="grid items-center gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_auto_auto_auto]">
+        <div className="min-w-0">
+          <h3 className="font-bold text-[#114F3C] dark:text-[#F8A900]">{booking.customerName}</h3>
+          <p className="truncate text-sm text-stone-600 dark:text-stone-300" title={tripName}>{tripName}</p>
+        </div>
+        <div className="text-sm text-stone-600 dark:text-stone-300">
+          <p>{trip ? formatDate(trip.date) : "Trip date unavailable"}</p>
+          <p>{booking.numberOfPeople} {booking.numberOfPeople === 1 ? "person" : "people"}</p>
+        </div>
+        <p className="text-sm font-bold text-[#114F3C] dark:text-[#F8A900]">{total ? formatPrice(total) : "Value unavailable"}</p>
+        <span className={`w-fit rounded-full px-3 py-1 text-xs font-bold ${booking.status === "Confirmed" ? "bg-green-100 text-green-900" : booking.status === "Cancelled" ? "bg-red-100 text-red-900" : "bg-amber-100 text-amber-950"}`}>{booking.status}</span>
+        <button type="button" aria-expanded={expanded} aria-controls={`booking-${booking.id}`} onClick={() => setExpanded(!expanded)} className="w-fit rounded-lg border border-[#114F3C]/30 px-3 py-2 text-sm font-bold text-[#114F3C] hover:bg-white/60 focus-visible:ring-2 focus-visible:ring-[#114F3C] dark:border-white/25 dark:text-white dark:hover:bg-white/10">{expanded ? "Hide details" : "View details"}</button>
+      </div>
+      {expanded ? <div id={`booking-${booking.id}`} className="border-t border-[#B5CCBF] p-4 dark:border-white/15">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {trip?.coverImage ? <img src={trip.coverImage} alt="" className="h-12 w-12 rounded-lg object-cover" /> : null}
+              <div><p className="text-sm font-semibold">{tripName}</p><p className="text-sm">Phone: {booking.phone}</p></div>
             </div>
-            <StatusSelect value={booking.status} options={bookingStatuses} onChange={onStatusChange} />
+            <label className="flex items-center gap-2 text-sm">Status <StatusSelect value={booking.status} options={bookingStatuses} onChange={changeStatus} disabled={saving} /></label>
           </div>
-          <div className="mt-4 grid gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300 sm:grid-cols-2">
-            <p className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-[#F54C0D]" />
-              {booking.phone}
-            </p>
-            <p className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-[#F54C0D]" />
-              {booking.numberOfPeople} people
-            </p>
-            <p className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-[#F54C0D]" />
-              {trip ? formatDate(trip.date) : "Trip date unavailable"}
-            </p>
-            <p className="font-black text-[#114F3C] dark:text-[#F8A900]">{total ? formatPrice(total) : "Value unavailable"}</p>
-          </div>
-          <p className="mt-3 rounded-lg bg-stone-50 p-3 text-sm leading-6 text-stone-700 dark:bg-black/15 dark:text-stone-300">{booking.message || "No guest message."}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <p className="mt-4 rounded-lg border border-[#B5CCBF] bg-white p-3 text-sm leading-6 text-stone-700 dark:border-white/10 dark:bg-black/15 dark:text-stone-300"><span className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#114F3C] dark:text-stone-300">Guest message</span>{booking.message || "No guest message."}</p>
+          {saving ? <p role="status" className="mt-3 text-sm">Saving booking status...</p> : null}
+          {statusError ? <p role="alert" className="mt-3 text-sm text-red-700 dark:text-red-300">{statusError}</p> : null}
+          {notificationStatus && notificationStatus === booking.status ? <div role="status" className="mt-3 rounded-lg bg-white p-3 text-sm dark:bg-white/10"><p>Status saved. Review and send the message to notify the guest.</p><a className="mt-2 inline-block font-bold underline" href={whatsappUrl(notificationStatus)} target="_blank" rel="noopener noreferrer">Notify guest on WhatsApp</a></div> : null}
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-[#B5CCBF] pt-4 dark:border-white/15">
             {booking.status !== "Confirmed" ? (
-              <a className="inline-flex items-center gap-2 rounded-lg bg-[#114F3C] px-4 py-3 text-sm font-black text-white transition hover:bg-[#0b392b]" href={whatsappUrl("Confirmed")} target="_blank" rel="noreferrer" onClick={() => onStatusChange("Confirmed")}>
-                <CheckCircle2 className="h-4 w-4" /> Confirm & notify
-              </a>
+              <button className="inline-flex items-center gap-2 rounded-lg bg-[#114F3C] px-4 py-3 text-sm font-black text-white transition hover:bg-[#0b392b]" type="button" disabled={saving} onClick={() => changeStatus("Confirmed")}>
+                <CheckCircle2 className="h-4 w-4" /> Confirm booking
+              </button>
             ) : null}
             {booking.status !== "Cancelled" ? (
-              <a className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700" href={whatsappUrl("Cancelled")} target="_blank" rel="noreferrer" onClick={() => onStatusChange("Cancelled")}>
-                <X className="h-4 w-4" /> Cancel & notify
-              </a>
+              <button className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700" type="button" disabled={saving} onClick={() => changeStatus("Cancelled")}>
+                <X className="h-4 w-4" /> Cancel booking
+              </button>
             ) : null}
             <a className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${orangeButton}`} href={whatsappUrl()} target="_blank" rel="noreferrer">
               <MessageCircle className="h-4 w-4" /> Message guest
             </a>
           </div>
-        </div>
-      </div>
+      </div> : null}
     </article>
   );
 }
@@ -585,19 +642,24 @@ function GalleryHighlightEditor({ highlight, onSave }: { highlight: GalleryHighl
   return (
     <form className="space-y-4" onSubmit={submitHighlight}>
       <FieldLabel label="Small label above the title">
-        <input className={`${inputClass} w-full`} value={draft.eyebrow} onChange={(event) => setDraft({ ...draft, eyebrow: event.target.value })} />
+        <input className={`${inputClass} w-full border-[#A6BFAF] dark:border-white/15`} value={draft.eyebrow} onChange={(event) => setDraft({ ...draft, eyebrow: event.target.value })} />
       </FieldLabel>
 
       <div className="grid gap-4 xl:grid-cols-2">
         {draft.items.map((item, index) => (
-          <article key={index} className="rounded-lg border border-stone-200 bg-stone-50 p-4 dark:border-white/10 dark:bg-white/5">
-            <div className="grid gap-4 sm:grid-cols-[120px_1fr]">
+          <article key={index} className="rounded-xl border border-[#B5CCBF] bg-[#E7EEE4] p-4 shadow-sm sm:p-5 dark:border-white/15 dark:bg-white/5">
+            <h3 className="mb-4 flex items-center gap-2 border-b border-[#B5CCBF] pb-3 text-base font-bold text-[#114F3C] dark:border-white/15 dark:text-white">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#114F3C] text-xs text-white dark:bg-[#F8A900] dark:text-[#114F3C]">{index + 1}</span>
+              Highlight {index + 1}
+            </h3>
+            <div className="grid min-w-0 gap-4 sm:grid-cols-[160px_minmax(0,1fr)]">
               <div>
-                <img className="h-28 w-full rounded-lg object-cover" src={item.image} alt={item.title || `Highlight ${index + 1}`} />
-                <label className={`mt-2 flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-[#114F3C]/25 px-3 py-2 text-center text-xs font-black text-[#114F3C] transition hover:border-[#F8A900] hover:bg-[#F8A900]/15 dark:border-white/15 dark:text-white ${uploadingIndex === index ? "pointer-events-none opacity-70" : ""}`}>
-                  {uploadingIndex === index ? "Uploading..." : "Upload"}
+                <img className="h-44 w-full rounded-lg border border-[#114F3C]/15 object-cover dark:border-white/15" src={item.image} alt={item.title || `Highlight ${index + 1}`} />
+                <label className={`mt-3 flex cursor-pointer items-center justify-center rounded-lg bg-[#114F3C] px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-[#0B392B] focus-within:ring-2 focus-within:ring-[#114F3C] focus-within:ring-offset-2 dark:bg-[#F8A900] dark:text-[#114F3C] dark:hover:bg-[#ffc247] ${uploadingIndex !== null ? "pointer-events-none opacity-70" : ""}`}>
+                  {uploadingIndex === index ? "Uploading..." : "Replace photo"}
                   <input
                     type="file"
+                    disabled={uploadingIndex !== null}
                     accept="image/jpeg,image/png,image/webp,image/gif"
                     className="sr-only"
                     onChange={(event) => {
@@ -608,16 +670,21 @@ function GalleryHighlightEditor({ highlight, onSave }: { highlight: GalleryHighl
                 </label>
               </div>
 
-              <div className="space-y-3">
-                <FieldLabel label={`${String(index + 1).padStart(2, "0")} title`}>
-                  <input className={`${inputClass} w-full`} value={item.title} onChange={(event) => updateItem(index, "title", event.target.value)} />
+              <div className="min-w-0 space-y-4">
+                <FieldLabel label="Title">
+                  <input className={`${inputClass} w-full border-[#A6BFAF] dark:border-white/15`} value={item.title} onChange={(event) => updateItem(index, "title", event.target.value)} />
                 </FieldLabel>
                 <FieldLabel label="Description">
-                  <textarea className={`${inputClass} min-h-20 w-full`} value={item.text} onChange={(event) => updateItem(index, "text", event.target.value)} />
+                  <textarea className={`${inputClass} min-h-28 w-full border-[#A6BFAF] dark:border-white/15`} value={item.text} onChange={(event) => updateItem(index, "text", event.target.value)} />
                 </FieldLabel>
-                <FieldLabel label="Image URL">
-                  <input className={`${inputClass} w-full`} value={item.image} onChange={(event) => updateItem(index, "image", event.target.value)} />
-                </FieldLabel>
+                <details className="rounded-lg border border-[#B5CCBF] bg-white/50 p-3 dark:border-white/15 dark:bg-black/10">
+                  <summary className="cursor-pointer text-sm font-semibold text-[#114F3C] dark:text-stone-200">Advanced</summary>
+                  <div className="mt-3">
+                    <FieldLabel label="Image URL">
+                      <input className={`${inputClass} w-full border-[#A6BFAF] dark:border-white/15`} value={item.image} onChange={(event) => updateItem(index, "image", event.target.value)} />
+                    </FieldLabel>
+                  </div>
+                </details>
               </div>
             </div>
           </article>
@@ -626,14 +693,20 @@ function GalleryHighlightEditor({ highlight, onSave }: { highlight: GalleryHighl
 
       {uploadError ? <p className="text-sm font-bold text-red-600 dark:text-red-300">{uploadError}</p> : null}
 
+      <div className="flex flex-col gap-4 rounded-xl border border-[#B5CCBF] bg-[#E7EEE4] p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/15 dark:bg-white/5">
+        <div>
+          <p className="text-sm font-bold text-[#114F3C] dark:text-white">Ready to update your gallery?</p>
+          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">Photo and text changes appear on the website after you save.</p>
+        </div>
       <button
         type="submit"
         disabled={uploadingIndex !== null}
-        className={`inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black transition ${uploadingIndex !== null ? "cursor-not-allowed bg-stone-300 text-stone-600 dark:bg-white/10 dark:text-stone-400" : orangeButton}`}
+        className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-black transition ${uploadingIndex !== null ? "cursor-not-allowed bg-stone-300 text-stone-600 dark:bg-white/10 dark:text-stone-400" : orangeButton}`}
       >
         <Save className="h-4 w-4" />
-        Save gallery highlight
+        Save highlights
       </button>
+      </div>
     </form>
   );
 }
@@ -1026,9 +1099,14 @@ function AdminInbox({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-function StatusSelect({ value, options, onChange }: { value: string; options: string[]; onChange: (value: string) => void }) {
+function StatusSelect({ value, options, onChange, disabled = false }: { value: string; options: string[]; onChange: (value: string) => void; disabled?: boolean }) {
+  const statusColor = value === "Confirmed" || value === "Published" || value === "Replied"
+    ? "border-green-300 bg-green-100 text-green-900"
+    : value === "Cancelled"
+      ? "border-red-300 bg-red-100 text-red-900"
+      : "border-amber-300 bg-amber-100 text-amber-950";
   return (
-    <select value={value} onChange={(event) => onChange(event.target.value)} className="rounded-full border border-[#114F3C]/10 bg-[#FCE4B4] px-3 py-2 text-xs font-black text-[#114F3C] outline-none dark:border-white/10">
+    <select disabled={disabled} value={value} onChange={(event) => onChange(event.target.value)} aria-label="Change status" className={`rounded-lg border px-3 py-2 text-sm font-bold outline-none focus-visible:ring-2 focus-visible:ring-[#114F3C] focus-visible:ring-offset-2 [color-scheme:light] ${statusColor}`}>
       {options.map((option) => (
         <option key={option}>{option}</option>
       ))}
