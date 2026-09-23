@@ -48,7 +48,7 @@ export function TripDetailPage({
     <section className="bg-canvas pb-24 transition-colors duration-300 dark:bg-[#071711] lg:pb-0">
       <TripHero trip={trip} galleryImages={galleryImages} onBack={onBack} />
 
-      <div className="mx-auto grid max-w-7xl gap-5 sm:gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:px-8">
+      <div className="trip-detail-content mx-auto grid max-w-7xl gap-5 sm:gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:px-8">
         <main className="min-w-0 space-y-8">
           <RouteSnapshot trip={trip} />
           <section className="rounded-xl border border-[#114F3C]/15 bg-surface p-5 dark:border-white/15 dark:bg-[#10241C]">
@@ -97,7 +97,7 @@ function TripHero({ trip, galleryImages, onBack }: { trip: Trip; galleryImages: 
   const secondaryImages = galleryImages.length > 1 ? galleryImages.slice(1, 4) : [trip.coverImage, trip.coverImage, trip.coverImage];
 
   return (
-    <header className="relative isolate overflow-hidden bg-[#071711] px-4 py-8 text-white sm:px-6 lg:px-8">
+    <header className="trip-detail-hero relative isolate overflow-hidden bg-[#071711] px-4 py-8 text-white sm:px-6 lg:px-8">
       <img className="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" src={trip.coverImage} alt={trip.destination} />
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(115deg,#071711_0%,rgba(7,23,17,0.95)_38%,rgba(17,79,60,0.7)_100%)]" />
 
@@ -116,7 +116,7 @@ function TripHero({ trip, galleryImages, onBack }: { trip: Trip; galleryImages: 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/78">{trip.description}</p>
           </div>
 
-          <div className="mt-9 grid max-w-3xl gap-3 sm:grid-cols-2">
+          <div className="trip-hero-facts mt-9 grid max-w-3xl gap-3 sm:grid-cols-2">
             <HeroFact Icon={CalendarDays} label="Trip date" value={formatDate(trip.date)} />
             <HeroFact Icon={Ticket} label={isHotTrip(trip) ? "Per person" : "Pricing"} value={isHotTrip(trip) ? formatPrice(trip.price) : "Contact us for pricing"} />
             <HeroFact Icon={Gauge} label="Difficulty" value={trip.difficulty} />
@@ -159,7 +159,7 @@ function RouteSnapshot({ trip }: { trip: Trip }) {
   ];
 
   return (
-    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C]">
+    <section className="trip-route-snapshot rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C]">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {facts.map(({ label, value, Icon }) => (
           <div key={label} className="rounded-2xl bg-sage p-4 dark:bg-white/5">

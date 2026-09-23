@@ -116,7 +116,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         </div>
       </section>
 
-      <section className={`${brandGreen} px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8`}>
+      <section className={`home-trust ${brandGreen} px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8`}>
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-4">
           {trustItems.map(({ title, text, Icon }) => (
             <article key={title} className="rounded-lg border border-white/10 bg-white/10 p-5">
@@ -128,7 +128,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         </div>
       </section>
 
-      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
+      <section className="home-experience px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="Experience" title="Your next adventure starts here" text="Find a walk that suits you, see what is included, and get in touch when you are ready to join." />
           <div className="grid gap-5 md:grid-cols-3">
@@ -164,7 +164,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
 
       <GalleryPreview images={galleryImages} onOpen={() => choosePage("gallery")} />
 
-      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
+      <section className="home-stories px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="Guest stories" title="See experiences shared by the Ermija community" />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -180,7 +180,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         </div>
       </section>
 
-      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="home-final-cta px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-lg bg-[#F54C0D] text-white shadow-2xl shadow-[#F54C0D]/20">
           <div className="grid md:grid-cols-[1.4fr_1fr]">
             <div className="flex items-center p-4 sm:p-8">

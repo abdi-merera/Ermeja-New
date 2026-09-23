@@ -35,8 +35,8 @@ const processSteps = [
 
 export function AboutPage() {
   return (
-    <>
-      <section className="relative overflow-hidden bg-[#071711] px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8">
+    <div className="about-mobile-layout">
+      <section className="about-intro relative overflow-hidden bg-[#071711] px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8">
         <img
           className="absolute inset-0 h-full w-full object-cover opacity-35"
           src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1800&q=85"
@@ -78,7 +78,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
+      <section className="about-story px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 sm:gap-8 lg:grid-cols-[0.78fr_1fr]">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">The story</p>
@@ -95,7 +95,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className={`${brandGreen} px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8`}>
+      <section className={`about-principles ${brandGreen} px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8`}>
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 max-w-2xl">
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F8A900]">What guides us</p>
@@ -113,7 +113,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
+      <section className="about-process px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 grid gap-5 lg:grid-cols-[0.7fr_1fr]">
             <div>
@@ -136,7 +136,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="about-trust px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-4">
           {trustItems.map(({ title, text, Icon }) => (
             <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-4 sm:p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
@@ -148,7 +148,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="about-cta px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl overflow-hidden rounded-lg bg-[#F54C0D] text-white shadow-2xl shadow-[#F54C0D]/20 lg:grid-cols-[1fr_0.42fr]">
           <div className="p-5 sm:p-10">
             <HeartHandshake className="h-10 w-10 text-white/80" />
@@ -170,6 +170,6 @@ export function AboutPage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

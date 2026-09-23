@@ -156,7 +156,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
 
   return (
     <section className="bg-canvas transition-colors duration-300 dark:bg-[#071711]">
-      <div className="relative overflow-hidden bg-[#114F3C] px-4 py-14 text-white sm:px-6 lg:px-8">
+      <div className="gallery-intro relative overflow-hidden bg-[#114F3C] px-4 py-14 text-white sm:px-6 lg:px-8">
         <div className="absolute inset-0 opacity-25">
           <img className="h-full w-full object-cover" src={featured.image} alt={featured.title} />
         </div>
@@ -170,7 +170,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
               Explore landscapes, shared adventures, and memorable moments from the trail. Find a place you would love to visit next.
             </p>
-            <div className="mt-8 grid max-w-xl grid-cols-3 gap-3">
+            <div className="gallery-intro-stats mt-8 grid max-w-xl grid-cols-3 gap-3">
               {[
                 [String(images.length), "Photo stories"],
                 [String(destinationGroups.length), "Destinations"],
@@ -184,7 +184,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="gallery-intro-previews grid grid-cols-2 gap-3 sm:grid-cols-4">
             {destinationGroups.slice(0, 6).map((group, index) => (
               <article
                 key={group.destination}
@@ -202,7 +202,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="gallery-content mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         {activeDestination ? (
           <section>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -274,7 +274,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
           </section>
         ) : null}
 
-        <section className="mt-12 grid gap-5 lg:grid-cols-[1fr_1fr_1fr]">
+        <section className="gallery-social-links mt-12 grid gap-5 lg:grid-cols-[1fr_1fr_1fr]">
           {[
             { title: "Instagram reels", text: "See trail views, group adventures, and memorable stops from our walks.", Icon: Instagram, href: "https://www.instagram.com/ermja__hiking?igsh=a3pneGhxNnJ5ejQ0&utm_source=qr", platform: "Instagram" },
             { title: "TikTok trail moments", text: "Enjoy a glimpse of life on the trail with our hiking community.", Icon: Film, href: "https://www.tiktok.com/@ermjahikingg?_r=1&_t=zn-98ldwtbjfgk", platform: "TikTok" },
@@ -283,7 +283,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
             <a key={title} href={href} target="_blank" rel="noopener noreferrer" aria-label={`Visit Ermija Hiking on ${platform} (opens in a new tab)`} className="group relative overflow-hidden rounded-lg border border-[#114F3C]/10 bg-[#114F3C] p-4 sm:p-6 text-white shadow-sm transition hover:-translate-y-1 hover:border-[#F8A900]/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900]">
               <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-full bg-[#F8A900]/20" />
               <Icon className="h-8 w-8 text-[#F8A900]" />
-              <h3 className="mt-5 text-xl font-black">{title}</h3>
+              <h3 className="mt-5 text-xl font-black"><span className="sm:hidden">{platform}</span><span className="hidden sm:inline">{title}</span></h3>
               <p className="mt-3 text-sm leading-6 text-white/72">{text}</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#F8A900]">Visit {platform} <ExternalLink className="h-4 w-4" /></span>
             </a>
@@ -376,9 +376,9 @@ function DestinationAlbums({ groups, onSelect, featuredFirst = false }: {
   featuredFirst?: boolean;
 }) {
   return (
-            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="gallery-album-list mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {groups.map((group, index) => (
-                <button key={group.destination} type="button" onClick={() => onSelect(group.destination)} className={`group relative min-h-56 sm:min-h-80 overflow-hidden rounded-2xl bg-[#114F3C] text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${featuredFirst && index === 0 ? "md:col-span-2" : ""}`}>
+                <button key={group.destination} type="button" onClick={() => onSelect(group.destination)} className={`gallery-album-card group relative min-h-56 sm:min-h-80 overflow-hidden rounded-2xl bg-[#114F3C] text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${featuredFirst && index === 0 ? "md:col-span-2" : ""}`}>
                   <span className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 bg-[#114F3C]">
                     {group.images.slice(0, 4).map((item, imageIndex) => (
                       <img

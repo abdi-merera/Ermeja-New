@@ -20,8 +20,8 @@ const planningSteps = [
 
 export function ContactPage({ contactForm, setContactForm, submitContact }: { contactForm: ContactForm; setContactForm: (form: ContactForm) => void; submitContact: ContactSubmitHandler }) {
   return (
-    <section className="bg-canvas transition-colors duration-300 dark:bg-[#071711]">
-      <div className="relative overflow-hidden bg-[#114F3C] px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8">
+    <section className="contact-mobile-layout bg-canvas transition-colors duration-300 dark:bg-[#071711]">
+      <div className="contact-intro relative overflow-hidden bg-[#114F3C] px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8">
         <img className="absolute inset-0 h-full w-full object-cover opacity-30" src={contactHeroImage} alt="Guided hiking path in Ethiopia" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#061B15] via-[#114F3C]/90 to-[#114F3C]/40" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-6 sm:gap-10 lg:grid-cols-[0.95fr_1.05fr]">
@@ -33,14 +33,14 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
               Ask about an upcoming package, request a private group walk, or confirm the details you need before booking.
             </p>
-            <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+            <div className="contact-intro-stats mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
               <HeroStat value="Get in touch" label="Ask our team" Icon={Clock} />
               <HeroStat value="Group" label="Trip planning" Icon={Users} />
               <HeroStat value="WhatsApp" label="Trip enquiries" Icon={MessageCircle} />
             </div>
           </div>
 
-          <div className="rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/25 backdrop-blur">
+          <div className="contact-preview rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/25 backdrop-blur">
             <div className="overflow-hidden rounded-lg">
               <img className="h-80 w-full object-cover" src={contactImage} alt="Sof Omar cave destination in Ethiopia" />
             </div>
@@ -56,15 +56,15 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <section className="grid gap-5 md:grid-cols-3">
+      <div className="contact-content mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <section className="contact-methods grid gap-5 md:grid-cols-3">
           {contactCards.map(({ title, text, value, Icon }) => (
             <ContactCard key={title} title={title} text={text} value={value} Icon={Icon} />
           ))}
         </section>
 
         <section className="mt-12 grid gap-5 sm:gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <aside className={`${brandGreen} h-fit rounded-lg p-4 sm:p-6 text-white shadow-xl shadow-[#114F3C]/15 lg:sticky lg:top-24`}>
+          <aside className={`contact-location ${brandGreen} h-fit rounded-lg p-4 sm:p-6 text-white shadow-xl shadow-[#114F3C]/15 lg:sticky lg:top-24`}>
             <MapPin className="h-10 w-10 text-[#F8A900]" />
             <h2 className="mt-5 text-2xl sm:text-3xl font-black">Based in Addis Ababa, planning trips across Ethiopia</h2>
             <p className="mt-4 text-sm leading-7 text-white/72">
@@ -91,7 +91,7 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
           </aside>
 
           <div>
-            <form className="rounded-lg border border-[#114F3C]/10 bg-surface p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-8" onSubmit={submitContact}>
+            <form className="contact-inquiry rounded-lg border border-[#114F3C]/10 bg-surface p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-8" onSubmit={submitContact}>
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Send inquiry</p>
@@ -130,7 +130,7 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
               </div>
             </form>
 
-            <section className="mt-6 rounded-lg bg-[#FCE4B4] p-4 shadow-sm transition-colors duration-300 dark:bg-[#162C22] sm:p-8">
+            <section className="contact-private mt-6 rounded-lg bg-[#FCE4B4] p-4 shadow-sm transition-colors duration-300 dark:bg-[#162C22] sm:p-8">
               <div className="grid gap-5 sm:gap-8 lg:grid-cols-[0.8fr_1.2fr]">
                 <div>
                   <CalendarCheck className="h-10 w-10 text-[#F54C0D]" />

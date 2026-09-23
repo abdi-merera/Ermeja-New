@@ -11,9 +11,9 @@ const socialLinks = [
   { label: "TikTok", href: "https://www.tiktok.com/@ermjahikingg?_r=1&_t=zn-98ldwtbjfgk", Icon: Music2, accent: "group-hover:bg-black" }
 ];
 
-export function Footer() {
+export function Footer({ compactMobile = false }: { compactMobile?: boolean }) {
   return (
-    <footer className={`${brandGreen} px-4 py-10 text-white sm:px-6 lg:px-8`}>
+    <footer className={`${compactMobile ? "home-footer" : ""} ${brandGreen} px-4 py-10 text-white sm:px-6 lg:px-8`}>
       <div className="mx-auto grid max-w-7xl gap-5 sm:gap-8 md:grid-cols-[1fr_0.8fr_0.8fr]">
         <div>
           <Logo />

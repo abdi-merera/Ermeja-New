@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Compass, Filter, MessageCircle, Search } from "lucide-react";
+import { ChevronDown, Compass, MessageCircle, Search } from "lucide-react";
 import { orangeButton, whatsappNumber, yellowButton } from "../constants";
 import { TripCard } from "../components/TripCard";
 import type { FormEvent } from "react";
@@ -61,6 +61,9 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
     .filter((trip) => new Date(`${trip.date}T00:00:00`).getTime() >= todayTime && trip.availableSeats > 0)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
 
+  const activeFilterCount = Number(difficulty !== allFilter) + Number(duration !== allFilter);
+  const hasActiveControls = activeFilterCount > 0 || Boolean(query.trim()) || sort !== (period === "Past trips" ? "Latest first" : "Soonest first");
+
   const resetFilters = () => {
     setDifficulty(allFilter);
     setDuration(allFilter);
@@ -75,7 +78,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
         <div className="absolute -right-24 top-12 h-72 w-72 rounded-full bg-[#F8A900]/20 blur-3xl" />
         <div className="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-[#F54C0D]/10 blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-6 px-4 py-7 sm:px-6 lg:grid-cols-[1fr_340px] lg:px-8">
+        <div className="trips-intro relative mx-auto grid max-w-7xl items-center gap-6 px-4 py-7 sm:px-6 lg:grid-cols-[1fr_340px] lg:px-8">
           <div className="flex flex-col justify-center">
             <p className="inline-flex w-fit rounded-full bg-[#FCE4B4] px-5 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#114F3C] shadow-sm">
               Explore Ethiopia
@@ -88,7 +91,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
             </p>
           </div>
 
-          <aside className="self-center overflow-hidden rounded-[1.5rem] bg-[#114F3C] p-5 text-white shadow-sm">
+          <aside className="trips-next self-center overflow-hidden rounded-[1.5rem] bg-[#114F3C] p-5 text-white shadow-sm">
               <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Next departure</p>
               {nextTrip ? (
                 <div className="mt-3">
@@ -103,13 +106,13 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-5 rounded-xl border border-[#114F3C]/15 bg-surface p-4 dark:border-white/15 dark:bg-[#10241C]">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6 sm:px-6 lg:px-8">
+        <div className="trips-toolbar mb-5 rounded-xl border border-[#114F3C]/15 bg-surface p-4 dark:border-white/15 dark:bg-[#10241C]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex gap-2" aria-label="Trip dates">
               {["All", "Upcoming", "Past trips"].map((value) => <button key={value} type="button" aria-pressed={period === value} onClick={() => { setPeriod(value); setSort(value === "Past trips" ? "Latest first" : "Soonest first"); }} className={`rounded-lg px-4 py-2 text-sm font-bold ${period === value ? "bg-[#114F3C] text-white dark:bg-[#F8A900] dark:text-[#114F3C]" : "text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-white/10"}`}>{value}</button>)}
             </div>
-            <button type="button" aria-expanded={filtersOpen} aria-controls="trip-filters" onClick={() => setFiltersOpen(!filtersOpen)} className="inline-flex items-center gap-2 rounded-lg border border-stone-300 px-3 py-2 text-sm dark:border-white/20 md:hidden"><Filter className="h-4 w-4" /> Filters</button>
+            <button type="button" aria-expanded={filtersOpen} aria-controls="trip-filters" onClick={() => setFiltersOpen(!filtersOpen)} className="inline-flex items-center gap-2 rounded-lg border border-stone-300 px-3 py-2 text-sm dark:border-white/20 md:hidden"><span>Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span><ChevronDown aria-hidden="true" className={`h-4 w-4 shrink-0 transition-transform ${filtersOpen ? "rotate-180" : ""}`} /></button>
           </div>
           <div className="mt-4 grid items-end gap-3 md:grid-cols-[minmax(180px,1.5fr)_3fr]">
             <label className="grid gap-2"><span className="text-xs font-bold text-stone-600 dark:text-stone-300">Search trips</span><span className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-stone-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Destination or trip name" className="w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-9 pr-3 text-sm text-stone-900 dark:border-white/20 dark:bg-[#183329] dark:text-white" /></span></label>
@@ -123,7 +126,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
         <div className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div><h2 className="text-2xl font-bold text-[#114F3C] dark:text-[#F8A900]">{period === "All" ? "All adventures" : period === "Upcoming" ? "Upcoming adventures" : "Past adventures"}</h2><p role="status" className="mt-1 text-sm text-stone-600 dark:text-stone-300">{filteredTrips.length} {filteredTrips.length === 1 ? "trip" : "trips"}{period === "Past trips" ? " / Previous departures, for inspiration" : ""}</p></div>
-            {(query || difficulty !== allFilter || duration !== allFilter) ? <button type="button" onClick={resetFilters} className="text-sm font-bold text-[#114F3C] underline dark:text-[#F8A900]">Clear filters</button> : null}
+            {hasActiveControls ? <button type="button" onClick={resetFilters} className="text-sm font-bold text-[#114F3C] underline dark:text-[#F8A900]">Clear filters</button> : null}
           </div>
 
           {filteredTrips.length ? (

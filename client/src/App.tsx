@@ -380,7 +380,7 @@ export function App() {
         backToTrips={backToTrips}
       />
 
-      <Footer />
+      <Footer compactMobile={page === "home"} />
     </main>
   );
 }
