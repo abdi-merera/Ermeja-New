@@ -14,7 +14,7 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className={`${brandGreen} px-4 py-10 text-white sm:px-6 lg:px-8`}>
-      <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_0.8fr_0.8fr]">
+      <div className="mx-auto grid max-w-7xl gap-5 sm:gap-8 md:grid-cols-[1fr_0.8fr_0.8fr]">
         <div>
           <Logo />
           <p className="mt-5 max-w-md text-sm leading-6 text-white/70">Ermija means walk. We help travelers step out, discover Ethiopia, and connect with nature through guided group adventures.</p>

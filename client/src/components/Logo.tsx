@@ -47,7 +47,7 @@ export function Logo({ onClick, onLongPress }: { onClick?: () => void; onLongPre
       onContextMenu={(event) => event.preventDefault()}
       aria-label="Ermija Hiking home"
     >
-      <img src="/logo-white.svg" alt="Ermija Hiking" className="h-14 w-auto" />
+      <img src="/logo-white.svg" alt="Ermija Hiking" className="h-11 sm:h-11 sm:h-14 w-auto" />
     </button>
   );
 }

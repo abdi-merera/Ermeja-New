@@ -161,12 +161,12 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
           <img className="h-full w-full object-cover" src={featured.image} alt={featured.title} />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-[#09251C] via-[#114F3C]/90 to-[#114F3C]/50" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-6 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#F8A900] backdrop-blur">
               Visual stories
             </p>
-            <h1 className="mt-5 text-5xl font-black leading-tight sm:text-6xl">See the walk before you book it</h1>
+            <h1 className="mt-5 text-3xl font-black leading-tight sm:text-6xl">See the walk before you book it</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
               Explore landscapes, shared adventures, and memorable moments from the trail. Find a place you would love to visit next.
             </p>
@@ -188,7 +188,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
             {destinationGroups.slice(0, 6).map((group, index) => (
               <article
                 key={group.destination}
-                className={`group relative overflow-hidden rounded-lg border border-white/15 bg-white/10 shadow-2xl shadow-black/20 ${index === 0 ? "col-span-2 row-span-2 min-h-80" : "min-h-40"}`}
+                className={`group relative overflow-hidden rounded-lg border border-white/15 bg-white/10 shadow-2xl shadow-black/20 ${index === 0 ? "col-span-2 row-span-2 min-h-56 sm:min-h-80" : "min-h-40"}`}
               >
                 <img loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" src={group.images[0].image} alt={group.destination} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
@@ -211,7 +211,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
                   <ArrowLeft className="h-4 w-4" /> All destinations
                 </button>
                 <p className="mt-5 flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]"><MapPin className="h-4 w-4" /> Destination album</p>
-                <h2 ref={albumHeadingRef} tabIndex={-1} className="mt-2 scroll-mt-32 text-4xl font-black text-[#114F3C] outline-none dark:text-[#F8A900]">{activeDestination}</h2>
+                <h2 ref={albumHeadingRef} tabIndex={-1} className="mt-2 scroll-mt-32 text-2xl sm:text-4xl font-black text-[#114F3C] outline-none dark:text-[#F8A900]">{activeDestination}</h2>
               </div>
               <p className="text-sm font-bold text-stone-600 dark:text-stone-300">{selectedImages.length} {selectedImages.length === 1 ? "photo" : "photos"}</p>
             </div>
@@ -231,7 +231,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
           <section>
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Browse by place</p>
-              <h2 className="mt-2 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">Choose a destination</h2>
+              <h2 className="mt-2 text-2xl sm:text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">Choose a destination</h2>
               <p className="mt-3 max-w-2xl text-base leading-7 text-stone-600 dark:text-stone-300">Open a destination to see every photo from its trips in one clean album.</p>
             </div>
 
@@ -239,11 +239,11 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
           </section>
         )}
 
-        <section className="mt-12 overflow-hidden rounded-lg bg-[#114F3C] p-6 text-white shadow-2xl shadow-[#114F3C]/15 sm:p-8">
-          <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1fr]">
+        <section className="mt-12 overflow-hidden rounded-lg bg-[#114F3C] p-4 text-white shadow-2xl shadow-[#114F3C]/15 sm:p-8">
+          <div className="grid items-center gap-5 sm:gap-8 lg:grid-cols-[0.8fr_1fr]">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[#F8A900]">{highlight.eyebrow || defaultGalleryHighlight.eyebrow}</p>
-              <h2 className="mt-3 text-4xl font-black">{splitHighlights[activeSplitImage].title}</h2>
+              <h2 className="mt-3 text-2xl sm:text-4xl font-black">{splitHighlights[activeSplitImage].title}</h2>
               <p className="mt-5 text-base leading-8 text-white/75">{splitHighlights[activeSplitImage].text}</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {splitHighlights.map((highlight, index) => (
@@ -268,7 +268,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
 
         {activeDestination && otherAlbums.length > 0 ? (
           <section className="mt-12" aria-labelledby="other-albums-heading">
-            <h2 id="other-albums-heading" className="text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Explore other albums</h2>
+            <h2 id="other-albums-heading" className="text-2xl sm:text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Explore other albums</h2>
             <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">Choose another destination to keep exploring.</p>
             <DestinationAlbums groups={otherAlbums} onSelect={openAlbum} />
           </section>
@@ -280,7 +280,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
             { title: "TikTok trail moments", text: "Enjoy a glimpse of life on the trail with our hiking community.", Icon: Film, href: "https://www.tiktok.com/@ermjahikingg?_r=1&_t=zn-98ldwtbjfgk", platform: "TikTok" },
             { title: "Facebook adventures", text: "Discover new places and find inspiration for your next outing.", Icon: Play, href: "https://www.facebook.com/share/1jlnaqcqen/?mibextid=wwxifr", platform: "Facebook" }
           ].map(({ title, text, Icon, href, platform }) => (
-            <a key={title} href={href} target="_blank" rel="noopener noreferrer" aria-label={`Visit Ermija Hiking on ${platform} (opens in a new tab)`} className="group relative overflow-hidden rounded-lg border border-[#114F3C]/10 bg-[#114F3C] p-6 text-white shadow-sm transition hover:-translate-y-1 hover:border-[#F8A900]/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900]">
+            <a key={title} href={href} target="_blank" rel="noopener noreferrer" aria-label={`Visit Ermija Hiking on ${platform} (opens in a new tab)`} className="group relative overflow-hidden rounded-lg border border-[#114F3C]/10 bg-[#114F3C] p-4 sm:p-6 text-white shadow-sm transition hover:-translate-y-1 hover:border-[#F8A900]/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900]">
               <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-full bg-[#F8A900]/20" />
               <Icon className="h-8 w-8 text-[#F8A900]" />
               <h3 className="mt-5 text-xl font-black">{title}</h3>
@@ -292,17 +292,17 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
 
         <section className="mt-12 overflow-hidden rounded-lg border border-[#114F3C]/10 bg-surface shadow-xl shadow-[#114F3C]/10 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
           <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="relative min-h-80">
+            <div className="relative min-h-56 sm:min-h-80">
               <img className="absolute inset-0 h-full w-full object-cover" src={images[2]?.image || featured.image} alt="Trail memory" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
                 <Heart className="h-8 w-8 text-[#F8A900]" />
-                <h2 className="mt-4 text-3xl font-black">Make memories beyond the city.</h2>
+                <h2 className="mt-4 text-2xl sm:text-3xl font-black">Make memories beyond the city.</h2>
               </div>
             </div>
-            <div className="p-8 sm:p-10">
+            <div className="p-5 sm:p-10">
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[#F54C0D]">Your next adventure</p>
-              <h2 className="mt-3 text-4xl font-black text-[#114F3C]">Ready to join us?</h2>
+              <h2 className="mt-3 text-2xl sm:text-4xl font-black text-[#114F3C]">Ready to join us?</h2>
               <p className="mt-5 text-base leading-8 text-stone-700 dark:text-stone-300">
                 Choose an upcoming trip or tell us which destination caught your eye. We can help you find a walk for your group.
               </p>
@@ -378,7 +378,7 @@ function DestinationAlbums({ groups, onSelect, featuredFirst = false }: {
   return (
             <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {groups.map((group, index) => (
-                <button key={group.destination} type="button" onClick={() => onSelect(group.destination)} className={`group relative min-h-80 overflow-hidden rounded-2xl bg-[#114F3C] text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${featuredFirst && index === 0 ? "md:col-span-2" : ""}`}>
+                <button key={group.destination} type="button" onClick={() => onSelect(group.destination)} className={`group relative min-h-56 sm:min-h-80 overflow-hidden rounded-2xl bg-[#114F3C] text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${featuredFirst && index === 0 ? "md:col-span-2" : ""}`}>
                   <span className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 bg-[#114F3C]">
                     {group.images.slice(0, 4).map((item, imageIndex) => (
                       <img
@@ -392,9 +392,9 @@ function DestinationAlbums({ groups, onSelect, featuredFirst = false }: {
                     ))}
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/5 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
                     <p className="flex items-center gap-2 text-sm font-bold text-[#F8A900]"><Images className="h-4 w-4" /> {group.images.length} {group.images.length === 1 ? "photo" : "photos"}</p>
-                    <h3 className="mt-2 text-3xl font-black">{group.destination}</h3>
+                    <h3 className="mt-2 text-2xl sm:text-3xl font-black">{group.destination}</h3>
                     <p className="mt-2 text-sm font-bold text-white/70">View all photos</p>
                   </div>
                 </button>

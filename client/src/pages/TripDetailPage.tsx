@@ -48,7 +48,7 @@ export function TripDetailPage({
     <section className="bg-canvas pb-24 transition-colors duration-300 dark:bg-[#071711] lg:pb-0">
       <TripHero trip={trip} galleryImages={galleryImages} onBack={onBack} />
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-5 sm:gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:px-8">
         <main className="min-w-0 space-y-8">
           <RouteSnapshot trip={trip} />
           <section className="rounded-xl border border-[#114F3C]/15 bg-surface p-5 dark:border-white/15 dark:bg-[#10241C]">
@@ -74,7 +74,7 @@ export function TripDetailPage({
           <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Keep exploring</p>
-              <h2 className="mt-2 text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Other trips guests compare</h2>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Other trips guests compare</h2>
             </div>
             <button type="button" onClick={onBack} className="rounded-lg bg-[#FCE4B4] px-5 py-3 text-sm font-black text-[#114F3C] transition hover:bg-[#f8d58b]">
               View all trips
@@ -101,7 +101,7 @@ function TripHero({ trip, galleryImages, onBack }: { trip: Trip; galleryImages: 
       <img className="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" src={trip.coverImage} alt={trip.destination} />
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(115deg,#071711_0%,rgba(7,23,17,0.95)_38%,rgba(17,79,60,0.7)_100%)]" />
 
-      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.94fr_1.06fr]">
+      <div className="mx-auto grid max-w-7xl items-center gap-6 sm:gap-10 lg:grid-cols-[0.94fr_1.06fr]">
         <div>
           <button type="button" onClick={onBack} className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white backdrop-blur transition hover:bg-white/20">
             <ArrowLeft className="h-4 w-4" />
@@ -128,7 +128,7 @@ function TripHero({ trip, galleryImages, onBack }: { trip: Trip; galleryImages: 
           <div className="relative min-h-[260px] lg:min-h-[380px] overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 shadow-2xl shadow-black/35">
             <img className="absolute inset-0 h-full w-full object-cover" src={trip.coverImage} alt={trip.title} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
-            <div className="absolute bottom-0 left-0 right-0 p-6">
+            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
               <p className="inline-flex items-center gap-2 rounded-full bg-white/92 px-4 py-2 text-sm font-black text-[#114F3C] backdrop-blur">
                 <MapPin className="h-4 w-4 text-[#F54C0D]" />
                 {trip.meetingPoint}
@@ -178,10 +178,10 @@ function ItinerarySection({ trip }: { trip: Trip }) {
   const [expanded, setExpanded] = useState<number[]>([0]);
   const allExpanded = expanded.length === days.length;
   return (
-    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] sm:p-8">
+    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-4 shadow-sm dark:border-white/10 dark:bg-[#10241C] sm:p-8">
       <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Your itinerary</p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Day by day</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Day by day</h2>
         <button type="button" className="rounded-lg border border-current/20 px-4 py-2 text-sm font-bold text-[#114F3C] dark:text-white" onClick={() => setExpanded(allExpanded ? [] : days.map((_, i) => i))}>{allExpanded ? "Collapse all" : "Expand all"}</button>
       </div>
       <div className="mt-6 space-y-3">
@@ -209,10 +209,10 @@ function ItinerarySection({ trip }: { trip: Trip }) {
 
 function SafetySection({ trip }: { trip: Trip }) {
   return (
-    <section className="grid gap-5 overflow-hidden rounded-[1.5rem] bg-[#114F3C] p-6 text-white shadow-xl shadow-[#114F3C]/15 sm:p-8 lg:grid-cols-[0.72fr_1fr]">
+    <section className="grid gap-5 overflow-hidden rounded-[1.5rem] bg-[#114F3C] p-4 text-white shadow-xl shadow-[#114F3C]/15 sm:p-8 lg:grid-cols-[0.72fr_1fr]">
       <div>
         <ShieldCheck className="h-10 w-10 text-[#F8A900]" />
-        <h2 className="mt-4 text-3xl font-black">Guided with practical safety notes</h2>
+        <h2 className="mt-4 text-2xl sm:text-3xl font-black">Guided with practical safety notes</h2>
         <p className="mt-4 text-sm leading-7 text-white/75">{trip.safetyNotes}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
@@ -245,11 +245,11 @@ function BookingPanel({
   const unavailable = bookingUnavailable(trip);
   return (
     <section id="booking" className="scroll-mt-28 overflow-hidden rounded-[1.5rem] border border-[#114F3C]/10 bg-surface shadow-2xl shadow-[#114F3C]/12 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/30">
-      <div className="bg-[#114F3C] p-6 text-white">
+      <div className="bg-[#114F3C] p-4 sm:p-6 text-white">
         <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Book this trip</p>
         <div className="mt-4 flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-4xl font-black">{isHotTrip(trip) ? formatPrice(trip.price) : "Ask for pricing"}</h2>
+            <h2 className="text-2xl sm:text-4xl font-black">{isHotTrip(trip) ? formatPrice(trip.price) : "Ask for pricing"}</h2>
             <p className="mt-1 text-sm font-bold text-white/60">{isHotTrip(trip) ? "per person" : "Our team will share the trip price."}</p>
           </div>
           <p className="rounded-lg bg-white/12 px-3 py-2 text-sm font-black text-white">{unavailable ? "Booking closed" : `${trip.availableSeats} seats`}</p>
@@ -299,7 +299,7 @@ function InfoPanel({ title, icon, items }: { title: string; icon: "check" | "min
   const iconColor = icon === "minus" ? "text-[#F54C0D]" : "text-[#9EC26D]";
 
   return (
-    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-4 sm:p-6 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
       <h3 className="text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h3>
       <ul className="mt-5 space-y-3 text-sm leading-6 text-stone-700 dark:text-stone-300">
         {(items.length ? items : ["Details will be shared before departure."]).map((item) => (
@@ -315,7 +315,7 @@ function InfoPanel({ title, icon, items }: { title: string; icon: "check" | "min
 
 function MobileBookingBar({ trip }: { trip: Trip }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#114F3C]/10 bg-white/95 p-3 shadow-2xl shadow-black/20 backdrop-blur dark:border-white/10 dark:bg-[#10241C]/95 lg:hidden">
+    <div className="mobile-booking-bar fixed inset-x-0 bottom-0 z-40 border-t border-[#114F3C]/10 bg-white/95 p-3 shadow-2xl shadow-black/20 backdrop-blur dark:border-white/10 dark:bg-[#10241C]/95 lg:hidden">
       <div className="mx-auto flex max-w-7xl items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-black text-[#114F3C] dark:text-[#F8A900]">{trip.title}</p>

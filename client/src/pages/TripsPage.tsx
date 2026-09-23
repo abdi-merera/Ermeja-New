@@ -142,7 +142,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
             </div>
           )}
 
-          <section className="mt-8 rounded-[1.5rem] border border-[#F8A900]/40 bg-[#FCE4B4] p-6 text-[#114F3C] shadow-lg dark:bg-[#10241C] dark:text-white">
+          <section className="mt-8 rounded-[1.5rem] border border-[#F8A900]/40 bg-[#FCE4B4] p-4 sm:p-6 text-[#114F3C] shadow-lg dark:bg-[#10241C] dark:text-white">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]">Private & group trips</p>
               <h3 className="mt-2 text-2xl font-black">Choose your own date, destination and group size.</h3>
@@ -163,7 +163,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
             </form> : null}
           </section>
 
-          <section className="mt-8 flex flex-col justify-between gap-5 rounded-[1.5rem] bg-[#114F3C] p-6 text-white shadow-xl shadow-[#114F3C]/15 sm:flex-row sm:items-center">
+          <section className="mt-8 flex flex-col justify-between gap-5 rounded-[1.5rem] bg-[#114F3C] p-4 sm:p-6 text-white shadow-xl shadow-[#114F3C]/15 sm:flex-row sm:items-center">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Not sure which trip fits?</p>
               <h3 className="mt-2 text-2xl font-black">Ask us for a route recommendation.</h3>

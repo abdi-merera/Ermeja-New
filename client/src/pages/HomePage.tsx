@@ -32,35 +32,35 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#09251C]/95 via-[#114F3C]/78 to-black/30" />
         <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-canvas to-transparent dark:from-[#071711]" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 lg:py-20 sm:px-6 lg:grid-cols-[1fr_0.82fr] lg:px-8">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-5 sm:gap-8 px-4 py-10 lg:py-20 sm:px-6 lg:grid-cols-[1fr_0.82fr] lg:px-8">
           <div className="max-w-3xl py-4 lg:self-start lg:pb-0 lg:pt-16">
-            <p className="mb-4 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#F8A900] backdrop-blur">
+            <p className="mb-4 inline-flex rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] sm:text-sm font-black uppercase tracking-[0.14em] sm:tracking-[0.22em] text-[#F8A900] backdrop-blur">
               Guided Ethiopian adventures
             </p>
             <h1 className="max-w-4xl text-center [container-type:inline-size] text-[clamp(1.875rem,8vw,3rem)] font-black leading-tight text-white sm:text-6xl lg:text-6xl"><span className="block whitespace-nowrap">እርምጃ Hiking</span><span className="mt-2 block whitespace-nowrap text-[6.6cqw] leading-tight">Explore Ethiopia with us</span></h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-white/90">
+            <p className="mt-4 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8 text-white/90">
               Discover upcoming hikes, compare packages, book a group trip, and step into Ethiopia's mountains, lakes, forests, and hidden places with local guides.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" onClick={() => choosePage("trips")} className={`inline-flex items-center gap-2 rounded-lg px-6 py-4 text-base font-black transition ${yellowButton}`}>
+              <button type="button" onClick={() => choosePage("trips")} className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm sm:px-6 sm:py-4 sm:text-base font-black transition ${yellowButton}`}>
                 View Trips
                 <ArrowRight className="h-5 w-5" />
               </button>
-              <a className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-6 py-4 text-base font-black text-white backdrop-blur transition hover:bg-white/20" href={`https://wa.me/${whatsappNumber}`}>
+              <a className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-4 py-3 text-sm sm:px-6 sm:py-4 sm:text-base font-black text-white backdrop-blur transition hover:bg-white/20" href={`https://wa.me/${whatsappNumber}`}>
                 <MessageCircle className="h-5 w-5" />
                 WhatsApp
               </a>
             </div>
-            <div className="mt-6 grid max-w-2xl grid-cols-3 gap-3">
+            <div className="mt-6 grid max-w-2xl grid-cols-3 gap-2 sm:gap-3">
               {heroStats.map((stat) => stat.label === "Guest rating" ? (
-                <a key={stat.label} href={googleReviewUrl} target="_blank" rel="noopener noreferrer" aria-label={`${stat.value} guest rating. Review us on Google (opens in a new tab)`} className="rounded-lg border border-white/15 bg-white/10 p-4 text-white backdrop-blur transition hover:border-[#F8A900] hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900]">
+                <a key={stat.label} href={googleReviewUrl} target="_blank" rel="noopener noreferrer" aria-label={`${stat.value} guest rating. Review us on Google (opens in a new tab)`} className="rounded-lg border border-white/15 bg-white/10 p-3 sm:p-4 text-white backdrop-blur transition hover:border-[#F8A900] hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900]">
                   <p className="text-2xl font-black text-[#F8A900]">{stat.value}</p>
-                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-white/75">{stat.label} <ArrowRight aria-hidden="true" className="inline h-3 w-3 -rotate-45" /></p>
+                  <p className="mt-1 text-[10px] sm:text-xs font-bold uppercase tracking-normal sm:tracking-[0.12em] text-white/75">{stat.label} <ArrowRight aria-hidden="true" className="inline h-3 w-3 -rotate-45" /></p>
                 </a>
               ) : (
-                <div key={stat.label} className="rounded-lg border border-white/15 bg-white/10 p-4 text-white backdrop-blur">
+                <div key={stat.label} className="rounded-lg border border-white/15 bg-white/10 p-3 sm:p-4 text-white backdrop-blur">
                   <p className="text-2xl font-black text-[#F8A900]">{stat.value}</p>
-                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-white/75">{stat.label}</p>
+                  <p className="mt-1 text-[10px] sm:text-xs font-bold uppercase tracking-normal sm:tracking-[0.12em] text-white/75">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -105,7 +105,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         </div>
       </section>
 
-      <section className="-mt-8 px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="mt-0 sm:-mt-8 px-4 pb-10 sm:pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="Upcoming trips" title="Choose your next walk" text="Explore upcoming walks and find the right date, destination, and pace for you." />
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -116,7 +116,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         </div>
       </section>
 
-      <section className={`${brandGreen} px-4 py-16 text-white sm:px-6 lg:px-8`}>
+      <section className={`${brandGreen} px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8`}>
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-4">
           {trustItems.map(({ title, text, Icon }) => (
             <article key={title} className="rounded-lg border border-white/10 bg-white/10 p-5">
@@ -128,12 +128,12 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         </div>
       </section>
 
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="Experience" title="Your next adventure starts here" text="Find a walk that suits you, see what is included, and get in touch when you are ready to join." />
           <div className="grid gap-5 md:grid-cols-3">
             {experienceHighlights.map(({ title, text, Icon }) => (
-              <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+              <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-4 sm:p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#FCE4B4] text-[#F54C0D]">
                   <Icon className="h-6 w-6" />
                 </span>
@@ -145,7 +145,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
         </div>
       </section>
 
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="Destinations" title="Popular places to explore" />
           <div className="grid gap-6 md:grid-cols-3">
@@ -164,7 +164,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
 
       <GalleryPreview images={galleryImages} onOpen={() => choosePage("gallery")} />
 
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="Guest stories" title="See experiences shared by the Ermija community" />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -173,7 +173,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
               ["Instagram", "Trip photos, tagged guests and comments from recent walks.", "https://www.instagram.com/ermja__hiking?igsh=a3pneGhxNnJ5ejQ0&utm_source=qr"],
               ["Facebook", "Catch up on trip updates and stories from our hiking community.", "https://www.facebook.com/share/1jlnaqcqen/?mibextid=wwxifr"],
               ["Linktree", "Find all our social pages and contact links in one place.", "https://linktr.ee/ermja_hiking"]
-            ].map(([name, text, url]) => <a key={name} href={url} target="_blank" rel="noreferrer" className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#10241C]">
+            ].map(([name, text, url]) => <a key={name} href={url} target="_blank" rel="noreferrer" className="rounded-lg border border-[#114F3C]/10 bg-surface p-4 sm:p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#10241C]">
               <p className="text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{name}</p><p className="mt-3 text-sm leading-7 text-stone-700 dark:text-stone-300">{text}</p><p className="mt-5 text-sm font-black text-[#F54C0D]">{name === "Google Reviews" ? "Review us on Google" : "View guest posts"} <span aria-hidden="true">&rarr;</span></p>
             </a>)}
           </div>
@@ -183,11 +183,11 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-lg bg-[#F54C0D] text-white shadow-2xl shadow-[#F54C0D]/20">
           <div className="grid md:grid-cols-[1.4fr_1fr]">
-            <div className="flex items-center p-6 sm:p-8">
+            <div className="flex items-center p-4 sm:p-8">
           <div className="grid justify-items-start gap-5">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.24em] text-white/80">Ready for your next walk?</p>
-              <h2 className="mt-3 text-3xl font-black sm:text-4xl">Book a seat or ask Ermija Hiking about the next group trip.</h2>
+              <h2 className="mt-3 text-2xl font-black sm:text-4xl">Book a seat or ask Ermija Hiking about the next group trip.</h2>
             </div>
             <a className="rounded-lg bg-white px-6 py-4 text-center text-base font-black text-[#114F3C] transition hover:bg-[#FCE4B4]" href={`https://wa.me/${whatsappNumber}`}>
               WhatsApp Ermija

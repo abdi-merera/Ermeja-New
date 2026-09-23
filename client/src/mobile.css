@@ -1,0 +1,14 @@
+/* Phone ergonomics shared by public pages and admin forms. */
+@media (max-width: 639px) {
+  html { scroll-padding-top: 80px; }
+  #root { min-width: 0; }
+  h1, h2, h3, h4 { overflow-wrap: anywhere; }
+  #root input:not([type="checkbox"]):not([type="radio"]), #root textarea, #root select {
+    font-size: 16px;
+    max-width: 100%;
+    min-width: 0;
+  }
+  button, a, input, select, textarea { touch-action: manipulation; }
+  button:not([role="switch"]), select { min-height: 44px; }
+  .mobile-booking-bar { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}

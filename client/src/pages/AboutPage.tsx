@@ -36,19 +36,19 @@ const processSteps = [
 export function AboutPage() {
   return (
     <>
-      <section className="relative overflow-hidden bg-[#071711] px-4 py-16 text-white sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-[#071711] px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8">
         <img
           className="absolute inset-0 h-full w-full object-cover opacity-35"
           src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1800&q=85"
           alt="Hikers walking through mountain nature"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#071711] via-[#114F3C]/90 to-black/35" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1fr_0.76fr]">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-6 sm:gap-10 lg:grid-cols-[1fr_0.76fr]">
           <div className="max-w-3xl">
             <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#F8A900] backdrop-blur">
               About Ermija Hiking
             </p>
-            <h1 className="mt-6 text-5xl font-black leading-tight sm:text-6xl lg:text-7xl">Discover Ethiopia, one walk at a time.</h1>
+            <h1 className="mt-6 text-3xl font-black leading-tight sm:text-6xl lg:text-7xl">Discover Ethiopia, one walk at a time.</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/84">
               Ermija means walk in Amharic. We bring people together for guided outdoor experiences across Ethiopia's lakes, mountains, forests, highlands, and cultural routes.
             </p>
@@ -65,7 +65,7 @@ export function AboutPage() {
           </div>
 
           <aside className="rounded-lg border border-white/15 bg-white/10 p-4 shadow-2xl shadow-black/35 backdrop-blur">
-            <img className="h-[420px] w-full rounded-lg object-cover" src={aboutImage} alt="Horses on an Ermija Hiking route" />
+            <img className="h-64 sm:h-[420px] w-full rounded-lg object-cover" src={aboutImage} alt="Horses on an Ermija Hiking route" />
             <div className="mt-4 grid grid-cols-3 gap-3">
               {storyStats.map((stat) => (
                 <div key={stat.label} className="rounded-lg bg-white/10 p-4">
@@ -78,11 +78,11 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.78fr_1fr]">
+      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-5 sm:gap-8 lg:grid-cols-[0.78fr_1fr]">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">The story</p>
-            <h2 className="mt-3 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">Step outside. Discover more of Ethiopia.</h2>
+            <h2 className="mt-3 text-2xl sm:text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">Step outside. Discover more of Ethiopia.</h2>
           </div>
           <div className="grid gap-5 text-base leading-8 text-stone-700 dark:text-stone-300">
             <p>
@@ -95,15 +95,15 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className={`${brandGreen} px-4 py-16 text-white sm:px-6 lg:px-8`}>
+      <section className={`${brandGreen} px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8`}>
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 max-w-2xl">
             <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F8A900]">What guides us</p>
-            <h2 className="mt-3 text-4xl font-black">Good company. Local knowledge. Memorable walks.</h2>
+            <h2 className="mt-3 text-2xl sm:text-4xl font-black">Good company. Local knowledge. Memorable walks.</h2>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             {principles.map(({ title, text, Icon }) => (
-              <article key={title} className="rounded-lg border border-white/10 bg-white/10 p-6">
+              <article key={title} className="rounded-lg border border-white/10 bg-white/10 p-4 sm:p-6">
                 <Icon className="h-8 w-8 text-[#F8A900]" />
                 <h3 className="mt-5 text-2xl font-black">{title}</h3>
                 <p className="mt-3 text-sm leading-7 text-white/74">{text}</p>
@@ -113,12 +113,12 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 grid gap-5 lg:grid-cols-[0.7fr_1fr]">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">How trips are shaped</p>
-              <h2 className="mt-3 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">From choosing a route to hitting the trail.</h2>
+              <h2 className="mt-3 text-2xl sm:text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">From choosing a route to hitting the trail.</h2>
             </div>
             <p className="text-base leading-8 text-stone-700 dark:text-stone-300">
               Check your trip details for the meeting point, walking difficulty, and what to pack. Our team can answer your questions and help you prepare before departure.
@@ -126,7 +126,7 @@ export function AboutPage() {
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {processSteps.map((item) => (
-              <article key={item.step} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+              <article key={item.step} className="rounded-lg border border-[#114F3C]/10 bg-surface p-4 sm:p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
                 <p className="text-sm font-black text-[#F54C0D]">{item.step}</p>
                 <h3 className="mt-3 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{item.title}</h3>
                 <p className="mt-3 text-sm leading-7 text-stone-700 dark:text-stone-300">{item.text}</p>
@@ -139,7 +139,7 @@ export function AboutPage() {
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-4">
           {trustItems.map(({ title, text, Icon }) => (
-            <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+            <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-4 sm:p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
               <Icon className="h-7 w-7 text-[#F54C0D]" />
               <h3 className="mt-5 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-stone-700 dark:text-stone-300">{text}</p>
@@ -150,9 +150,9 @@ export function AboutPage() {
 
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl overflow-hidden rounded-lg bg-[#F54C0D] text-white shadow-2xl shadow-[#F54C0D]/20 lg:grid-cols-[1fr_0.42fr]">
-          <div className="p-8 sm:p-10">
+          <div className="p-5 sm:p-10">
             <HeartHandshake className="h-10 w-10 text-white/80" />
-            <h2 className="mt-5 text-4xl font-black">Planning a group walk, company trip, or weekend escape?</h2>
+            <h2 className="mt-5 text-2xl sm:text-4xl font-black">Planning a group walk, company trip, or weekend escape?</h2>
             <p className="mt-4 max-w-2xl text-base leading-8 text-white/84">
               Ermija Hiking can help shape a route, explain the package, and guide your group through the next available trip.
             </p>

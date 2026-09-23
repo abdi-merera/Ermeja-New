@@ -21,7 +21,7 @@ export function Navbar({
 }) {
   return (
     <header className={`sticky top-0 z-40 ${brandGreen} border-b border-white/10 shadow-lg shadow-[#114F3C]/20`}>
-      <div className="flex w-full items-center justify-start px-4 py-4 sm:px-6 lg:px-8">
+      <div className="flex w-full items-center justify-start px-4 py-2 sm:py-4 sm:px-6 lg:px-8">
         <Logo onClick={() => choosePage("home")} onLongPress={() => choosePage("admin")} />
         <FootstepTrail />
         <nav className="ml-auto hidden items-center gap-1 lg:flex">
@@ -29,7 +29,7 @@ export function Navbar({
             <button
               key={item.page}
               type="button"
-              onClick={() => choosePage(item.page)}
+              onClick={() => { choosePage(item.page); setMobileOpen(false); }}
               className={`rounded-lg px-4 py-2 text-sm font-bold transition ${
                 page === item.page ? "bg-white text-[#114F3C] shadow-sm" : "text-white/85 hover:bg-white/10 hover:text-white"
               }`}
@@ -49,18 +49,18 @@ export function Navbar({
             <WhatsAppIcon className="h-5 w-5" />
           </a>
         </div>
-        <button type="button" className="ml-auto rounded-lg bg-white/10 p-3 text-white lg:ml-0 lg:hidden" onClick={() => setMobileOpen((open) => !open)}>
+        <button type="button" aria-label={mobileOpen ? "Close navigation" : "Open navigation"} aria-expanded={mobileOpen} aria-controls="mobile-navigation" className="ml-auto rounded-lg bg-white/10 p-3 text-white lg:ml-0 lg:hidden" onClick={() => setMobileOpen((open) => !open)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
       {mobileOpen ? (
-        <div className="border-t border-white/10 px-4 pb-4 lg:hidden">
+        <nav id="mobile-navigation" aria-label="Mobile navigation" className="max-h-[calc(100dvh-72px)] overflow-y-auto border-t border-white/10 px-4 pb-4 lg:hidden">
           <div className="grid gap-2">
             {navItems.map((item) => (
               <button
                 key={item.page}
                 type="button"
-                onClick={() => choosePage(item.page)}
+                onClick={() => { choosePage(item.page); setMobileOpen(false); }}
                 className="rounded-lg px-4 py-3 text-left text-sm font-bold text-white hover:bg-white/10"
               >
                 {item.label}
@@ -78,7 +78,7 @@ export function Navbar({
               </a>
             </div>
           </div>
-        </div>
+        </nav>
       ) : null}
     </header>
   );
@@ -95,7 +95,7 @@ function FootstepTrail() {
   ];
 
   return (
-    <div className="ermija-footstep-trail relative ml-2 h-14 w-32 shrink-0 sm:ml-5 sm:w-96" aria-hidden="true">
+    <div className="ermija-footstep-trail relative hidden sm:block ml-2 h-14 w-32 shrink-0 sm:ml-5 sm:w-96" aria-hidden="true">
       <style>
         {`
           @keyframes ermija-footstep {

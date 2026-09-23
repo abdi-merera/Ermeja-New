@@ -134,7 +134,7 @@ export function StandaloneGalleryEditor({ photos, onChange }: { photos: GalleryI
       <div className="space-y-2 p-4"><h3 className="font-bold">{photo.title}</h3><p className="text-sm text-stone-500 dark:text-stone-400">{photo.destination}</p><p className="text-sm">{photo.description}</p>
         <div className="flex flex-wrap gap-3"><button type="button" disabled={busy} onClick={() => { begin(null); setDestination(photo.destination); setTitle(photo.title); }} className="inline-flex items-center gap-1 rounded-lg bg-[#F8A900] px-3 py-2 text-sm font-bold text-[#114F3C] disabled:opacity-50"><ImagePlus className="h-4 w-4" /> Add to album</button><button type="button" disabled={busy} onClick={() => begin(photo)} className="inline-flex items-center gap-1 rounded-lg border border-stone-300 px-3 py-2 text-sm dark:border-white/20 disabled:opacity-50"><Edit3 className="h-4 w-4" /> Edit</button><button type="button" disabled={busy} onClick={() => remove(photo)} className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-red-600 dark:text-red-300 disabled:opacity-50"><Trash2 className="h-4 w-4" /> Remove from gallery</button></div>
       </div>
-    </article>)}</div> : <p className="rounded-lg border border-dashed border-stone-300 p-6 text-center text-sm text-stone-500 dark:border-white/20 dark:text-stone-400">No independent photos yet. Select Add photos to share your first adventure.</p>}
+    </article>)}</div> : <p className="rounded-lg border border-dashed border-stone-300 p-4 sm:p-6 text-center text-sm text-stone-500 dark:border-white/20 dark:text-stone-400">No independent photos yet. Select Add photos to share your first adventure.</p>}
   </div>;
 }
 
