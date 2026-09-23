@@ -3,6 +3,12 @@ import type { FormEvent } from "react";
 export type TripStatus = "Draft" | "Published";
 export type Page = "home" | "trips" | "gallery" | "about" | "contact" | "admin";
 
+export type ItineraryDay = {
+  activities: { title: string; description: string }[];
+  overnight: string;
+  meals: string;
+};
+
 export type Trip = {
   id: string;
   title: string;
@@ -22,6 +28,7 @@ export type Trip = {
   whatToBring: string[];
   notIncluded: string[];
   itinerary: string[];
+  itineraryDays?: ItineraryDay[];
   safetyNotes: string;
   coverImage: string;
   galleryImages: string[];
@@ -124,6 +131,7 @@ export type AdminTripForm = {
   whatToBring: string;
   notIncluded: string;
   itinerary: string;
+  itineraryDays?: ItineraryDay[];
   safetyNotes: string;
   description: string;
   coverImage: string;

@@ -53,7 +53,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
         const date = new Date(`${trip.date}T00:00:00`).getTime();
         const matchesPeriod = period === "All" || (period === "Upcoming" ? date >= todayTime : date < todayTime);
         return matchesPeriod && matchesDifficulty && matchesDuration && matchesQuery;
-      }).sort((a, b) => sort === "Price: low to high" ? a.price - b.price : sort === "Price: high to low" ? b.price - a.price : sort === "Latest first" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)),
+      }).sort((a, b) => sort === "Latest first" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)),
     [difficulty, duration, query, trips, period, sort, todayTime]
   );
 
@@ -84,7 +84,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
               Find your next hiking trip.
             </h1>
             <p className="mt-3 max-w-3xl text-base leading-7 text-stone-700 dark:text-stone-300 sm:text-lg">
-              Compare destinations, dates, prices and available seats, then open the trip that matches your pace.
+              Compare destinations, dates, and available seats, then find the trip that matches your pace.
             </p>
           </div>
 
@@ -116,7 +116,7 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
             <div id="trip-filters" className={`${filtersOpen ? "grid" : "hidden"} gap-3 sm:grid-cols-3 md:grid`}>
               <FilterSelect label="Difficulty" value={difficulty} options={difficultyOptions} onChange={setDifficulty} />
               <FilterSelect label="Duration" value={duration} options={durationOptions} onChange={setDuration} />
-              <FilterSelect label="Sort by" value={sort} options={["Soonest first", "Latest first", "Price: low to high", "Price: high to low"]} onChange={setSort} />
+              <FilterSelect label="Sort by" value={sort} options={["Soonest first", "Latest first"]} onChange={setSort} />
             </div>
           </div>
         </div>

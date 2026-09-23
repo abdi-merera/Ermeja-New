@@ -64,6 +64,8 @@ function CircularSplitGallery({ images, activeImage, setActiveImage }: { images:
 }
 
 export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGalleryHighlight }: { images: GalleryImage[]; trips: Trip[]; chooseTrip: (trip: Trip) => void; highlight?: GalleryHighlight }) {
+  const albumHeadingRef = useRef<HTMLHeadingElement>(null);
+  const scrollToAlbum = useRef(false);
   const [activeDestination, setActiveDestination] = useState<string | null>(null);
   const [activeSplitImage, setActiveSplitImage] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -80,6 +82,20 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
     })),
     [images]
   );
+  const otherAlbums = destinationGroups.filter((group) => group.destination !== activeDestination);
+  const openAlbum = (destination: string) => {
+    scrollToAlbum.current = true;
+    setLightboxIndex(null);
+    setShowPhotoGrid(false);
+    setActiveDestination(destination);
+  };
+  useEffect(() => {
+    if (!scrollToAlbum.current || !activeDestination) return;
+    scrollToAlbum.current = false;
+    albumHeadingRef.current?.focus({ preventScroll: true });
+    albumHeadingRef.current?.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }, [activeDestination]);
+
   const selectedImages = activeDestination ? images.filter((item) => item.destination === activeDestination) : [];
   const featured = images[0];
   const selectedTrip = trips.find((trip) => selectedImages.some((image) => image.tripId === trip.id));
@@ -195,7 +211,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
                   <ArrowLeft className="h-4 w-4" /> All destinations
                 </button>
                 <p className="mt-5 flex items-center gap-2 text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]"><MapPin className="h-4 w-4" /> Destination album</p>
-                <h2 className="mt-2 text-4xl font-black text-[#114F3C] dark:text-[#F8A900]">{activeDestination}</h2>
+                <h2 ref={albumHeadingRef} tabIndex={-1} className="mt-2 scroll-mt-32 text-4xl font-black text-[#114F3C] outline-none dark:text-[#F8A900]">{activeDestination}</h2>
               </div>
               <p className="text-sm font-bold text-stone-600 dark:text-stone-300">{selectedImages.length} {selectedImages.length === 1 ? "photo" : "photos"}</p>
             </div>
@@ -219,30 +235,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
               <p className="mt-3 max-w-2xl text-base leading-7 text-stone-600 dark:text-stone-300">Open a destination to see every photo from its trips in one clean album.</p>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {destinationGroups.map((group, index) => (
-                <button key={group.destination} type="button" onClick={() => setActiveDestination(group.destination)} className={`group relative min-h-80 overflow-hidden rounded-2xl bg-[#114F3C] text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${index === 0 ? "md:col-span-2" : ""}`}>
-                  <span className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 bg-[#114F3C]">
-                    {group.images.slice(0, 4).map((item, imageIndex) => (
-                      <img
-                        key={item.id}
-                        className={`h-full min-h-0 w-full object-cover transition duration-700 group-hover:scale-[1.03] ${group.images.length === 1 ? "col-span-2 row-span-2" : group.images.length === 2 ? "row-span-2" : imageIndex === 0 && group.images.length === 3 ? "row-span-2" : ""}`}
-                        src={item.image}
-                        loading="lazy"
-                        decoding="async"
-                        alt={`${group.destination} preview ${imageIndex + 1}`}
-                      />
-                    ))}
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/5 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <p className="flex items-center gap-2 text-sm font-bold text-[#F8A900]"><Images className="h-4 w-4" /> {group.images.length} {group.images.length === 1 ? "photo" : "photos"}</p>
-                    <h3 className="mt-2 text-3xl font-black">{group.destination}</h3>
-                    <p className="mt-2 text-sm font-bold text-white/70">View all photos</p>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <DestinationAlbums groups={destinationGroups} onSelect={openAlbum} featuredFirst />
           </section>
         )}
 
@@ -273,18 +266,27 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
           </div>
         </section>
 
+        {activeDestination && otherAlbums.length > 0 ? (
+          <section className="mt-12" aria-labelledby="other-albums-heading">
+            <h2 id="other-albums-heading" className="text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Explore other albums</h2>
+            <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">Choose another destination to keep exploring.</p>
+            <DestinationAlbums groups={otherAlbums} onSelect={openAlbum} />
+          </section>
+        ) : null}
+
         <section className="mt-12 grid gap-5 lg:grid-cols-[1fr_1fr_1fr]">
           {[
-            { title: "Instagram reels", text: "See trail views, group adventures, and memorable stops from our walks.", Icon: Instagram },
-            { title: "TikTok trail moments", text: "Enjoy a glimpse of life on the trail with our hiking community.", Icon: Film },
-            { title: "A glimpse of the adventure", text: "Discover new places and find inspiration for your next outing.", Icon: Play }
-          ].map(({ title, text, Icon }) => (
-            <article key={title} className="relative overflow-hidden rounded-lg border border-[#114F3C]/10 bg-[#114F3C] p-6 text-white shadow-sm">
+            { title: "Instagram reels", text: "See trail views, group adventures, and memorable stops from our walks.", Icon: Instagram, href: "https://www.instagram.com/ermja__hiking?igsh=a3pneGhxNnJ5ejQ0&utm_source=qr", platform: "Instagram" },
+            { title: "TikTok trail moments", text: "Enjoy a glimpse of life on the trail with our hiking community.", Icon: Film, href: "https://www.tiktok.com/@ermjahikingg?_r=1&_t=zn-98ldwtbjfgk", platform: "TikTok" },
+            { title: "Facebook adventures", text: "Discover new places and find inspiration for your next outing.", Icon: Play, href: "https://www.facebook.com/share/1jlnaqcqen/?mibextid=wwxifr", platform: "Facebook" }
+          ].map(({ title, text, Icon, href, platform }) => (
+            <a key={title} href={href} target="_blank" rel="noopener noreferrer" aria-label={`Visit Ermija Hiking on ${platform} (opens in a new tab)`} className="group relative overflow-hidden rounded-lg border border-[#114F3C]/10 bg-[#114F3C] p-6 text-white shadow-sm transition hover:-translate-y-1 hover:border-[#F8A900]/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900]">
               <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-full bg-[#F8A900]/20" />
               <Icon className="h-8 w-8 text-[#F8A900]" />
               <h3 className="mt-5 text-xl font-black">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-white/72">{text}</p>
-            </article>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#F8A900]">Visit {platform} <ExternalLink className="h-4 w-4" /></span>
+            </a>
           ))}
         </section>
 
@@ -365,5 +367,38 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
         </dialog>
       ) : null}
     </section>
+  );
+}
+
+function DestinationAlbums({ groups, onSelect, featuredFirst = false }: {
+  groups: { destination: string; images: GalleryImage[] }[];
+  onSelect: (destination: string) => void;
+  featuredFirst?: boolean;
+}) {
+  return (
+            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {groups.map((group, index) => (
+                <button key={group.destination} type="button" onClick={() => onSelect(group.destination)} className={`group relative min-h-80 overflow-hidden rounded-2xl bg-[#114F3C] text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${featuredFirst && index === 0 ? "md:col-span-2" : ""}`}>
+                  <span className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0.5 bg-[#114F3C]">
+                    {group.images.slice(0, 4).map((item, imageIndex) => (
+                      <img
+                        key={item.id}
+                        className={`h-full min-h-0 w-full object-cover transition duration-700 group-hover:scale-[1.03] ${group.images.length === 1 ? "col-span-2 row-span-2" : group.images.length === 2 ? "row-span-2" : imageIndex === 0 && group.images.length === 3 ? "row-span-2" : ""}`}
+                        src={item.image}
+                        loading="lazy"
+                        decoding="async"
+                        alt={`${group.destination} preview ${imageIndex + 1}`}
+                      />
+                    ))}
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/5 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <p className="flex items-center gap-2 text-sm font-bold text-[#F8A900]"><Images className="h-4 w-4" /> {group.images.length} {group.images.length === 1 ? "photo" : "photos"}</p>
+                    <h3 className="mt-2 text-3xl font-black">{group.destination}</h3>
+                    <p className="mt-2 text-sm font-bold text-white/70">View all photos</p>
+                  </div>
+                </button>
+              ))}
+            </div>
   );
 }

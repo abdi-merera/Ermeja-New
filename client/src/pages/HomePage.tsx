@@ -4,7 +4,7 @@ import { GalleryPreview } from "../components/GalleryPreview";
 import { SectionTitle } from "../components/SectionTitle";
 import { TripCard } from "../components/TripCard";
 import type { GalleryImage, Page, Trip } from "../types";
-import { formatPrice } from "../utils";
+import { formatPrice, isHotTrip } from "../utils";
 
 const googleReviewUrl = "https://search.google.com/local/writereview?placeid=ChIJ0Z_w4jt5SxYRGwjl68dCYq0";
 
@@ -18,7 +18,7 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
     })
     .sort((first, second) => first.date.localeCompare(second.date));
   const daysUntil = (trip: Trip) => Math.ceil((new Date(`${trip.date}T00:00:00`).getTime() - today.getTime()) / 86_400_000);
-  const hotTrip = upcomingTrips.find((trip) => daysUntil(trip) <= (trip.hotLeadDays ?? 5)) || null;
+  const hotTrip = upcomingTrips.find((trip) => isHotTrip(trip)) || null;
   const daysUntilHotTrip = hotTrip ? daysUntil(hotTrip) : null;
   const countdown = daysUntilHotTrip === 0 ? "Leaving today" : daysUntilHotTrip === 1 ? "Leaving tomorrow" : `Leaving in ${daysUntilHotTrip} days`;
 

@@ -1,3 +1,5 @@
+import { ItineraryEditor } from "../components/ItineraryEditor";
+import { getItineraryDays } from "../itinerary";
 import { StandaloneGalleryEditor } from "../components/StandaloneGalleryEditor";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, CheckCircle2, Edit3, ImagePlus, LogIn, LogOut, Mail, MessageCircle, Mountain, Phone, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
@@ -40,6 +42,7 @@ function tripToForm(trip: Trip): AdminTripForm {
     whatToBring: trip.whatToBring.join(", "),
     notIncluded: trip.notIncluded.join(", "),
     itinerary: trip.itinerary.join("\n"),
+    itineraryDays: getItineraryDays(trip),
     safetyNotes: trip.safetyNotes,
     description: trip.description,
     coverImage: trip.coverImage,
@@ -763,10 +766,7 @@ function TripForm({
     const price = Number(form.price);
     const seats = Number(form.availableSeats);
     const hotLeadDays = Number(form.hotLeadDays);
-    const itinerarySteps = form.itinerary
-      .split(/\r?\n/)
-      .map((item) => item.trim())
-      .filter(Boolean);
+    const days = form.itineraryDays ?? getItineraryDays({ itinerary: form.itinerary.split(/\r?\n/).filter(Boolean) });
 
     if (form.title.trim().length < 4) {
       errors.title = "Use at least 4 characters.";
@@ -804,8 +804,8 @@ function TripForm({
       errors.coverImage = "Add a cover image before publishing.";
     }
 
-    if (itinerarySteps.length < 2) {
-      errors.itinerary = "Add at least 2 itinerary steps.";
+    if (!days.length || days.some(day => !day.activities.length || day.activities.some(activity => !activity.description.trim()))) {
+      errors.itinerary = "Add at least one activity per day, with a description for every activity.";
     }
 
     return errors;
@@ -937,7 +937,7 @@ function TripForm({
             </div>
           </FormSection>
 
-          <FormSection title="Package details" text="Use commas for short lists and one itinerary step per line.">
+          <FormSection title="Package details" text="Use commas to separate items in the short lists.">
             <FieldLabel label="Included" hint="Comma separated">
               <input className={`${inputClass} w-full`} placeholder="Transport, Guide, Entrance fee" value={form.includes} onChange={(event) => setForm({ ...form, includes: event.target.value })} />
             </FieldLabel>
@@ -947,9 +947,11 @@ function TripForm({
             <FieldLabel label="Not included" hint="Comma separated">
               <input className={`${inputClass} w-full`} placeholder="Personal expenses, Extra snacks, Personal insurance" value={form.notIncluded} onChange={(event) => setForm({ ...form, notIncluded: event.target.value })} />
             </FieldLabel>
-            <FieldLabel label="Itinerary" hint="One step per line" error={fieldErrors.itinerary}>
-              <textarea className={`${inputClass} min-h-28 w-full`} placeholder={"Meet the guide and group.\nTravel to the destination.\nEnjoy the route."} value={form.itinerary} onChange={(event) => setForm({ ...form, itinerary: event.target.value })} />
-            </FieldLabel>
+            <ItineraryEditor
+              days={form.itineraryDays ?? getItineraryDays({ itinerary: form.itinerary.split(/\r?\n/).filter(Boolean) })}
+              onChange={(itineraryDays) => setForm({ ...form, itineraryDays })}
+              error={fieldErrors.itinerary}
+            />
             <FieldLabel label="Safety notes">
               <textarea className={`${inputClass} min-h-20 w-full`} placeholder="Safety guidance shown on the trip detail page." value={form.safetyNotes} onChange={(event) => setForm({ ...form, safetyNotes: event.target.value })} />
             </FieldLabel>

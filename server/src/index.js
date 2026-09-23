@@ -104,6 +104,7 @@ app.use((_req, res, next) => {
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("Vary", "Origin");
   next();
 });
 app.use(express.json({ limit: "2mb" }));
@@ -494,6 +495,11 @@ function isTooLong(value, maxLength) {
 function requireTrustedOrigin(req, res, next) {
   const origin = req.get("origin");
 
+  // Requests without an Origin header (e.g. same-origin server-to-server) are
+  // allowed. Requests with an Origin that is not in the allowlist are rejected.
+  // This, combined with requireJsonBody (Content-Type: application/json), is
+  // the CSRF mitigation for this REST API / SPA architecture — cookie-based
+  // CSRF tokens are not applicable here because the API uses Bearer tokens.
   if (origin && !allowedOrigins.has(origin.replace(/\/$/, ""))) {
     res.status(403).json({ message: "Request origin is not allowed." });
     return;

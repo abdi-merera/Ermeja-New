@@ -1,3 +1,4 @@
+import { getItineraryDays } from "../itinerary";
 import { useRef, useState } from "react";
 import { bookingUnavailable } from "../bookingRules";
 import {
@@ -19,7 +20,7 @@ import type { LucideIcon } from "lucide-react";
 import { orangeButton, whatsappNumber, yellowButton } from "../constants";
 import { TripCard } from "../components/TripCard";
 import type { BookingForm, BookingSubmitHandler, Trip } from "../types";
-import { formatDate, formatPrice } from "../utils";
+import { formatDate, formatPrice, isHotTrip } from "../utils";
 
 const inputClass =
   "w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-semibold text-stone-900 outline-none transition focus:border-[#114F3C] focus:ring-4 focus:ring-[#114F3C]/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-stone-500 dark:focus:border-[#F8A900]";
@@ -54,7 +55,7 @@ export function TripDetailPage({
             <h2 className="text-xl font-bold text-[#114F3C] dark:text-[#F8A900]">Meeting point and times</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2"><div><dt className="text-sm text-stone-500 dark:text-stone-400">Meet at</dt><dd className="font-semibold">{trip.meetingPoint || "Our team will confirm the meeting point."}</dd></div><div><dt className="text-sm text-stone-500 dark:text-stone-400">Departure</dt><dd className="font-semibold">{formatDate(trip.date)} / {trip.departureTime || "Time to be confirmed"}</dd></div><div><dt className="text-sm text-stone-500 dark:text-stone-400">Return</dt><dd className="font-semibold">{trip.returnDate ? formatDate(trip.returnDate) : formatDate(trip.date)} / {trip.returnTime || "Time to be confirmed"}</dd></div></dl>
           </section>
-          <ItinerarySection trip={trip} />
+          <ItinerarySection key={trip.id} trip={trip} />
           <div className="grid gap-5 xl:grid-cols-3">
             <InfoPanel title="Included" icon="check" items={trip.includes} />
             <InfoPanel title="Not included" icon="minus" items={trip.notIncluded} />
@@ -117,7 +118,7 @@ function TripHero({ trip, galleryImages, onBack }: { trip: Trip; galleryImages: 
 
           <div className="mt-9 grid max-w-3xl gap-3 sm:grid-cols-2">
             <HeroFact Icon={CalendarDays} label="Trip date" value={formatDate(trip.date)} />
-            <HeroFact Icon={Ticket} label="Per person" value={formatPrice(trip.price)} />
+            <HeroFact Icon={Ticket} label={isHotTrip(trip) ? "Per person" : "Pricing"} value={isHotTrip(trip) ? formatPrice(trip.price) : "Contact us for pricing"} />
             <HeroFact Icon={Gauge} label="Difficulty" value={trip.difficulty} />
             <HeroFact Icon={Users} label="Availability" value={bookingUnavailable(trip) ? "Booking closed" : `${trip.availableSeats} seats`} />
           </div>
@@ -173,26 +174,34 @@ function RouteSnapshot({ trip }: { trip: Trip }) {
 }
 
 function ItinerarySection({ trip }: { trip: Trip }) {
+  const days = getItineraryDays(trip);
+  const [expanded, setExpanded] = useState<number[]>([0]);
+  const allExpanded = expanded.length === days.length;
   return (
-    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-6 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] sm:p-8">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Route plan</p>
-          <h2 className="mt-2 text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">From first meet-up to final return</h2>
-        </div>
-        <p className="rounded-lg bg-[#FCE4B4] px-4 py-3 text-sm font-black text-[#114F3C]">{trip.departureTime} departure</p>
+    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-6 shadow-sm dark:border-white/10 dark:bg-[#10241C] sm:p-8">
+      <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Your itinerary</p>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
+        <h2 className="text-3xl font-black text-[#114F3C] dark:text-[#F8A900]">Day by day</h2>
+        <button type="button" className="rounded-lg border border-current/20 px-4 py-2 text-sm font-bold text-[#114F3C] dark:text-white" onClick={() => setExpanded(allExpanded ? [] : days.map((_, i) => i))}>{allExpanded ? "Collapse all" : "Expand all"}</button>
       </div>
-
-      <div className="mt-8 grid gap-4">
-        {trip.itinerary.map((item, index) => (
-          <article key={item} className="grid gap-4 rounded-2xl border border-[#114F3C]/10 bg-sage p-4 dark:border-white/10 dark:bg-white/5 sm:grid-cols-[76px_1fr]">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#114F3C] text-sm font-black text-[#F8A900]">{String(index + 1).padStart(2, "0")}</span>
-            <div>
-              <h3 className="text-lg font-black text-[#114F3C] dark:text-white">Step {index + 1}</h3>
-              <p className="mt-2 text-sm leading-7 text-stone-700 dark:text-stone-300">{item}</p>
-            </div>
-          </article>
-        ))}
+      <div className="mt-6 space-y-3">
+        {days.map((day, index) => <div key={index} className="overflow-hidden rounded-xl border border-[#114F3C]/15 bg-sage dark:border-white/15 dark:bg-white/5">
+          <h3><button type="button" aria-expanded={expanded.includes(index)} aria-controls={`itinerary-day-${index}`} onClick={() => setExpanded(previous => previous.includes(index) ? previous.filter(i => i !== index) : [...previous, index])} className="flex w-full items-center gap-4 p-4 text-left text-[#114F3C] dark:text-white">
+            <span className="shrink-0 rounded-lg bg-[#114F3C] px-3 py-2 font-black text-[#F8A900]">Day {index + 1}</span>
+            <span className="min-w-0 flex-1 break-words font-bold">{day.activities[0]?.title || `${day.activities.length} ${day.activities.length === 1 ? "activity" : "activities"}`}</span>
+            <span aria-hidden="true" className="text-xl">{expanded.includes(index) ? "-" : "+"}</span>
+          </button></h3>
+          <div id={`itinerary-day-${index}`} hidden={!expanded.includes(index)} className="space-y-5 border-t border-current/10 p-4 sm:p-6">
+            {day.activities.map((activity, i) => <article key={i} className="border-l-2 border-[#F8A900]/60 pl-4">
+              <h4 className="text-lg font-bold text-[#114F3C] dark:text-white">{activity.title || `Activity ${i + 1}`}</h4>
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-stone-700 dark:text-stone-300">{activity.description}</p>
+            </article>)}
+            {(day.overnight || day.meals) && <dl className="grid gap-4 rounded-lg bg-white/70 p-4 text-sm text-[#114F3C] dark:bg-black/20 dark:text-white sm:grid-cols-2">
+              {day.overnight && <div><dt className="font-black">Overnight</dt><dd className="mt-1 break-words">{day.overnight}</dd></div>}
+              {day.meals && <div><dt className="font-black">Meals</dt><dd className="mt-1 break-words">{day.meals}</dd></div>}
+            </dl>}
+          </div>
+        </div>)}
       </div>
     </section>
   );
@@ -240,8 +249,8 @@ function BookingPanel({
         <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Book this trip</p>
         <div className="mt-4 flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-4xl font-black">{formatPrice(trip.price)}</h2>
-            <p className="mt-1 text-sm font-bold text-white/60">per person</p>
+            <h2 className="text-4xl font-black">{isHotTrip(trip) ? formatPrice(trip.price) : "Ask for pricing"}</h2>
+            <p className="mt-1 text-sm font-bold text-white/60">{isHotTrip(trip) ? "per person" : "Our team will share the trip price."}</p>
           </div>
           <p className="rounded-lg bg-white/12 px-3 py-2 text-sm font-black text-white">{unavailable ? "Booking closed" : `${trip.availableSeats} seats`}</p>
         </div>
@@ -310,7 +319,7 @@ function MobileBookingBar({ trip }: { trip: Trip }) {
       <div className="mx-auto flex max-w-7xl items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-black text-[#114F3C] dark:text-[#F8A900]">{trip.title}</p>
-          <p className="text-xs font-bold text-stone-500 dark:text-stone-400">{formatPrice(trip.price)} per person</p>
+          <p className="text-xs font-bold text-stone-500 dark:text-stone-400">{isHotTrip(trip) ? `${formatPrice(trip.price)} per person` : "Contact us for pricing"}</p>
         </div>
         <a className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-black transition ${orangeButton}`} href="#booking">
           <MessageCircle className="h-4 w-4" />

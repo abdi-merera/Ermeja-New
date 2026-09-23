@@ -1,6 +1,6 @@
 import { ArrowRight, CalendarDays, Clock, MapPin, Users } from "lucide-react";
 import type { Trip } from "../types";
-import { formatDate, formatPrice } from "../utils";
+import { formatDate, formatPrice, isHotTrip } from "../utils";
 
 export function TripCard({ trip, onSelect }: { trip: Trip; onSelect: (trip: Trip) => void }) {
   const today = new Date();
@@ -54,8 +54,8 @@ export function TripCard({ trip, onSelect }: { trip: Trip; onSelect: (trip: Trip
 
         <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-4 dark:border-white/10">
           <div>
-            <p className="text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatPrice(trip.price)}</p>
-            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400">per person</p>
+            <p className="text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{isHotTrip(trip) ? formatPrice(trip.price) : "Ask for pricing"}</p>
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400">{isHotTrip(trip) ? "per person" : "Contact our team"}</p>
           </div>
           <span className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold bg-[#FCE4B4] text-[#114F3C] transition group-hover:translate-x-1 group-hover:bg-[#F8A900]">
             View trip <ArrowRight className="h-4 w-4" />

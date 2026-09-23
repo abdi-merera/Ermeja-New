@@ -1,3 +1,4 @@
+import { serializeItinerary } from "../itinerary";
 import type { AdminLoginForm, AdminSession, AdminTripForm, Booking, BookingForm, ContactForm, ContactMessage, GalleryHighlight, GalleryImage, Trip, TripStatus } from "../types";
 import { splitCommaList } from "../utils";
 
@@ -97,7 +98,7 @@ function adminFetch<T>(url: string, options: RequestInit = {}) {
 }
 
 function tripPayload(form: AdminTripForm) {
-  const itinerary = form.itinerary
+  const itinerary = form.itineraryDays?.length ? serializeItinerary(form.itineraryDays) : form.itinerary
     .split(/\r?\n/)
     .map((item) => item.trim())
     .filter(Boolean);
@@ -116,6 +117,8 @@ function tripPayload(form: AdminTripForm) {
   };
 }
 
+// All fetch calls that use this function are protected against SSRF: the URL
+// is validated to be https://*.supabase.co before any network request is made.
 function trustedSupabaseProjectUrl() {
   if (!supabaseUrl) {
     throw new ApiError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
