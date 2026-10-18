@@ -6,6 +6,7 @@ export const pagePaths: Record<Page, string> = {
   gallery: "/gallery",
   about: "/about",
   contact: "/contact",
+  faq: "/faq",
   admin: "/admin"
 };
 

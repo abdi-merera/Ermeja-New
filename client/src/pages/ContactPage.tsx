@@ -21,7 +21,7 @@ const planningSteps = [
 export function ContactPage({ contactForm, setContactForm, submitContact }: { contactForm: ContactForm; setContactForm: (form: ContactForm) => void; submitContact: ContactSubmitHandler }) {
   return (
     <section className="contact-mobile-layout bg-canvas transition-colors duration-300 dark:bg-[#071711]">
-      <div className="contact-intro relative overflow-hidden bg-[#114F3C] px-4 py-10 sm:py-16 text-white sm:px-6 lg:px-8">
+      <div className="contact-intro relative overflow-hidden bg-[#114F3C] px-4 py-8 text-white sm:px-6 sm:py-10 lg:px-8">
         <img className="absolute inset-0 h-full w-full object-cover opacity-30" src={contactHeroImage} alt="Guided hiking path in Ethiopia" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#061B15] via-[#114F3C]/90 to-[#114F3C]/40" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-6 sm:gap-10 lg:grid-cols-[0.95fr_1.05fr]">
@@ -29,25 +29,31 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
             <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#F8A900] backdrop-blur">
               Contact Ermija
             </p>
-            <h1 className="mt-5 text-3xl font-black leading-tight sm:text-6xl">Start with a message. We will help shape the trip.</h1>
+            <h1 className="mt-5 max-w-3xl text-3xl font-black leading-[1.05] sm:text-5xl lg:text-6xl">Start with a message. We will help shape the trip.</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
               Ask about an upcoming package, request a private group walk, or confirm the details you need before booking.
             </p>
             <div className="contact-intro-stats mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
               <HeroStat value="Get in touch" label="Ask our team" Icon={Clock} />
               <HeroStat value="Group" label="Trip planning" Icon={Users} />
-              <HeroStat value="WhatsApp" label="Trip enquiries" Icon={MessageCircle} />
+              <a href="#contact-inquiry" className={`inline-flex min-h-[136px] items-center justify-center gap-2 rounded-lg px-5 py-4 text-base font-black transition ${yellowButton}`}>
+                <Send className="h-5 w-5" />
+                <span>Send an enquiry</span>
+              </a>
             </div>
           </div>
 
-          <div className="contact-preview rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/25 backdrop-blur">
-            <div className="overflow-hidden rounded-lg">
-              <img className="h-80 w-full object-cover" src={contactImage} alt="Sof Omar cave destination in Ethiopia" />
+          <div className="contact-preview rounded-[2rem] border border-white/15 bg-white/10 p-3 shadow-2xl shadow-black/25 backdrop-blur sm:p-4">
+            <div className="relative overflow-hidden rounded-[1.5rem] bg-[#08251C] p-2">
+              <div className="overflow-hidden rounded-[1.15rem]">
+                <img className="h-64 w-full object-cover transition duration-700 hover:scale-105 sm:h-80 lg:h-[28rem]" src={contactImage} alt="Sof Omar cave destination in Ethiopia" />
+              </div>
+              <div className="absolute bottom-5 left-5 rounded-full bg-[#F8A900] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#114F3C]">Explore Ethiopia</div>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {["Private groups", "Weekend packages", "Company outings", "Route advice"].map((item) => (
-                <p key={item} className="flex items-center gap-3 rounded-lg bg-white/10 p-3 text-sm font-bold text-white/80">
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-[#9EC26D]" />
+                <p key={item} className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm font-bold text-white/80">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[#9EC26D]" />
                   {item}
                 </p>
               ))}
@@ -91,7 +97,7 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
           </aside>
 
           <div>
-            <form className="contact-inquiry rounded-lg border border-[#114F3C]/10 bg-surface p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-8" onSubmit={submitContact}>
+            <form id="contact-inquiry" className="contact-inquiry scroll-mt-24 rounded-lg border border-[#114F3C]/10 bg-surface p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-8" onSubmit={submitContact}>
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Send inquiry</p>
@@ -167,13 +173,20 @@ function HeroStat({ value, label, Icon }: { value: string; label: string; Icon: 
 }
 
 function ContactCard({ title, text, value, Icon }: { title: string; text: string; value: string; Icon: LucideIcon }) {
+  const href = title === "WhatsApp"
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Ermija Hiking, I want help planning a trip.")}`
+    : title === "Phone" ? `tel:${value.replace(/\s/g, "")}` : `mailto:${value}`;
   return (
-    <article className="rounded-lg border border-[#114F3C]/10 bg-surface p-4 sm:p-6 shadow-xl shadow-[#114F3C]/10 transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
-      <Icon className="h-9 w-9 text-[#F54C0D]" />
-      <h2 className="mt-4 text-2xl font-black text-[#114F3C]">{title}</h2>
-      <p className="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-300">{text}</p>
-      <p className="mt-5 rounded-lg bg-stone-50 px-4 py-3 text-sm font-black text-[#114F3C] dark:bg-white/5 dark:text-[#F8A900]">{value}</p>
-    </article>
+    <a href={href} className="group block rounded-xl border border-[#114F3C]/10 bg-surface p-3 shadow-md shadow-[#114F3C]/8 transition duration-300 hover:-translate-y-1 hover:border-[#F8A900]/60 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F8A900]/40 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-4">
+      <div className="flex items-start gap-3">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#FCE4B4] text-[#F54C0D] transition group-hover:bg-[#F8A900]"><Icon className="h-5 w-5" /></span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-lg font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h2>
+          <p className="mt-0.5 text-xs leading-4 text-stone-600 dark:text-stone-300">{text}</p>
+          <p className="mt-2 truncate rounded-lg bg-stone-50 px-3 py-2 text-xs font-black text-[#114F3C] transition group-hover:bg-[#FCE4B4] dark:bg-white/5 dark:text-[#F8A900]">{value}</p>
+        </div>
+      </div>
+    </a>
   );
 }
 

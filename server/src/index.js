@@ -665,9 +665,9 @@ app.get("/api/trips/:id", (req, res) => {
 });
 
 app.post("/api/bookings", requireTrustedOrigin, requireJsonBody, publicWriteLimiter, (req, res) => {
-  const { tripId, customerName, phone, numberOfPeople, message } = req.body;
+  const { tripId, customerName, phone, numberOfPeople, message, consentAccepted } = req.body;
 
-  if (!tripId || !customerName || !phone || !numberOfPeople) {
+  if (!tripId || !customerName || !phone || !numberOfPeople || consentAccepted !== true) {
     res.status(400).json({ message: "Trip, name, phone, and number of people are required." });
     return;
   }
@@ -699,11 +699,11 @@ app.post("/api/bookings", requireTrustedOrigin, requireJsonBody, publicWriteLimi
     numberOfPeople: people,
     message: textValue(message, 800),
     status: "New",
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    consentAcceptedAt: new Date().toISOString()
   };
 
   bookings = [booking, ...bookings];
-  trip.availableSeats -= people;
   trip.updatedAt = new Date().toISOString();
   saveBookings();
   saveTrips();
@@ -728,13 +728,38 @@ app.patch("/api/admin/bookings/:id", requireAdmin, (req, res) => {
     return;
   }
 
+  const previousBooking = bookings[bookingIndex];
+  const nextStatus = req.body.status || previousBooking.status;
+  if (!["New", "Confirmed", "Cancelled"].includes(nextStatus)) {
+    res.status(400).json({ message: "Invalid booking status." });
+    return;
+  }
+
+  const trip = trips.find((item) => item.id === previousBooking.tripId);
+  if (!trip) {
+    res.status(404).json({ message: "Trip not found" });
+    return;
+  }
+
+  if (previousBooking.status !== "Confirmed" && nextStatus === "Confirmed") {
+    if (trip.availableSeats < previousBooking.numberOfPeople) {
+      res.status(400).json({ message: "Not enough seats available to confirm this booking." });
+      return;
+    }
+    trip.availableSeats -= previousBooking.numberOfPeople;
+  } else if (previousBooking.status === "Confirmed" && nextStatus !== "Confirmed") {
+    trip.availableSeats += previousBooking.numberOfPeople;
+  }
+
   bookings[bookingIndex] = {
     ...bookings[bookingIndex],
-    status: req.body.status || bookings[bookingIndex].status,
+    status: nextStatus,
     updatedAt: new Date().toISOString()
   };
 
   saveBookings();
+  trip.updatedAt = new Date().toISOString();
+  saveTrips();
   res.json(bookings[bookingIndex]);
 });
 
@@ -836,7 +861,7 @@ app.post(
 );
 
 app.post("/api/admin/trips", requireAdmin, (req, res) => {
-  const { title, destination, date, duration, price, difficulty, availableSeats, meetingPoint, departureTime, returnTime, includes, whatToBring, notIncluded, itinerary, safetyNotes, description, coverImage, galleryImages, status } = req.body;
+  const { title, destination, date, duration, price, tripExpense, foreignerPricingEnabled, foreignerPrivatePriceUsd, foreignerGroupPriceUsd, difficulty, availableSeats, meetingPoint, departureTime, returnTime, includes, whatToBring, notIncluded, itinerary, safetyNotes, description, coverImage, galleryImages, status } = req.body;
 
   if (!title || !destination || !date || !duration || !price || !difficulty || !availableSeats || !description) {
     res.status(400).json({ message: "Missing required trip fields." });
@@ -854,6 +879,11 @@ app.post("/api/admin/trips", requireAdmin, (req, res) => {
     date,
     duration,
     price: Number(price),
+    tripExpenses: Array.isArray(req.body.tripExpenses) ? req.body.tripExpenses : [],
+    tripExpense: Array.isArray(req.body.tripExpenses) ? req.body.tripExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0) : Number(tripExpense || 0),
+    foreignerPricingEnabled: Boolean(foreignerPricingEnabled),
+    foreignerPrivatePriceUsd: foreignerPricingEnabled ? Number(foreignerPrivatePriceUsd) : 0,
+    foreignerGroupPriceUsd: foreignerPricingEnabled ? Number(foreignerGroupPriceUsd) : 0,
     difficulty,
     availableSeats: Number(availableSeats),
     meetingPoint: meetingPoint || "To be announced",
@@ -889,6 +919,11 @@ app.patch("/api/admin/trips/:id", requireAdmin, (req, res) => {
     ...trips[tripIndex],
     ...req.body,
     price: req.body.price === undefined ? trips[tripIndex].price : Number(req.body.price),
+    tripExpenses: req.body.tripExpenses === undefined ? trips[tripIndex].tripExpenses || [] : req.body.tripExpenses,
+    tripExpense: req.body.tripExpenses === undefined ? trips[tripIndex].tripExpense || 0 : req.body.tripExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0),
+    foreignerPricingEnabled: req.body.foreignerPricingEnabled === undefined ? trips[tripIndex].foreignerPricingEnabled : Boolean(req.body.foreignerPricingEnabled),
+    foreignerPrivatePriceUsd: req.body.foreignerPrivatePriceUsd === undefined ? trips[tripIndex].foreignerPrivatePriceUsd : Number(req.body.foreignerPrivatePriceUsd),
+    foreignerGroupPriceUsd: req.body.foreignerGroupPriceUsd === undefined ? trips[tripIndex].foreignerGroupPriceUsd : Number(req.body.foreignerGroupPriceUsd),
     availableSeats: req.body.availableSeats === undefined ? trips[tripIndex].availableSeats : Number(req.body.availableSeats),
     updatedAt: new Date().toISOString()
   };

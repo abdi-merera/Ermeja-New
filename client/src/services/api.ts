@@ -106,6 +106,11 @@ function tripPayload(form: AdminTripForm) {
   return {
     ...form,
     price: Number(form.price),
+    tripExpense: form.tripExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0),
+    tripExpenses: form.tripExpenses,
+    foreignerPricingEnabled: form.foreignerPricingEnabled,
+    foreignerPrivatePriceUsd: form.foreignerPricingEnabled ? Number(form.foreignerPrivatePriceUsd) : 0,
+    foreignerGroupPriceUsd: form.foreignerPricingEnabled ? Number(form.foreignerGroupPriceUsd) : 0,
     availableSeats: Number(form.availableSeats),
     hotLeadDays: Number(form.hotLeadDays || 5),
     returnDate: form.duration === "Day Trip" ? "" : form.returnDate,
@@ -113,7 +118,8 @@ function tripPayload(form: AdminTripForm) {
     whatToBring: splitCommaList(form.whatToBring),
     notIncluded: splitCommaList(form.notIncluded),
     itinerary,
-    galleryImages: splitCommaList(form.galleryImages)
+    galleryImages: splitCommaList(form.galleryImages),
+    galleryImageAlbums: form.galleryImageAlbums
   };
 }
 
@@ -209,6 +215,7 @@ export function getAdminTrips() {
 export function createBooking(form: BookingForm, tripId: string) {
   const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
+  const consentAcceptedAt = form.consentAccepted ? createdAt : "";
   const booking = {
     id,
     trip_id: tripId,
@@ -217,14 +224,15 @@ export function createBooking(form: BookingForm, tripId: string) {
     number_of_people: Number(form.numberOfPeople),
     message: form.message.trim(),
     status: "New",
-    created_at: createdAt
+    created_at: createdAt,
+    consent_accepted_at: consentAcceptedAt
   };
   return fetch(databaseUrl("ermija_bookings"), {
     method: "POST",
     headers: supabaseHeaders(false, true),
     body: JSON.stringify(booking)
   }).then((response) => parseResponse<void>(response)).then(() => ({
-    booking: { ...form, id, tripId, numberOfPeople: Number(form.numberOfPeople), status: "New", createdAt },
+    booking: { ...form, id, tripId, numberOfPeople: Number(form.numberOfPeople), status: "New", createdAt, consentAcceptedAt },
     whatsappUrl: `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || "251913181343"}`
   }));
 }
@@ -329,7 +337,7 @@ function bookingFromRow(row: Record<string, unknown>): Booking {
   return {
     id: String(row.id), tripId: String(row.trip_id), customerName: String(row.customer_name),
     phone: String(row.phone), numberOfPeople: Number(row.number_of_people), message: String(row.message || ""),
-    status: String(row.status), createdAt: String(row.created_at)
+    status: String(row.status), createdAt: String(row.created_at), consentAcceptedAt: row.consent_accepted_at ? String(row.consent_accepted_at) : undefined
   };
 }
 

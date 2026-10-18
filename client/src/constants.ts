@@ -78,6 +78,11 @@ export const emptyAdminTripForm: AdminTripForm = {
   date: "",
   duration: "Day Trip",
   price: "",
+  tripExpense: "0",
+  tripExpenses: [],
+  foreignerPricingEnabled: false,
+  foreignerPrivatePriceUsd: "",
+  foreignerGroupPriceUsd: "",
   difficulty: "Easy",
   availableSeats: "",
   hotLeadDays: "5",
@@ -93,6 +98,7 @@ export const emptyAdminTripForm: AdminTripForm = {
   description: "",
   coverImage: "",
   galleryImages: "",
+  galleryImageAlbums: {},
   status: "Draft"
 };
 

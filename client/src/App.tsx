@@ -27,7 +27,7 @@ export function App() {
   const [galleryHighlight, setGalleryHighlight] = useState<GalleryHighlight>(defaultGalleryHighlight);
   const [standalonePhotos, setStandalonePhotos] = useState<GalleryImage[]>([]);
   const [apiMessage, setApiMessage] = useState("");
-  const [bookingForm, setBookingForm] = useState<BookingForm>({ customerName: "", phone: "", numberOfPeople: "1", message: "" });
+  const [bookingForm, setBookingForm] = useState<BookingForm>({ customerName: "", phone: "", numberOfPeople: "1", message: "", consentAccepted: false });
   const [contactForm, setContactForm] = useState<ContactForm>({ name: "", phone: "", email: "", message: "" });
   const [adminSession, setAdminSession] = useState<AdminSession | null>(() => api.getSavedAdminSession());
   const [adminLoginForm, setAdminLoginForm] = useState<AdminLoginForm>({ email: "", password: "" });
@@ -114,7 +114,7 @@ export function App() {
           tripId: trip.id,
           image,
           title: trip.title,
-          destination: trip.destination,
+          destination: trip.galleryImageAlbums?.[image] || trip.destination,
           description: trip.description,
           source: "gallery" as const
         }))
@@ -172,7 +172,7 @@ export function App() {
       if (bookingForm.customerName.trim().length < 2 || bookingForm.phone.trim().length < 7) throw new Error("Enter your full name and a valid contact number.");
       await api.createBooking(bookingForm, selectedTrip.id);
       setApiMessage("Booking request received. Your seats are not confirmed yet; our team will contact you.");
-      setBookingForm({ customerName: "", phone: "", numberOfPeople: "1", message: "" });
+      setBookingForm({ customerName: "", phone: "", numberOfPeople: "1", message: "", consentAccepted: false });
       if (adminSession) loadAdminData().catch(() => {});
       return true;
     } catch (error) {

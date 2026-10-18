@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, CheckCircle2, Edit3, ImagePlus, LogIn, LogOut, Mail, MessageCircle, Mountain, Phone, Plus, Save, Search, Trash2, Users, X } from "lucide-react";
 import { orangeButton, whatsappNumber, yellowButton } from "../constants";
 import { uploadTripImage } from "../services/api";
-import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, ContactMessage, GalleryHighlight, GalleryImage, Trip, TripStatus } from "../types";
+import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, ContactMessage, GalleryHighlight, GalleryImage, Trip, TripExpense, TripStatus } from "../types";
 import { formatDate, formatPrice, splitCommaList } from "../utils";
 
 const tripFilters = ["All", "Published", "Draft"] as const;
@@ -31,6 +31,11 @@ function tripToForm(trip: Trip): AdminTripForm {
     date: trip.date,
     duration: trip.duration,
     price: String(trip.price),
+    tripExpense: String(trip.tripExpense ?? 0),
+    tripExpenses: trip.tripExpenses || [],
+    foreignerPricingEnabled: Boolean(trip.foreignerPricingEnabled),
+    foreignerPrivatePriceUsd: trip.foreignerPrivatePriceUsd ? String(trip.foreignerPrivatePriceUsd) : "",
+    foreignerGroupPriceUsd: trip.foreignerGroupPriceUsd ? String(trip.foreignerGroupPriceUsd) : "",
     difficulty: trip.difficulty,
     availableSeats: String(trip.availableSeats),
     hotLeadDays: String(trip.hotLeadDays ?? 5),
@@ -47,6 +52,7 @@ function tripToForm(trip: Trip): AdminTripForm {
     description: trip.description,
     coverImage: trip.coverImage,
     galleryImages: trip.galleryImages.join(", "),
+    galleryImageAlbums: trip.galleryImageAlbums || Object.fromEntries(trip.galleryImages.map((image) => [image, trip.destination])),
     status: trip.status
   };
 }
@@ -157,6 +163,17 @@ export function AdminPage({
     [trips]
   );
 
+  const existingMedia = useMemo(() => {
+    const items = [
+      ...standalonePhotos,
+      ...trips.flatMap((trip) => [
+        { id: `${trip.id}-cover`, tripId: trip.id, image: trip.coverImage, title: trip.title, destination: trip.destination, description: "Trip cover", source: "cover" as const },
+        ...trip.galleryImages.map((image, index) => ({ id: `${trip.id}-gallery-${index}`, tripId: trip.id, image, title: trip.title, destination: trip.galleryImageAlbums?.[image] || trip.destination, description: "Trip gallery", source: "gallery" as const }))
+      ])
+    ].filter((item) => item.image);
+    return items.filter((item, index, all) => all.findIndex((candidate) => candidate.image === item.image) === index);
+  }, [standalonePhotos, trips]);
+
   const sectionStats = {
     trips: [
       { label: "Total trips", value: trips.length, icon: Mountain },
@@ -255,7 +272,7 @@ export function AdminPage({
           </div>
         </header>
 
-        <nav aria-label="Admin sections" className="mb-4 grid grid-cols-2 gap-2 rounded-xl border border-stone-200 bg-white p-2 dark:border-white/15 dark:bg-[#10241C] lg:grid-cols-4">
+        <nav aria-label="Admin sections" className="mb-4 grid grid-cols-2 gap-2 rounded-xl border border-stone-200 bg-white p-2 dark:border-white/15 dark:bg-[#10241C] sm:gap-3 lg:grid-cols-4">
           {adminSections.map((section) => {
             const Icon = section.icon;
             const selected = activeSection === section.id;
@@ -266,9 +283,9 @@ export function AdminPage({
                 type="button"
                 aria-current={selected ? "page" : undefined}
                 onClick={() => setActiveSection(section.id)}
-                className={`flex min-w-0 items-center gap-3 rounded-xl border-2 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#10241C] sm:px-4 sm:py-2 ${selected ? "border-[#F8A900] bg-[#F8A900] text-[#092F23] shadow-sm" : "border-transparent text-stone-700 hover:border-stone-200 hover:bg-stone-50 dark:text-stone-200 dark:hover:border-white/20 dark:hover:bg-white/5"}`}
+                className={`relative flex min-h-16 min-w-0 items-center gap-2 rounded-xl border-2 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8A900] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#10241C] sm:gap-3 sm:px-4 sm:py-3 ${selected ? "border-[#F8A900] bg-[#F8A900] text-[#092F23] shadow-[0_4px_12px_rgba(248,169,0,0.28)]" : "border-stone-200 bg-stone-50 text-stone-800 hover:border-[#F8A900]/70 hover:bg-[#fff8e8] dark:border-white/10 dark:bg-white/[0.03] dark:text-stone-200 dark:hover:border-[#F8A900]/60 dark:hover:bg-white/10"}`}
               >
-                <Icon className="hidden h-5 w-5 shrink-0 sm:block" />
+                <Icon className={`h-5 w-5 shrink-0 ${selected ? "text-[#114F3C]" : "text-[#F8A900]"}`} />
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2 text-base font-bold">
                     {section.label}
@@ -276,6 +293,7 @@ export function AdminPage({
                   </span>
 
                 </span>
+                {selected ? <span aria-hidden="true" className="absolute right-3 h-2.5 w-2.5 rounded-full bg-[#114F3C]" /> : null}
               </button>
             );
           })}
@@ -295,7 +313,7 @@ export function AdminPage({
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-[#F54C0D]">Trip inventory</p>
                     <h2 className="mt-1 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">Search and manage packages</h2>
                   </div>
-                  <div className="flex gap-2"><select aria-label="Filter trips by status" className={inputClass} value={tripFilter} onChange={(event) => setTripFilter(event.target.value as (typeof tripFilters)[number])}>
+                  <div className="grid gap-2 sm:flex"><select aria-label="Filter trips by status" className={`${inputClass} w-full sm:w-auto`} value={tripFilter} onChange={(event) => setTripFilter(event.target.value as (typeof tripFilters)[number])}>
                     {tripFilters.map((filter) => (
                       <option key={filter}>{filter}</option>
                     ))}
@@ -314,6 +332,7 @@ export function AdminPage({
                   ))}
                 </div>
               ) : <EmptyAdminState text="No trips match the current search." />}
+              <FinanceOverview trips={trips} bookings={bookings} updateTrip={updateAdminTrip} />
           </div>
         ) : null}
 
@@ -370,7 +389,7 @@ export function AdminPage({
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
                   <input className={`${inputClass} w-full pl-12`} value={bookingQuery} onChange={(event) => { setBookingQuery(event.target.value); setBookingPage(1); }} placeholder="Search guest, phone, trip..." />
                 </label>
-                <select aria-label="Filter bookings by status" className={inputClass} value={bookingFilter} onChange={(event) => { setBookingFilter(event.target.value); setBookingPage(1); }}>
+                <select aria-label="Filter bookings by status" className={`${inputClass} w-full sm:w-auto`} value={bookingFilter} onChange={(event) => { setBookingFilter(event.target.value); setBookingPage(1); }}>
                   {["All", ...bookingStatuses].map((status) => (
                     <option key={status}>{status}</option>
                   ))}
@@ -388,12 +407,12 @@ export function AdminPage({
                   <EmptyAdminState text="No bookings match the current filters." />
                 )}
               </div>
-            {filteredBookings.length > 0 ? <nav aria-label="Booking pages" className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-3 text-sm dark:border-white/15">
+            {filteredBookings.length > 0 ? <nav aria-label="Booking pages" className="flex flex-col gap-3 border-t border-stone-200 pt-3 text-sm dark:border-white/15 sm:flex-row sm:items-center sm:justify-between">
                 <p role="status">Showing {(currentBookingPage - 1) * 20 + 1}-{Math.min(currentBookingPage * 20, filteredBookings.length)} of {filteredBookings.length} requests</p>
-                <div className="flex items-center gap-3">
-                  <button type="button" disabled={currentBookingPage === 1} onClick={() => setBookingPage(currentBookingPage - 1)} className="rounded-lg border border-stone-300 px-3 py-2 disabled:opacity-40 dark:border-white/20">Previous</button>
-                  <span>Page {currentBookingPage} of {bookingPageCount}</span>
-                  <button type="button" disabled={currentBookingPage === bookingPageCount} onClick={() => setBookingPage(currentBookingPage + 1)} className="rounded-lg border border-stone-300 px-3 py-2 disabled:opacity-40 dark:border-white/20">Next</button>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+                  <button type="button" disabled={currentBookingPage === 1} onClick={() => setBookingPage(currentBookingPage - 1)} className="rounded-lg border border-stone-300 px-3 py-3 disabled:opacity-40 dark:border-white/20 sm:py-2">Previous</button>
+                  <span className="col-span-2 text-center sm:order-none">Page {currentBookingPage} of {bookingPageCount}</span>
+                  <button type="button" disabled={currentBookingPage === bookingPageCount} onClick={() => setBookingPage(currentBookingPage + 1)} className="rounded-lg border border-stone-300 px-3 py-3 disabled:opacity-40 dark:border-white/20 sm:py-2">Next</button>
                 </div>
               </nav> : null}
             </AdminInbox>
@@ -409,7 +428,7 @@ export function AdminPage({
                   <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
                   <input className={`${inputClass} w-full pl-12`} value={messageQuery} onChange={(event) => setMessageQuery(event.target.value)} placeholder="Search messages..." />
                 </label>
-                <select aria-label="Filter messages by status" className={inputClass} value={messageFilter} onChange={(event) => setMessageFilter(event.target.value)}>
+                <select aria-label="Filter messages by status" className={`${inputClass} w-full sm:w-auto`} value={messageFilter} onChange={(event) => setMessageFilter(event.target.value)}>
                   {["All", ...messageStatuses].map((status) => (
                     <option key={status}>{status}</option>
                   ))}
@@ -428,8 +447,8 @@ export function AdminPage({
       </div>
 
       {editingTrip && editForm ? (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 px-4 py-8 backdrop-blur-sm">
-          <div className="mx-auto max-w-4xl rounded-lg bg-white p-5 shadow-2xl dark:bg-[#10241C]">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 px-2 py-3 backdrop-blur-sm sm:px-4 sm:py-8">
+          <div className="mx-auto max-w-4xl rounded-lg bg-white p-3 shadow-2xl dark:bg-[#10241C] sm:p-5">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]">Edit trip</p>
@@ -439,19 +458,19 @@ export function AdminPage({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <TripForm form={editForm} setForm={setEditForm} onSubmit={submitEdit} title="Update trip details" actionLabel="Save Changes" actionIcon={<Save className="h-5 w-5" />} />
+            <TripForm form={editForm} setForm={setEditForm} existingMedia={existingMedia} onSubmit={submitEdit} title="Update trip details" actionLabel="Save Changes" actionIcon={<Save className="h-5 w-5" />} />
           </div>
         </div>
       ) : null}
 
       {creatingTrip ? (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 px-4 py-8 backdrop-blur-sm">
-          <div className="mx-auto max-w-5xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-[#10241C]">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/65 px-2 py-3 backdrop-blur-sm sm:px-4 sm:py-8">
+          <div className="mx-auto max-w-5xl rounded-2xl bg-white p-3 shadow-2xl dark:bg-[#10241C] sm:p-5">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div><p className="text-sm font-black uppercase tracking-[0.2em] text-[#F54C0D]">New package</p><h2 className="mt-2 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">Create an upcoming trip</h2></div>
               <button type="button" onClick={() => setCreatingTrip(false)} className="rounded-lg bg-stone-100 p-3 text-[#114F3C] transition hover:bg-stone-200 dark:bg-white/10 dark:text-white" aria-label="Close new trip form"><X className="h-5 w-5" /></button>
             </div>
-            <TripForm form={form} setForm={setForm} onSubmit={submitTrip} title="Trip details" actionLabel="Save Trip" actionIcon={<Plus className="h-5 w-5" />} />
+            <TripForm form={form} setForm={setForm} existingMedia={existingMedia} onSubmit={submitTrip} title="Trip details" actionLabel="Save Trip" actionIcon={<Plus className="h-5 w-5" />} />
           </div>
         </div>
       ) : null}
@@ -516,7 +535,7 @@ function BookingAdminCard({
 
   return (
     <article className="overflow-hidden rounded-xl border border-[#B5CCBF] bg-[#E7EEE4] shadow-sm dark:border-white/15 dark:bg-white/5">
-      <div className="grid items-center gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_auto_auto_auto]">
+      <div className="grid items-start gap-3 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_auto_auto_auto]">
         <div className="min-w-0">
           <h3 className="font-bold text-[#114F3C] dark:text-[#F8A900]">{booking.customerName}</h3>
           <p className="truncate text-sm text-stone-600 dark:text-stone-300" title={tripName}>{tripName}</p>
@@ -742,6 +761,7 @@ function FieldLabel({ label, hint, error, children }: { label: string; hint?: st
 function TripForm({
   form,
   setForm,
+  existingMedia,
   onSubmit,
   title,
   actionLabel,
@@ -749,6 +769,7 @@ function TripForm({
 }: {
   form: AdminTripForm;
   setForm: (form: AdminTripForm) => void;
+  existingMedia: GalleryImage[];
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   title: string;
   actionLabel: string;
@@ -782,6 +803,15 @@ function TripForm({
 
     if (!Number.isFinite(price) || price <= 0) {
       errors.price = "Price must be a positive number.";
+    }
+
+    if (form.tripExpenses.some((expense) => !expense.name.trim() || !Number.isFinite(Number(expense.amount)) || Number(expense.amount) < 0)) errors.tripExpenses = "Complete each expense name and use a valid amount.";
+
+    if (form.foreignerPricingEnabled) {
+      const privatePrice = Number(form.foreignerPrivatePriceUsd);
+      const groupPrice = Number(form.foreignerGroupPriceUsd);
+      if (!Number.isFinite(privatePrice) || privatePrice <= 0) errors.foreignerPrivatePriceUsd = "Enter a positive USD price.";
+      if (!Number.isFinite(groupPrice) || groupPrice <= 0) errors.foreignerGroupPriceUsd = "Enter a positive USD price.";
     }
 
     if (!Number.isInteger(seats) || seats <= 0) {
@@ -824,7 +854,8 @@ function TripForm({
   };
 
   const setGalleryImages = (images: string[]) => {
-    setForm({ ...form, galleryImages: images.join(", ") });
+    const albums = Object.fromEntries(images.map((image) => [image, form.galleryImageAlbums[image] || form.destination || "General adventures"]));
+    setForm({ ...form, galleryImages: images.join(", "), galleryImageAlbums: albums });
   };
 
   const uploadCoverImage = async (file: File | undefined) => {
@@ -899,6 +930,18 @@ function TripForm({
               <FieldLabel label="Price" error={fieldErrors.price}>
                 <input required type="number" className={`${inputClass} w-full`} placeholder="3200" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} />
               </FieldLabel>
+              <label className="flex items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm font-semibold dark:border-white/10 dark:bg-white/5 sm:col-span-2">
+                <input type="checkbox" className="h-4 w-4 accent-[#114F3C]" checked={form.foreignerPricingEnabled} onChange={(event) => setForm({ ...form, foreignerPricingEnabled: event.target.checked })} />
+                <span>Offer separate pricing for foreign visitors</span>
+              </label>
+              {form.foreignerPricingEnabled ? <>
+                <FieldLabel label="Foreigner private price (USD)" error={fieldErrors.foreignerPrivatePriceUsd}>
+                  <input required type="number" min="0.01" step="0.01" className={`${inputClass} w-full`} placeholder="250" value={form.foreignerPrivatePriceUsd} onChange={(event) => setForm({ ...form, foreignerPrivatePriceUsd: event.target.value })} />
+                </FieldLabel>
+                <FieldLabel label="Foreigner group price (USD)" error={fieldErrors.foreignerGroupPriceUsd}>
+                  <input required type="number" min="0.01" step="0.01" className={`${inputClass} w-full`} placeholder="120" value={form.foreignerGroupPriceUsd} onChange={(event) => setForm({ ...form, foreignerGroupPriceUsd: event.target.value })} />
+                </FieldLabel>
+              </> : null}
               <FieldLabel label="Available seats" error={fieldErrors.availableSeats}>
                 <input required type="number" className={`${inputClass} w-full`} placeholder="18" value={form.availableSeats} onChange={(event) => setForm({ ...form, availableSeats: event.target.value })} />
               </FieldLabel>
@@ -961,9 +1004,14 @@ function TripForm({
             <FieldLabel label="Cover image / destination album cover URL" error={fieldErrors.coverImage}>
               <input className={`${inputClass} w-full`} placeholder="/uploads/photo.jpg or https://..." value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })} />
             </FieldLabel>
+              {existingMedia.length ? <div className="rounded-xl border border-[#114F3C]/15 bg-sage p-4 dark:border-white/15 dark:bg-white/5 sm:col-span-2">
+                <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-sm font-black text-[#114F3C] dark:text-[#F8A900]">Reuse existing media</p><p className="text-xs text-stone-600 dark:text-stone-300">Choose an image already in storage instead of uploading it again.</p></div><select aria-label="Choose existing cover image" className={`${inputClass} max-w-full`} value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })}><option value="">Select existing cover</option>{existingMedia.map((item) => <option key={item.id} value={item.image}>{item.destination} / {item.title}</option>)}</select></div>
+                <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">{existingMedia.slice(0, 12).map((item) => <button type="button" key={item.id} onClick={() => setForm({ ...form, coverImage: item.image })} className={`overflow-hidden rounded-lg border-2 ${form.coverImage === item.image ? "border-[#F8A900] ring-2 ring-[#F8A900]/30" : "border-transparent"}`} aria-label={`Use ${item.title} as cover`}><img src={item.image} alt="" className="aspect-square w-full object-cover" /></button>)}</div>
+              </div> : null}
             <FieldLabel label="Gallery image URLs" hint="Comma separated">
               <textarea className={`${inputClass} min-h-20 w-full`} placeholder="/uploads/one.jpg, /uploads/two.jpg" value={form.galleryImages} onChange={(event) => setForm({ ...form, galleryImages: event.target.value })} />
             </FieldLabel>
+              {existingMedia.length ? <div className="rounded-xl border border-[#114F3C]/15 bg-sage p-4 dark:border-white/15 dark:bg-white/5 sm:col-span-2"><p className="text-sm font-black text-[#114F3C] dark:text-[#F8A900]">Add existing images to this trip</p><p className="mt-1 text-xs text-stone-600 dark:text-stone-300">Tap thumbnails to add them without creating another upload. Existing images keep their original album.</p><div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">{existingMedia.slice(0, 12).map((item) => { const selected = galleryImages.includes(item.image); return <button type="button" key={`gallery-${item.id}`} onClick={() => setGalleryImages(selected ? galleryImages.filter((image) => image !== item.image) : [...galleryImages, item.image])} className={`relative overflow-hidden rounded-lg border-2 ${selected ? "border-[#F8A900] ring-2 ring-[#F8A900]/30" : "border-transparent"}`} aria-label={`${selected ? "Remove" : "Add"} ${item.title}`}><img src={item.image} alt="" className="aspect-square w-full object-cover" />{selected ? <span className="absolute inset-0 grid place-items-center bg-[#114F3C]/55 text-xl font-black text-white">✓</span> : null}</button>; })}</div></div> : null}
           </FormSection>
         </div>
 
@@ -1060,7 +1108,7 @@ function TripAdminCard({ trip, onEdit, onDelete, onStatusChange }: { trip: Trip;
               {trip.status}
             </span>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             <button type="button" onClick={() => onStatusChange(trip, "Published")} className="rounded-lg bg-[#114F3C] px-3 py-2 text-sm font-bold text-white">
               Publish
             </button>
@@ -1094,9 +1142,45 @@ function TripAdminCard({ trip, onEdit, onDelete, onStatusChange }: { trip: Trip;
 
 function AdminInbox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-[#114F3C]/10 bg-surface p-5 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-6">
+    <section className="rounded-xl border border-[#114F3C]/10 bg-surface p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20 sm:p-6">
       <h2 className="text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h2>
       <div className="mt-5 space-y-4">{children}</div>
+    </section>
+  );
+}
+
+function FinanceOverview({ trips, bookings, updateTrip }: { trips: Trip[]; bookings: Booking[]; updateTrip: (trip: Trip, form: AdminTripForm) => void }) {
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const selectedTrip = trips.find((trip) => trip.id === selectedTripId) || null;
+  const [draftExpenses, setDraftExpenses] = useState<TripExpense[]>([]);
+  const expenseEditorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (selectedTripId) {
+      window.requestAnimationFrame(() => expenseEditorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
+  }, [selectedTripId]);
+  const rows = trips.map((trip) => {
+    const confirmed = bookings.filter((booking) => booking.tripId === trip.id && booking.status === "Confirmed");
+    const customers = confirmed.reduce((total, booking) => total + booking.numberOfPeople, 0);
+    const revenue = customers * trip.price;
+    const expenses = trip.tripExpenses ? trip.tripExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0) : (trip.tripExpense || 0);
+    return { trip, customers, revenue, expenses, profit: revenue - expenses };
+  });
+  const revenue = rows.reduce((total, row) => total + row.revenue, 0);
+  const expenses = rows.reduce((total, row) => total + row.expenses, 0);
+  const customers = rows.reduce((total, row) => total + row.customers, 0);
+
+  const openExpenses = (trip: Trip) => { setSelectedTripId(trip.id); setDraftExpenses(trip.tripExpenses || []); };
+  const saveExpenses = () => { if (!selectedTrip) return; updateTrip(selectedTrip, { ...tripToForm(selectedTrip), tripExpenses: draftExpenses, tripExpense: String(draftExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0)) }); };
+
+  return (
+    <section className="rounded-xl border border-[#114F3C]/10 bg-surface p-4 shadow-sm dark:border-white/10 dark:bg-[#10241C] sm:p-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-[#F54C0D]">Finance</p><h2 className="mt-1 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">Revenue and trip performance</h2></div><p className="text-xs text-stone-500 dark:text-stone-400">Confirmed bookings only · ETB</p></div>
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4"><MiniStat label="Total revenue" value={formatPrice(revenue)} /><MiniStat label="Total expenses" value={formatPrice(expenses)} /><MiniStat label="Estimated profit" value={formatPrice(revenue - expenses)} /><MiniStat label="Customers served" value={customers} /></div>
+      <div className="mt-5 hidden overflow-x-auto rounded-lg border border-stone-200 dark:border-white/10 lg:block"><table className="min-w-[760px] w-full text-left text-sm"><thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500 dark:bg-white/5 dark:text-stone-400"><tr><th className="p-3">Trip</th><th className="p-3">Customers</th><th className="p-3">Revenue</th><th className="p-3">Expenses</th><th className="p-3">Profit</th><th className="p-3">Manage</th></tr></thead><tbody>{rows.map((row) => <tr key={row.trip.id} className="border-t border-stone-200 dark:border-white/10"><td className="p-3 font-bold text-[#114F3C] dark:text-white">{row.trip.title}</td><td className="p-3">{row.customers}</td><td className="p-3">{formatPrice(row.revenue)}</td><td className="p-3">{formatPrice(row.expenses)}</td><td className={`p-3 font-bold ${row.profit >= 0 ? "text-green-700 dark:text-green-300" : "text-red-600 dark:text-red-300"}`}>{formatPrice(row.profit)}</td><td className="p-3"><button type="button" onClick={() => openExpenses(row.trip)} className="rounded-lg bg-[#F8A900] px-3 py-2 text-sm font-bold text-[#114F3C]">Edit expenses</button></td></tr>)}</tbody></table></div>
+      <div className="mt-5 grid gap-3 lg:hidden">{rows.map((row) => <article key={row.trip.id} className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5"><h3 className="font-black text-[#114F3C] dark:text-[#F8A900]">{row.trip.title}</h3><div className="mt-3 grid grid-cols-2 gap-2 text-sm"><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Customers</span><strong>{row.customers}</strong></div><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Revenue</span><strong>{formatPrice(row.revenue)}</strong></div><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Expenses</span><strong>{formatPrice(row.expenses)}</strong></div><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Profit</span><strong className={row.profit >= 0 ? "text-green-700 dark:text-green-300" : "text-red-600 dark:text-red-300"}>{formatPrice(row.profit)}</strong></div></div><button type="button" onClick={() => openExpenses(row.trip)} className="mt-3 w-full rounded-lg bg-[#F8A900] px-4 py-3 text-sm font-bold text-[#114F3C]">Edit expenses</button></article>)}</div>
+      {selectedTrip ? <div ref={expenseEditorRef} className="mt-5 scroll-mt-6 rounded-xl border-2 border-[#F8A900] bg-[#fffaf0] p-4 shadow-sm dark:bg-white/5"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wide text-[#F54C0D]">Managing expenses</p><h3 className="mt-1 text-lg font-black text-[#114F3C] dark:text-[#F8A900]">{selectedTrip.title}</h3></div><button type="button" onClick={() => setSelectedTripId(null)} className="rounded-lg border border-stone-300 px-3 py-2 text-sm font-bold dark:border-white/20">Close</button></div><div className="mt-4 space-y-3">{draftExpenses.map((expense, index) => <div key={index} className="grid gap-2 sm:grid-cols-[1fr_1.3fr_140px_auto]"><input className={inputClass} placeholder="Expense name" value={expense.name} onChange={(event) => setDraftExpenses((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} /><input className={inputClass} placeholder="Remark" value={expense.remark} onChange={(event) => setDraftExpenses((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, remark: event.target.value } : item))} /><input className={inputClass} type="number" min="0" placeholder="Amount (ETB)" value={expense.amount || ""} onChange={(event) => setDraftExpenses((items) => items.map((item, itemIndex) => itemIndex === index ? { ...item, amount: Number(event.target.value) || 0 } : item))} /><button type="button" onClick={() => setDraftExpenses((items) => items.filter((_, itemIndex) => itemIndex !== index))} className="text-left text-sm font-bold text-red-600">Remove</button></div>)}</div><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={() => setDraftExpenses((items) => [...items, { name: "", remark: "", amount: 0 }])} className="rounded-lg border border-[#114F3C] px-4 py-2 text-sm font-bold text-[#114F3C]">Add expense</button><button type="button" onClick={saveExpenses} className="rounded-lg bg-[#114F3C] px-4 py-2 text-sm font-bold text-white">Save expenses</button></div></div> : null}
     </section>
   );
 }

@@ -1,7 +1,8 @@
 import type { FormEvent } from "react";
 
 export type TripStatus = "Draft" | "Published";
-export type Page = "home" | "trips" | "gallery" | "about" | "contact" | "admin";
+export type TripExpense = { name: string; remark: string; amount: number };
+export type Page = "home" | "trips" | "gallery" | "about" | "contact" | "faq" | "admin";
 
 export type ItineraryDay = {
   activities: { title: string; description: string }[];
@@ -17,6 +18,11 @@ export type Trip = {
   date: string;
   duration: string;
   price: number;
+  tripExpense?: number;
+  tripExpenses?: TripExpense[];
+  foreignerPricingEnabled?: boolean;
+  foreignerPrivatePriceUsd?: number;
+  foreignerGroupPriceUsd?: number;
   difficulty: string;
   availableSeats: number;
   hotLeadDays?: number;
@@ -32,6 +38,7 @@ export type Trip = {
   safetyNotes: string;
   coverImage: string;
   galleryImages: string[];
+  galleryImageAlbums?: Record<string, string>;
   status: TripStatus;
   bookingsCount?: number;
 };
@@ -41,6 +48,7 @@ export type BookingForm = {
   phone: string;
   numberOfPeople: string;
   message: string;
+  consentAccepted: boolean;
 };
 
 export type ContactForm = {
@@ -81,6 +89,7 @@ export type Booking = {
   message: string;
   status: string;
   createdAt: string;
+  consentAcceptedAt?: string;
 };
 
 export type ContactMessage = {
@@ -120,6 +129,11 @@ export type AdminTripForm = {
   date: string;
   duration: string;
   price: string;
+  tripExpense: string;
+  tripExpenses: TripExpense[];
+  foreignerPricingEnabled: boolean;
+  foreignerPrivatePriceUsd: string;
+  foreignerGroupPriceUsd: string;
   difficulty: string;
   availableSeats: string;
   hotLeadDays: string;
@@ -136,6 +150,7 @@ export type AdminTripForm = {
   description: string;
   coverImage: string;
   galleryImages: string;
+  galleryImageAlbums: Record<string, string>;
   status: TripStatus;
 };
 

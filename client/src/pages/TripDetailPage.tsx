@@ -51,6 +51,7 @@ export function TripDetailPage({
       <div className="trip-detail-content mx-auto grid max-w-7xl gap-5 sm:gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:px-8">
         <main className="min-w-0 space-y-8">
           <RouteSnapshot trip={trip} />
+          <PricingSection trip={trip} />
           <section className="rounded-xl border border-[#114F3C]/15 bg-surface p-5 dark:border-white/15 dark:bg-[#10241C]">
             <h2 className="text-xl font-bold text-[#114F3C] dark:text-[#F8A900]">Meeting point and times</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2"><div><dt className="text-sm text-stone-500 dark:text-stone-400">Meet at</dt><dd className="font-semibold">{trip.meetingPoint || "Our team will confirm the meeting point."}</dd></div><div><dt className="text-sm text-stone-500 dark:text-stone-400">Departure</dt><dd className="font-semibold">{formatDate(trip.date)} / {trip.departureTime || "Time to be confirmed"}</dd></div><div><dt className="text-sm text-stone-500 dark:text-stone-400">Return</dt><dd className="font-semibold">{trip.returnDate ? formatDate(trip.returnDate) : formatDate(trip.date)} / {trip.returnTime || "Time to be confirmed"}</dd></div></dl>
@@ -89,6 +90,39 @@ export function TripDetailPage({
       ) : null}
 
       <MobileBookingBar trip={trip} />
+    </section>
+  );
+}
+
+function PricingSection({ trip }: { trip: Trip }) {
+  if (!trip.foreignerPricingEnabled) return null;
+
+  const formatUsd = (value?: number) => typeof value === "number" && value > 0
+    ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value)
+    : "Contact us";
+
+  return (
+    <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-5 shadow-sm dark:border-white/10 dark:bg-[#10241C] sm:p-6">
+      <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Pricing</p>
+      <h2 className="mt-2 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">Choose how you want to travel</h2>
+      <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl bg-sage p-4 dark:bg-white/5">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">Local guests</p>
+          <p className="mt-2 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatPrice(trip.price)}</p>
+          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">Payable in ETB</p>
+        </div>
+        <div className="rounded-2xl bg-sage p-4 dark:bg-white/5">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">Foreign visitors / group</p>
+          <p className="mt-2 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatUsd(trip.foreignerGroupPriceUsd)}</p>
+          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">Join a scheduled group</p>
+        </div>
+        <div className="rounded-2xl bg-sage p-4 dark:bg-white/5">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">Foreign visitors / private</p>
+          <p className="mt-2 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatUsd(trip.foreignerPrivatePriceUsd)}</p>
+          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">Private arrangement</p>
+        </div>
+      </div>
+      <p className="mt-4 text-sm leading-6 text-stone-600 dark:text-stone-300">Foreign visitor prices can be paid in USD or the equivalent amount in ETB.</p>
     </section>
   );
 }
@@ -269,6 +303,10 @@ function BookingPanel({
         <label className="block text-sm font-semibold">Phone / WhatsApp<span className="mt-1 block"><input type="tel" minLength={7} maxLength={30} autoComplete="tel" required className={inputClass} placeholder="Phone / WhatsApp" value={bookingForm.phone} onChange={(event) => setBookingForm({ ...bookingForm, phone: event.target.value })} /></span></label>
         <label className="block text-sm font-semibold">Number of people<span className="mt-1 block"><input required min="1" max={Math.min(100, trip.availableSeats)} step="1" type="number" className={inputClass} placeholder="Number of people" value={bookingForm.numberOfPeople} onChange={(event) => setBookingForm({ ...bookingForm, numberOfPeople: event.target.value })} /></span></label>
         <label className="block text-sm font-semibold">Message (optional)<span className="mt-1 block"><textarea maxLength={1000} className={`${inputClass} min-h-28`} placeholder="Message" value={bookingForm.message} onChange={(event) => setBookingForm({ ...bookingForm, message: event.target.value })} /></span></label>
+        <label className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50 p-3 text-sm leading-6 dark:border-white/10 dark:bg-white/5">
+          <input required type="checkbox" className="mt-1 h-4 w-4 shrink-0 accent-[#114F3C]" checked={bookingForm.consentAccepted} onChange={(event) => setBookingForm({ ...bookingForm, consentAccepted: event.target.checked })} />
+          <span>I understand that this is a booking request, not a confirmed reservation. I agree to follow the trip safety, payment, and cancellation instructions provided by Ermija Hiking.</span>
+        </label>
         <button type="submit" className={`w-full rounded-lg px-5 py-4 text-base font-black transition ${yellowButton}`}>
           {pending ? "Sending request..." : "Request a booking"}
         </button>

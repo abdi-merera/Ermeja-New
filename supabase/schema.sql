@@ -46,6 +46,7 @@ create table if not exists public.ermija_bookings (
   updated_at timestamptz not null default now()
 );
 alter table public.ermija_bookings add column if not exists status text not null default 'New';
+alter table public.ermija_bookings add column if not exists consent_accepted_at timestamptz;
 
 -- Confirms/cancels a booking and changes seats exactly once. Run this updated
 -- schema in the SQL editor after deploying the matching client code.

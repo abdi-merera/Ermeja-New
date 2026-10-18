@@ -239,7 +239,7 @@ export function GalleryPage({ images, trips, chooseTrip, highlight = defaultGall
           </section>
         )}
 
-        <section className="mt-12 overflow-hidden rounded-lg bg-[#114F3C] p-4 text-white shadow-2xl shadow-[#114F3C]/15 sm:p-8">
+        <section className="mt-12 hidden overflow-hidden rounded-lg bg-[#114F3C] p-4 text-white shadow-2xl shadow-[#114F3C]/15 lg:block sm:p-8">
           <div className="grid items-center gap-5 sm:gap-8 lg:grid-cols-[0.8fr_1fr]">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[#F8A900]">{highlight.eyebrow || defaultGalleryHighlight.eyebrow}</p>
