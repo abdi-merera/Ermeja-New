@@ -2,7 +2,7 @@ import type { FormEvent } from "react";
 
 export type TripStatus = "Draft" | "Published";
 export type TripExpense = { name: string; remark: string; amount: number };
-export type Page = "home" | "trips" | "gallery" | "about" | "contact" | "faq" | "admin";
+export type Page = "home" | "trips" | "gallery" | "about" | "contact" | "faq" | "policies" | "admin";
 
 export type ItineraryDay = {
   activities: { title: string; description: string }[];

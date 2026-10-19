@@ -5,6 +5,7 @@ import { ContactPage } from "../pages/ContactPage";
 import { GalleryPage } from "../pages/GalleryPage";
 import { HomePage } from "../pages/HomePage";
 import { FAQPage } from "../pages/FAQPage";
+import { PoliciesPage } from "../pages/PoliciesPage";
 import { TripDetailPage } from "../pages/TripDetailPage";
 import { TripsPage } from "../pages/TripsPage";
 import type { AdminLoginForm, AdminTripForm, AdminTripSubmitHandler, Booking, BookingForm, BookingSubmitHandler, ContactForm, ContactMessage, ContactSubmitHandler, GalleryHighlight, GalleryImage, Page, PrivateTripRequest, Trip, TripStatus } from "../types";
@@ -118,6 +119,10 @@ export function AppRoutes({
 
   if (page === "faq") {
     return <FAQPage />;
+  }
+
+  if (page === "policies") {
+    return <PoliciesPage />;
   }
 
   if (page === "admin") {

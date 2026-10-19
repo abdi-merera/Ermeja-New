@@ -113,6 +113,23 @@ export function AboutPage() {
         </div>
       </section>
 
+      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Meet your guides</p>
+            <h2 className="mt-3 text-2xl font-black text-[#114F3C] dark:text-[#F8A900] sm:text-4xl">Local knowledge, calm guidance, and a clear plan.</h2>
+            <p className="mt-4 text-base leading-8 text-stone-700 dark:text-stone-300">Our guides help guests understand the route, stay together, manage the pace, and enjoy the destination responsibly.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              ["Route knowledge", "We explain the terrain, timing, meeting points, and route expectations before the trip."],
+              ["Group care", "We keep the group connected, make room for rest, and help guests move at a comfortable pace."],
+              ["Safety first", "We monitor conditions and may adjust the route or timing when safety requires it."]
+            ].map(([title, text]) => <article key={title} className="rounded-lg border border-[#114F3C]/10 bg-surface p-5 shadow-sm dark:border-white/10 dark:bg-[#10241C]"><ShieldCheck className="h-7 w-7 text-[#F54C0D]" /><h3 className="mt-4 font-black text-[#114F3C] dark:text-[#F8A900]">{title}</h3><p className="mt-2 text-sm leading-6 text-stone-700 dark:text-stone-300">{text}</p></article>)}
+          </div>
+        </div>
+      </section>
+
       <section className="about-process px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8 grid gap-5 lg:grid-cols-[0.7fr_1fr]">

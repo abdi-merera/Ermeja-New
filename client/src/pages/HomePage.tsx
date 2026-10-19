@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2, Flame, MessageCircle } from "lucide-react";
-import { beigePanel, brandGreen, destinations, experienceHighlights, heroStats, orangeButton, trustItems, whatsappNumber, yellowButton } from "../constants";
+import { beigePanel, brandGreen, destinations, experienceHighlights, heroStats, orangeButton, testimonials, trustItems, whatsappNumber, yellowButton } from "../constants";
 import { GalleryPreview } from "../components/GalleryPreview";
 import { SectionTitle } from "../components/SectionTitle";
 import { TripCard } from "../components/TripCard";
@@ -163,6 +163,25 @@ export function HomePage({ trips, galleryImages, choosePage, chooseTrip }: { tri
       </section>
 
       <GalleryPreview images={galleryImages} onOpen={() => choosePage("gallery")} />
+
+      <section className="px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <SectionTitle eyebrow="Reviews and testimonials" title="Good trips are better when shared" text="A few words from guests who value clear planning, local guidance, and memorable time outdoors." />
+          <div className="grid gap-5 md:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <article key={testimonial.name} className="rounded-lg border border-[#114F3C]/10 bg-surface p-5 shadow-sm dark:border-white/10 dark:bg-[#10241C] dark:shadow-black/20">
+                <div className="flex gap-1 text-[#F8A900]" aria-label="5 star review">★★★★★</div>
+                <p className="mt-4 text-sm leading-7 text-stone-700 dark:text-stone-300">“{testimonial.text}”</p>
+                <div className="mt-5 border-t border-stone-200 pt-4 dark:border-white/10">
+                  <p className="font-black text-[#114F3C] dark:text-[#F8A900]">{testimonial.name}</p>
+                  <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-stone-500 dark:text-stone-400">{testimonial.role}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          <a className="mt-6 inline-flex rounded-lg border border-[#114F3C] px-5 py-3 text-sm font-black text-[#114F3C] transition hover:bg-[#114F3C] hover:text-white dark:border-[#F8A900] dark:text-[#F8A900] dark:hover:bg-[#F8A900] dark:hover:text-[#114F3C]" href={googleReviewUrl} target="_blank" rel="noopener noreferrer">Read or leave a Google review</a>
+        </div>
+      </section>
 
       <section className="home-stories px-4 py-10 sm:py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">

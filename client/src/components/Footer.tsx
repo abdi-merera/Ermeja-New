@@ -50,7 +50,7 @@ export function Footer({ compactMobile = false }: { compactMobile?: boolean }) {
               </a>
             ))}
           </div>
-          <a href="/faq" className="mt-3 inline-flex rounded-lg border border-[#F8A900] px-4 py-2 text-sm font-black text-[#F8A900] transition hover:bg-[#F8A900] hover:text-[#114F3C]">FAQ</a>
+          <div className="mt-3 flex flex-wrap gap-2"><a href="/faq" className="inline-flex rounded-lg border border-[#F8A900] px-4 py-2 text-sm font-black text-[#F8A900] transition hover:bg-[#F8A900] hover:text-[#114F3C]">FAQ</a><a href="/policies" className="inline-flex rounded-lg border border-white/20 px-4 py-2 text-sm font-black text-white transition hover:border-[#F8A900] hover:text-[#F8A900]">Policies</a></div>
         </div>
       </div>
     </footer>

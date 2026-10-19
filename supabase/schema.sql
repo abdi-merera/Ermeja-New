@@ -13,6 +13,8 @@ as $$
     'amanuelbereket330@gmail.com'
   );
 $$;
+revoke all on function public.is_ermija_admin() from public;
+grant execute on function public.is_ermija_admin() to anon, authenticated;
 
 create table if not exists public.ermija_trips (
   id text primary key,
@@ -110,13 +112,15 @@ create policy "Admins manage trips" on public.ermija_trips for all
 using (public.is_ermija_admin()) with check (public.is_ermija_admin());
 
 drop policy if exists "Settings are public" on public.ermija_site_settings;
-create policy "Settings are public" on public.ermija_site_settings for select using (true);
+create policy "Settings are public" on public.ermija_site_settings for select
+using (key = 'gallery-highlight' or key like 'gallery-photo.%' or public.is_ermija_admin());
 drop policy if exists "Admins manage settings" on public.ermija_site_settings;
 create policy "Admins manage settings" on public.ermija_site_settings for all
 using (public.is_ermija_admin()) with check (public.is_ermija_admin());
 
 drop policy if exists "Anyone can create bookings" on public.ermija_bookings;
-create policy "Anyone can create bookings" on public.ermija_bookings for insert with check (status = 'New');
+create policy "Anyone can create bookings" on public.ermija_bookings for insert
+with check (status = 'New' and consent_accepted_at is not null);
 drop policy if exists "Admins manage bookings" on public.ermija_bookings;
 create policy "Admins manage bookings" on public.ermija_bookings for all
 using (public.is_ermija_admin()) with check (public.is_ermija_admin());

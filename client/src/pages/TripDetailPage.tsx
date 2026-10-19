@@ -305,7 +305,7 @@ function BookingPanel({
         <label className="block text-sm font-semibold">Message (optional)<span className="mt-1 block"><textarea maxLength={1000} className={`${inputClass} min-h-28`} placeholder="Message" value={bookingForm.message} onChange={(event) => setBookingForm({ ...bookingForm, message: event.target.value })} /></span></label>
         <label className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50 p-3 text-sm leading-6 dark:border-white/10 dark:bg-white/5">
           <input required type="checkbox" className="mt-1 h-4 w-4 shrink-0 accent-[#114F3C]" checked={bookingForm.consentAccepted} onChange={(event) => setBookingForm({ ...bookingForm, consentAccepted: event.target.checked })} />
-          <span>I understand that this is a booking request, not a confirmed reservation. I agree to follow the trip safety, payment, and cancellation instructions provided by Ermija Hiking.</span>
+          <span>I understand that this is a booking request, not a confirmed reservation. I agree to follow the trip safety, payment, and cancellation instructions provided by Ermija Hiking. <a href="/policies" target="_blank" rel="noreferrer" className="font-bold text-[#F54C0D] underline">Read policies</a></span>
         </label>
         <button type="submit" className={`w-full rounded-lg px-5 py-4 text-base font-black transition ${yellowButton}`}>
           {pending ? "Sending request..." : "Request a booking"}
