@@ -272,8 +272,8 @@ export function uploadTripImage(file: File) {
 }
 
 export function createTrip(form: AdminTripForm) {
-  const base = form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  const id = base;
+  // IDs are stable identities, independent of editable/repeatable titles.
+  const id = crypto.randomUUID();
   const payload = { ...tripPayload(form), id } as Trip;
   return fetch(databaseUrl("ermija_trips"), {
     method: "POST",

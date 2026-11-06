@@ -71,7 +71,7 @@ export function App() {
 
   useEffect(() => {
     if (!apiMessage) return;
-    const dismissTimer = window.setTimeout(() => setApiMessage(""), 30_000);
+    const dismissTimer = window.setTimeout(() => setApiMessage(""), 5_000);
     return () => window.clearTimeout(dismissTimer);
   }, [apiMessage]);
 
@@ -131,6 +131,16 @@ export function App() {
       : page === "trips" ? "Compare scheduled, private and group hiking trips across Ethiopia with Ermija Hiking."
       : "Discover guided hiking, camping and group trips across Ethiopia with Ermija Hiking.";
     document.title = title;
+    const canonicalUrl = `${window.location.origin}${page === "home" ? "/" : `/${page}`}`;
+    const setMeta = (selector: string, attribute: "name" | "property", value: string) => {
+      let element = document.querySelector<HTMLMetaElement>(selector);
+      if (!element) {
+        element = document.createElement("meta");
+        element.setAttribute(attribute, selector.includes("property=") ? selector.split('property="')[1]?.split('"')[0] || "" : selector.split('name="')[1]?.split('"')[0] || "");
+        document.head.appendChild(element);
+      }
+      element.content = value;
+    };
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (!meta) {
       meta = document.createElement("meta");
@@ -138,6 +148,14 @@ export function App() {
       document.head.appendChild(meta);
     }
     meta.content = description;
+    setMeta('meta[property="og:title"]', "property", title);
+    setMeta('meta[property="og:description"]', "property", description);
+    setMeta('meta[property="og:url"]', "property", canonicalUrl);
+    setMeta('meta[name="twitter:title"]', "name", title);
+    setMeta('meta[name="twitter:description"]', "name", description);
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
+    canonical.href = canonicalUrl;
   }, [page, selectedTrip]);
 
   const choosePage = (target: Page) => {

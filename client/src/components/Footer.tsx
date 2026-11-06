@@ -50,7 +50,16 @@ export function Footer({ compactMobile = false }: { compactMobile?: boolean }) {
               </a>
             ))}
           </div>
-          <div className="mt-3 flex flex-wrap gap-2"><a href="/faq" className="inline-flex rounded-lg border border-[#F8A900] px-4 py-2 text-sm font-black text-[#F8A900] transition hover:bg-[#F8A900] hover:text-[#114F3C]">FAQ</a><a href="/policies" className="inline-flex rounded-lg border border-white/20 px-4 py-2 text-sm font-black text-white transition hover:border-[#F8A900] hover:text-[#F8A900]">Policies</a></div>
+        </div>
+      </div>
+      <div className="mx-auto mt-8 max-w-7xl border-t border-white/20 pt-5">
+        <div className="flex flex-col gap-3 text-xs text-white/65 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} Ermija Hiking. All rights reserved.</p>
+          <nav aria-label="Legal links" className="flex flex-wrap gap-x-5 gap-y-2">
+            <a href="/faq" className="transition hover:text-white hover:underline">FAQ</a>
+            <a href="/policies" className="transition hover:text-white hover:underline">Disclaimer</a>
+            <a href="/policies" className="transition hover:text-white hover:underline">Privacy Policy</a>
+          </nav>
         </div>
       </div>
     </footer>

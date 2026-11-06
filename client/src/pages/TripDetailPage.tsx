@@ -105,21 +105,21 @@ function PricingSection({ trip }: { trip: Trip }) {
     <section className="rounded-[1.5rem] border border-[#114F3C]/10 bg-surface p-5 shadow-sm dark:border-white/10 dark:bg-[#10241C] sm:p-6">
       <p className="text-sm font-black uppercase tracking-[0.22em] text-[#F54C0D]">Pricing</p>
       <h2 className="mt-2 text-2xl font-black text-[#114F3C] dark:text-[#F8A900]">Choose how you want to travel</h2>
-      <div className="mt-5 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl bg-sage p-4 dark:bg-white/5">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">Local guests</p>
-          <p className="mt-2 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatPrice(trip.price)}</p>
-          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">Payable in ETB</p>
+      <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="rounded-2xl bg-sage p-3 dark:bg-white/5 sm:p-4">
+          <p className="text-[10px] font-black uppercase leading-tight tracking-[0.1em] text-stone-500 dark:text-stone-400 sm:text-xs sm:tracking-[0.14em]">Local guests</p>
+          <p className="mt-2 text-base font-black text-[#114F3C] dark:text-[#F8A900] sm:text-xl">{formatPrice(trip.price)}</p>
+          <p className="mt-1 text-xs text-stone-600 dark:text-stone-300 sm:text-sm">Payable in ETB</p>
         </div>
-        <div className="rounded-2xl bg-sage p-4 dark:bg-white/5">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">Foreign visitors / group</p>
-          <p className="mt-2 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatUsd(trip.foreignerGroupPriceUsd)}</p>
-          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">Join a scheduled group</p>
+        <div className="rounded-2xl bg-sage p-3 dark:bg-white/5 sm:p-4">
+          <p className="text-[10px] font-black uppercase leading-tight tracking-[0.1em] text-stone-500 dark:text-stone-400 sm:text-xs sm:tracking-[0.14em]">Foreign visitors / group</p>
+          <p className="mt-2 text-base font-black text-[#114F3C] dark:text-[#F8A900] sm:text-xl">{formatUsd(trip.foreignerGroupPriceUsd)}</p>
+          <p className="mt-1 text-xs text-stone-600 dark:text-stone-300 sm:text-sm">Join a scheduled group</p>
         </div>
-        <div className="rounded-2xl bg-sage p-4 dark:bg-white/5">
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">Foreign visitors / private</p>
-          <p className="mt-2 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">{formatUsd(trip.foreignerPrivatePriceUsd)}</p>
-          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">Private arrangement</p>
+        <div className="rounded-2xl bg-sage p-3 dark:bg-white/5 sm:p-4">
+          <p className="text-[10px] font-black uppercase leading-tight tracking-[0.1em] text-stone-500 dark:text-stone-400 sm:text-xs sm:tracking-[0.14em]">Foreign visitors / private</p>
+          <p className="mt-2 text-base font-black text-[#114F3C] dark:text-[#F8A900] sm:text-xl">{formatUsd(trip.foreignerPrivatePriceUsd)}</p>
+          <p className="mt-1 text-xs text-stone-600 dark:text-stone-300 sm:text-sm">Private arrangement</p>
         </div>
       </div>
       <p className="mt-4 text-sm leading-6 text-stone-600 dark:text-stone-300">Foreign visitor prices can be paid in USD or the equivalent amount in ETB.</p>

@@ -15,7 +15,8 @@ const adminSections = [
   { id: "trips", label: "Trips", text: "Create and manage packages.", icon: Mountain },
   { id: "bookings", label: "Bookings", text: "Review and confirm requests", icon: Users },
   { id: "messages", label: "Messages", text: "Read and reply to guests", icon: Mail },
-  { id: "gallery", label: "Gallery", text: "Manage photos and highlights", icon: ImagePlus }
+  { id: "gallery", label: "Gallery", text: "Manage photos and highlights", icon: ImagePlus },
+  { id: "finance", label: "Finance", text: "Track revenue and expenses", icon: FileText }
 ] as const;
 
 const inputClass =
@@ -198,6 +199,12 @@ export function AdminPage({
       { label: "Cover images", value: trips.filter((trip) => trip.coverImage).length, icon: ImagePlus },
       { label: "Gallery images", value: trips.reduce((total, trip) => total + trip.galleryImages.filter(Boolean).length, 0), icon: ImagePlus },
       { label: "Independent photos", value: standalonePhotos.length, icon: ImagePlus }
+    ],
+    finance: [
+      { label: "Total trips", value: trips.length, icon: Mountain },
+      { label: "Confirmed bookings", value: confirmedBookings, icon: CheckCircle2 },
+      { label: "Expense entries", value: trips.reduce((total, trip) => total + (trip.tripExpenses || []).length, 0), icon: FileText },
+      { label: "Trips with expenses", value: trips.filter((trip) => (trip.tripExpenses || []).length > 0).length, icon: FileText }
     ]
   }[activeSection];
 
@@ -252,27 +259,27 @@ export function AdminPage({
   return (
     <section className="min-h-screen bg-canvas px-4 py-6 transition-colors dark:bg-[#071711] sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-[1440px]">
-        <header className="mb-4 overflow-hidden rounded-xl bg-[#114F3C] p-4 text-white">
-          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+        <header className="mb-4 overflow-hidden rounded-xl bg-[#114F3C] p-2.5 text-white sm:p-4">
+          <div className="flex flex-col justify-between gap-2 sm:gap-5 lg:flex-row lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-[#F8A900]">Ermija administration</p>
-            <h1 className="mt-1 text-2xl font-black leading-tight">Admin dashboard</h1>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#F8A900] sm:text-xs sm:tracking-[0.22em]">Ermija administration</p>
+            <h1 className="mt-0.5 text-lg font-black leading-tight sm:mt-1 sm:text-2xl">Admin dashboard</h1>
 
           </div>
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/10 p-3 backdrop-blur">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#F8A900] font-black text-[#114F3C]">{adminEmail.slice(0, 1).toUpperCase()}</div>
+          <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 p-1 backdrop-blur sm:gap-3 sm:rounded-xl sm:p-3">
+            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-[#F8A900] text-xs font-black text-[#114F3C] sm:h-11 sm:w-11 sm:rounded-xl sm:text-base">{adminEmail.slice(0, 1).toUpperCase()}</div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-white/60">Signed in as</p>
-              <p className="truncate text-sm font-black">{adminEmail}</p>
+              <p className="text-[10px] font-bold leading-none text-white/60 sm:text-xs">Signed in as</p>
+              <p className="truncate text-[11px] font-black leading-tight sm:text-sm">{adminEmail}</p>
             </div>
-            <button type="button" onClick={logoutAdmin} className="grid h-10 w-10 place-items-center rounded-lg bg-white/10 text-white transition hover:bg-white/20" aria-label="Log out">
+            <button type="button" onClick={logoutAdmin} className="grid h-7 w-7 place-items-center rounded-md bg-white/10 text-white transition hover:bg-white/20 sm:h-10 sm:w-10 sm:rounded-lg" aria-label="Log out">
               <LogOut className="h-4 w-4" />
             </button>
           </div>
           </div>
         </header>
 
-        <nav aria-label="Admin sections" className="mb-4 grid grid-cols-2 gap-2 rounded-xl border border-stone-200 bg-white p-2 dark:border-white/15 dark:bg-[#10241C] sm:gap-3 lg:grid-cols-4">
+        <nav aria-label="Admin sections" className="mb-4 grid grid-cols-2 gap-2 rounded-xl border border-stone-200 bg-white p-2 dark:border-white/15 dark:bg-[#10241C] sm:gap-3 lg:grid-cols-5">
           {adminSections.map((section) => {
             const Icon = section.icon;
             const selected = activeSection === section.id;
@@ -332,9 +339,10 @@ export function AdminPage({
                   ))}
                 </div>
               ) : <EmptyAdminState text="No trips match the current search." />}
-              <FinanceOverview trips={trips} bookings={bookings} updateTrip={updateAdminTrip} />
           </div>
         ) : null}
+
+        {activeSection === "finance" ? <FinanceOverview trips={trips} bookings={bookings} updateTrip={updateAdminTrip} /> : null}
 
         {activeSection === "gallery" ? (
           <div className="space-y-6">
@@ -777,6 +785,8 @@ function TripForm({
 }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const [mediaMode, setMediaMode] = useState<"cover" | "gallery">("cover");
+  const [visibleMediaCount, setVisibleMediaCount] = useState(24);
   const [uploadError, setUploadError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const galleryImages = splitCommaList(form.galleryImages);
@@ -1005,13 +1015,14 @@ function TripForm({
               <input className={`${inputClass} w-full`} placeholder="/uploads/photo.jpg or https://..." value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })} />
             </FieldLabel>
               {existingMedia.length ? <div className="rounded-xl border border-[#114F3C]/15 bg-sage p-4 dark:border-white/15 dark:bg-white/5 sm:col-span-2">
-                <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-sm font-black text-[#114F3C] dark:text-[#F8A900]">Reuse existing media</p><p className="text-xs text-stone-600 dark:text-stone-300">Choose an image already in storage instead of uploading it again.</p></div><select aria-label="Choose existing cover image" className={`${inputClass} max-w-full`} value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })}><option value="">Select existing cover</option>{existingMedia.map((item) => <option key={item.id} value={item.image}>{item.destination} / {item.title}</option>)}</select></div>
-                <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">{existingMedia.slice(0, 12).map((item) => <button type="button" key={item.id} onClick={() => setForm({ ...form, coverImage: item.image })} className={`overflow-hidden rounded-lg border-2 ${form.coverImage === item.image ? "border-[#F8A900] ring-2 ring-[#F8A900]/30" : "border-transparent"}`} aria-label={`Use ${item.title} as cover`}><img src={item.image} alt="" className="aspect-square w-full object-cover" /></button>)}</div>
+                <div className="mb-3 flex gap-2"><button type="button" onClick={() => setMediaMode("cover")} className={`rounded-lg px-3 py-2 text-sm font-black ${mediaMode === "cover" ? "bg-[#114F3C] text-white" : "bg-white/70 text-[#114F3C]"}`}>Choose cover</button><button type="button" onClick={() => setMediaMode("gallery")} className={`rounded-lg px-3 py-2 text-sm font-black ${mediaMode === "gallery" ? "bg-[#114F3C] text-white" : "bg-white/70 text-[#114F3C]"}`}>Choose gallery images</button></div>
+                <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-sm font-black text-[#114F3C] dark:text-[#F8A900]">Reuse existing media</p><p className="text-xs text-stone-600 dark:text-stone-300">Choose an image already in storage instead of uploading it again.</p></div>{mediaMode === "cover" ? <select aria-label="Choose existing cover image" className={`${inputClass} max-w-full`} value={form.coverImage} onChange={(event) => setForm({ ...form, coverImage: event.target.value })}><option value="">Select existing cover</option>{existingMedia.map((item) => <option key={item.id} value={item.image}>{item.destination} / {item.title}</option>)}</select> : null}</div>
+                {mediaMode === "cover" ? <div className="mt-3 grid max-h-[30rem] grid-cols-4 gap-2 overflow-y-auto sm:grid-cols-6">{existingMedia.slice(0, visibleMediaCount).map((item) => <button type="button" key={item.id} onClick={() => setForm({ ...form, coverImage: item.image })} className={`overflow-hidden rounded-lg border-2 ${form.coverImage === item.image ? "border-[#F8A900] ring-2 ring-[#F8A900]/30" : "border-transparent"}`} aria-label={`Use ${item.title} as cover`}><img src={item.image} alt="" className="aspect-square w-full object-cover" /></button>)}{visibleMediaCount < existingMedia.length ? <button type="button" onClick={() => setVisibleMediaCount((count) => count + 24)} className="col-span-full rounded-lg bg-white/70 px-3 py-2 text-sm font-black text-[#114F3C]">Load more media</button> : null}</div> : null}
               </div> : null}
             <FieldLabel label="Gallery image URLs" hint="Comma separated">
               <textarea className={`${inputClass} min-h-20 w-full`} placeholder="/uploads/one.jpg, /uploads/two.jpg" value={form.galleryImages} onChange={(event) => setForm({ ...form, galleryImages: event.target.value })} />
             </FieldLabel>
-              {existingMedia.length ? <div className="rounded-xl border border-[#114F3C]/15 bg-sage p-4 dark:border-white/15 dark:bg-white/5 sm:col-span-2"><p className="text-sm font-black text-[#114F3C] dark:text-[#F8A900]">Add existing images to this trip</p><p className="mt-1 text-xs text-stone-600 dark:text-stone-300">Tap thumbnails to add them without creating another upload. Existing images keep their original album.</p><div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">{existingMedia.slice(0, 12).map((item) => { const selected = galleryImages.includes(item.image); return <button type="button" key={`gallery-${item.id}`} onClick={() => setGalleryImages(selected ? galleryImages.filter((image) => image !== item.image) : [...galleryImages, item.image])} className={`relative overflow-hidden rounded-lg border-2 ${selected ? "border-[#F8A900] ring-2 ring-[#F8A900]/30" : "border-transparent"}`} aria-label={`${selected ? "Remove" : "Add"} ${item.title}`}><img src={item.image} alt="" className="aspect-square w-full object-cover" />{selected ? <span className="absolute inset-0 grid place-items-center bg-[#114F3C]/55 text-xl font-black text-white">✓</span> : null}</button>; })}</div></div> : null}
+              {existingMedia.length && mediaMode === "gallery" ? <div className="rounded-xl border border-[#114F3C]/15 bg-sage p-4 dark:border-white/15 dark:bg-white/5 sm:col-span-2"><p className="text-sm font-black text-[#114F3C] dark:text-[#F8A900]">Add existing images to this trip</p><p className="mt-1 text-xs text-stone-600 dark:text-stone-300">Tap thumbnails to add them without creating another upload. Existing images keep their original album.</p><div className="mt-3 grid max-h-[30rem] grid-cols-4 gap-2 overflow-y-auto sm:grid-cols-6">{existingMedia.slice(0, visibleMediaCount).map((item) => { const selected = galleryImages.includes(item.image); return <button type="button" key={`gallery-${item.id}`} onClick={() => setGalleryImages(selected ? galleryImages.filter((image) => image !== item.image) : [...galleryImages, item.image])} className={`relative overflow-hidden rounded-lg border-2 ${selected ? "border-[#F8A900] ring-2 ring-[#F8A900]/30" : "border-transparent"}`} aria-label={`${selected ? "Remove" : "Add"} ${item.title}`}><img src={item.image} alt="" className="aspect-square w-full object-cover" />{selected ? <span className="absolute inset-0 grid place-items-center bg-[#114F3C]/55 text-xl font-black text-white">✓</span> : null}</button>; })}{visibleMediaCount < existingMedia.length ? <button type="button" onClick={() => setVisibleMediaCount((count) => count + 24)} className="col-span-full rounded-lg bg-white/70 px-3 py-2 text-sm font-black text-[#114F3C]">Load more media</button> : null}</div></div> : null}
           </FormSection>
         </div>
 
@@ -1175,6 +1186,10 @@ function FinanceOverview({ trips, bookings, updateTrip }: { trips: Trip[]; booki
   const openExpenses = (trip: Trip) => { setSelectedTripId(trip.id); setDraftExpenses(trip.tripExpenses || []); };
   const saveExpenses = () => { if (!selectedTrip) return; updateTrip(selectedTrip, { ...tripToForm(selectedTrip), tripExpenses: draftExpenses, tripExpense: String(draftExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0)) }); };
   const exportReport = () => {
+    if (!selectedTrip) {
+      window.alert("Select a trip first to export its finance report.");
+      return;
+    }
     const escapeCsv = (value: string | number) => `"${String(value).replace(/"/g, '""')}"`;
     const lines = [["Trip", "Confirmed customers", "Revenue (ETB)", "Expenses (ETB)", "Profit (ETB)"], ...rows.map((row) => [row.trip.title, row.customers, row.revenue, row.expenses, row.profit]), [], ["Expense history"], ["Trip", "Expense", "Remark", "Amount (ETB)"], ...expenseHistory.map((expense) => [expense.tripTitle, expense.name, expense.remark, expense.amount])];
     const csv = lines.map((line) => line.map((value) => escapeCsv(value ?? "")).join(",")).join("\r\n");
@@ -1207,7 +1222,7 @@ function FinanceOverview({ trips, bookings, updateTrip }: { trips: Trip[]; booki
   return (
     <section data-selected-trip={selectedTrip ? "true" : "false"} className="flex flex-col rounded-xl border border-[#114F3C]/10 bg-surface p-4 shadow-sm dark:border-white/10 dark:bg-[#10241C] sm:p-5 [&>div:first-child]:order-4 [&[data-selected-trip=false]>div:first-child]:hidden">
       <div className="mt-6 rounded-xl border border-stone-200 dark:border-white/10"><div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200 p-4 dark:border-white/10"><div><h3 className="font-black text-[#114F3C] dark:text-[#F8A900]">Expense history</h3><p className="text-xs text-stone-500 dark:text-stone-400">Every saved expense across all trips</p></div><span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-bold text-stone-600 dark:bg-white/10 dark:text-stone-300">{expenseHistory.length} entries</span></div>{expenseHistory.length ? <div className="overflow-x-auto"><table className="min-w-[620px] w-full text-left text-sm"><thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500 dark:bg-white/5 dark:text-stone-400"><tr><th className="p-3">Trip</th><th className="p-3">Expense</th><th className="p-3">Remark</th><th className="p-3 text-right">Amount</th></tr></thead><tbody>{expenseHistory.map((expense, index) => <tr key={`${expense.tripTitle}-${expense.name}-${index}`} className="border-t border-stone-200 dark:border-white/10"><td className="p-3 font-bold">{expense.tripTitle}</td><td className="p-3">{expense.name}</td><td className="p-3 text-stone-500 dark:text-stone-400">{expense.remark || "—"}</td><td className="p-3 text-right font-bold">{formatPrice(expense.amount)}</td></tr>)}</tbody></table></div> : <p className="p-4 text-sm text-stone-500 dark:text-stone-400">No expenses have been saved yet.</p>}</div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-[#F54C0D]">Finance</p><h2 className="mt-1 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">Revenue and trip performance</h2><p className="mt-1 text-xs text-stone-500 dark:text-stone-400">Confirmed bookings only · ETB</p></div><button type="button" onClick={exportReport} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#114F3C] px-4 py-2.5 text-sm font-bold text-white"><Download size={16} />Export finance report</button></div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-[#F54C0D]">Finance</p><h2 className="mt-1 text-xl font-black text-[#114F3C] dark:text-[#F8A900]">Revenue and trip performance</h2><p className="mt-1 text-xs text-stone-500 dark:text-stone-400">Confirmed bookings only · ETB</p></div><div className="flex flex-wrap gap-2"><button type="button" onClick={exportPdf} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#114F3C] px-4 py-2.5 text-sm font-bold text-white"><Download size={16} />Export PDF</button><button type="button" onClick={exportReport} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#F8A900] px-4 py-2.5 text-sm font-bold text-[#114F3C]"><Download size={16} />Export CSV</button></div></div>
       <div className="flex flex-wrap gap-2 mt-4"><MiniStat label="Total revenue" value={formatPrice(revenue)} /><MiniStat label="Total expenses" value={formatPrice(expenses)} /><MiniStat label="Estimated profit" value={formatPrice(revenue - expenses)} /><MiniStat label="Customers served" value={customers} /><MiniStat label="Total trips" value={rows.length} /></div>
       <div className="mt-5 hidden overflow-x-auto rounded-lg border border-stone-200 dark:border-white/10 lg:block"><table className="min-w-[760px] w-full text-left text-sm"><thead className="bg-stone-50 text-xs uppercase tracking-wide text-stone-500 dark:bg-white/5 dark:text-stone-400"><tr><th className="p-3">Trip</th><th className="p-3">Customers</th><th className="p-3">Revenue</th><th className="p-3">Expenses</th><th className="p-3">Profit</th><th className="p-3">Manage</th></tr></thead><tbody>{rows.map((row) => <tr key={row.trip.id} className="border-t border-stone-200 dark:border-white/10"><td className="p-3 font-bold text-[#114F3C] dark:text-white">{row.trip.title}</td><td className="p-3">{row.customers}</td><td className="p-3">{formatPrice(row.revenue)}</td><td className="p-3">{formatPrice(row.expenses)}</td><td className={`p-3 font-bold ${row.profit >= 0 ? "text-green-700 dark:text-green-300" : "text-red-600 dark:text-red-300"}`}>{formatPrice(row.profit)}</td><td className="p-3"><button type="button" onClick={() => openExpenses(row.trip)} className="rounded-lg bg-[#F8A900] px-3 py-2 text-sm font-bold text-[#114F3C]">Edit expenses</button></td></tr>)}</tbody></table></div>
       <div className="mt-5 grid gap-3 lg:hidden">{rows.map((row) => <article key={row.trip.id} className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/5"><h3 className="font-black text-[#114F3C] dark:text-[#F8A900]">{row.trip.title}</h3><div className="mt-3 grid grid-cols-2 gap-2 text-sm"><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Customers</span><strong>{row.customers}</strong></div><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Revenue</span><strong>{formatPrice(row.revenue)}</strong></div><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Expenses</span><strong>{formatPrice(row.expenses)}</strong></div><div className="rounded-lg bg-stone-50 p-3 dark:bg-white/5"><span className="block text-xs uppercase text-stone-500">Profit</span><strong className={row.profit >= 0 ? "text-green-700 dark:text-green-300" : "text-red-600 dark:text-red-300"}>{formatPrice(row.profit)}</strong></div></div><button type="button" onClick={() => openExpenses(row.trip)} className="mt-3 w-full rounded-lg bg-[#F8A900] px-4 py-3 text-sm font-bold text-[#114F3C]">Edit expenses</button></article>)}</div>

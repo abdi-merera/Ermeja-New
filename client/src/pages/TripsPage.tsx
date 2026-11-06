@@ -4,7 +4,7 @@ import { orangeButton, whatsappNumber, yellowButton } from "../constants";
 import { TripCard } from "../components/TripCard";
 import type { FormEvent } from "react";
 import type { PrivateTripRequest, Trip } from "../types";
-import { formatDate } from "../utils";
+import { formatDate, isHotTrip } from "../utils";
 
 type TripFilter = "All" | string;
 
@@ -19,7 +19,7 @@ const emptyPrivateRequest: PrivateTripRequest = { name: "", phone: "", email: ""
 export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { trips: Trip[]; chooseTrip: (trip: Trip) => void; submitPrivateTripRequest: (request: PrivateTripRequest) => Promise<boolean> }) {
   const [difficulty, setDifficulty] = useState<TripFilter>(allFilter);
   const [duration, setDuration] = useState<TripFilter>(allFilter);
-  const [period, setPeriod] = useState("All");
+  const [period, setPeriod] = useState("Upcoming");
   const [sort, setSort] = useState("Soonest first");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [privateOpen, setPrivateOpen] = useState(false);
@@ -53,7 +53,17 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
         const date = new Date(`${trip.date}T00:00:00`).getTime();
         const matchesPeriod = period === "All" || (period === "Upcoming" ? date >= todayTime : date < todayTime);
         return matchesPeriod && matchesDifficulty && matchesDuration && matchesQuery;
-      }).sort((a, b) => sort === "Latest first" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)),
+      }).sort((a, b) => {
+        // Keep the currently hot trip first, then upcoming trips by departure,
+        // with past trips after all active/upcoming trips.
+        const aHot = isHotTrip(a) ? 1 : 0;
+        const bHot = isHotTrip(b) ? 1 : 0;
+        if (aHot !== bHot) return bHot - aHot;
+        const aPast = new Date(`${a.date}T00:00:00`).getTime() < todayTime;
+        const bPast = new Date(`${b.date}T00:00:00`).getTime() < todayTime;
+        if (aPast !== bPast) return aPast ? 1 : -1;
+        return sort === "Latest first" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date);
+      }),
     [difficulty, duration, query, trips, period, sort, todayTime]
   );
 
@@ -78,20 +88,26 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
         <div className="absolute -right-24 top-12 h-72 w-72 rounded-full bg-[#F8A900]/20 blur-3xl" />
         <div className="absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-[#F54C0D]/10 blur-3xl" />
 
-        <div className="trips-intro relative mx-auto grid max-w-7xl items-center gap-6 px-4 py-7 sm:px-6 lg:grid-cols-[1fr_340px] lg:px-8">
+        <div className="trips-intro relative mx-auto grid max-w-7xl items-center gap-5 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[1fr_340px] lg:px-8">
           <div className="flex flex-col justify-center">
             <p className="inline-flex w-fit rounded-full bg-[#FCE4B4] px-5 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#114F3C] shadow-sm">
-              Explore Ethiopia
+              Next departure
             </p>
-            <h1 className="mt-3 max-w-4xl text-3xl font-black leading-[1.05] text-[#114F3C] dark:text-[#F8A900] sm:text-4xl">
-              Find your next hiking trip.
+            <h1 className="mt-2 max-w-4xl text-3xl font-black leading-[1.05] text-[#114F3C] dark:text-[#F8A900] sm:text-4xl">
+              {nextTrip ? nextTrip.title : "Upcoming hiking trips in Ethiopia"}
             </h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-stone-700 dark:text-stone-300 sm:text-lg">
-              Compare destinations, dates, and available seats, then find the trip that matches your pace.
+            <p className="mt-2 max-w-3xl text-base leading-7 text-stone-700 dark:text-stone-300 sm:text-lg">
+              {nextTrip ? `${formatDate(nextTrip.date)} · ${nextTrip.destination} · ${nextTrip.availableSeats} seats available` : "Check back soon for the next departure."}
             </p>
+            {nextTrip ? <button type="button" onClick={() => chooseTrip(nextTrip)} className={`mt-5 w-fit rounded-xl px-5 py-3 text-sm font-black transition ${yellowButton}`}>View this trip</button> : null}
           </div>
 
-          <aside className="trips-next self-center overflow-hidden rounded-[1.5rem] bg-[#114F3C] p-5 text-white shadow-sm">
+          {nextTrip ? <div className="relative min-h-52 overflow-hidden rounded-[1.5rem] bg-[#114F3C] lg:min-h-64">
+            <img className="absolute inset-0 h-full w-full object-cover" src={nextTrip.coverImage} alt={nextTrip.title} />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#114F3C]/35 to-transparent" />
+          </div> : null}
+
+          <aside className="trips-next hidden self-center overflow-hidden rounded-[1.5rem] bg-[#114F3C] p-5 text-white shadow-sm">
               <p className="text-sm font-black uppercase tracking-[0.2em] text-[#F8A900]">Next departure</p>
               {nextTrip ? (
                 <div className="mt-3">
@@ -106,17 +122,17 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6 sm:px-6 lg:px-8">
-        <div className="trips-toolbar mb-5 rounded-xl border border-[#114F3C]/15 bg-surface p-4 dark:border-white/15 dark:bg-[#10241C]">
+      <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="trips-toolbar mb-5 rounded-xl border border-[#114F3C]/15 bg-surface p-2 dark:border-white/15 dark:bg-[#10241C] sm:p-2.5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex gap-2" aria-label="Trip dates">
-              {["All", "Upcoming", "Past trips"].map((value) => <button key={value} type="button" aria-pressed={period === value} onClick={() => { setPeriod(value); setSort(value === "Past trips" ? "Latest first" : "Soonest first"); }} className={`rounded-lg px-4 py-2 text-sm font-bold ${period === value ? "bg-[#114F3C] text-white dark:bg-[#F8A900] dark:text-[#114F3C]" : "text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-white/10"}`}>{value}</button>)}
+            <div className="flex gap-1" aria-label="Trip dates">
+              {["All", "Upcoming", "Past trips"].map((value) => <button key={value} type="button" aria-pressed={period === value} onClick={() => { setPeriod(value); setSort(value === "Past trips" ? "Latest first" : "Soonest first"); }} className={`rounded-lg px-3 py-1.5 text-sm font-bold ${period === value ? "bg-[#114F3C] text-white dark:bg-[#F8A900] dark:text-[#114F3C]" : "text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-white/10"}`}>{value}</button>)}
             </div>
             <button type="button" aria-expanded={filtersOpen} aria-controls="trip-filters" onClick={() => setFiltersOpen(!filtersOpen)} className="inline-flex items-center gap-2 rounded-lg border border-stone-300 px-3 py-2 text-sm dark:border-white/20 md:hidden"><span>Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}</span><ChevronDown aria-hidden="true" className={`h-4 w-4 shrink-0 transition-transform ${filtersOpen ? "rotate-180" : ""}`} /></button>
           </div>
-          <div className="mt-4 grid items-end gap-3 md:grid-cols-[minmax(180px,1.5fr)_3fr]">
-            <label className="grid gap-2"><span className="text-xs font-bold text-stone-600 dark:text-stone-300">Search trips</span><span className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-stone-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Destination or trip name" className="w-full rounded-lg border border-stone-300 bg-white py-2.5 pl-9 pr-3 text-sm text-stone-900 dark:border-white/20 dark:bg-[#183329] dark:text-white" /></span></label>
-            <div id="trip-filters" className={`${filtersOpen ? "grid" : "hidden"} gap-3 sm:grid-cols-3 md:grid`}>
+          <div className="mt-2 grid items-end gap-2 md:grid-cols-[minmax(180px,1.4fr)_repeat(3,minmax(0,1fr))]">
+            <label className="grid gap-1"><span className="text-[11px] font-bold text-stone-600 dark:text-stone-300">Search trips</span><span className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-stone-400" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Destination or trip name" className="w-full rounded-lg border border-stone-300 bg-white py-2 pl-9 pr-3 text-sm text-stone-900 dark:border-white/20 dark:bg-[#183329] dark:text-white" /></span></label>
+            <div id="trip-filters" className={`${filtersOpen ? "grid" : "hidden"} gap-3 sm:grid-cols-3 md:contents`}>
               <FilterSelect label="Difficulty" value={difficulty} options={difficultyOptions} onChange={setDifficulty} />
               <FilterSelect label="Duration" value={duration} options={durationOptions} onChange={setDuration} />
               <FilterSelect label="Sort by" value={sort} options={["Soonest first", "Latest first"]} onChange={setSort} />
@@ -184,9 +200,9 @@ export function TripsPage({ trips, chooseTrip, submitPrivateTripRequest }: { tri
 
 function FilterSelect({ label, value, options, onChange }: { label: string; value: TripFilter; options: TripFilter[]; onChange: (value: TripFilter) => void }) {
   return (
-    <label className="grid gap-2">
-      <span className="text-xs font-black uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm font-black text-[#114F3C] shadow-sm outline-none transition focus:border-[#114F3C] focus:bg-white focus:shadow-md dark:border-white/10 dark:bg-[#183329] dark:text-white dark:[color-scheme:dark] dark:focus:bg-[#183329]">
+    <label className="grid gap-1">
+      <span className="text-[11px] font-black uppercase tracking-[0.12em] text-stone-500 dark:text-stone-400">{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full min-w-0 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-black text-[#114F3C] shadow-sm outline-none transition focus:border-[#114F3C] focus:bg-white focus:shadow-md dark:border-white/10 dark:bg-[#183329] dark:text-white dark:[color-scheme:dark] dark:focus:bg-[#183329]">
         {options.map((option) => (
           <option key={option} className="bg-white text-stone-900 dark:bg-[#183329] dark:text-white">{option}</option>
         ))}

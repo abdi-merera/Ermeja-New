@@ -868,8 +868,8 @@ app.post("/api/admin/trips", requireAdmin, (req, res) => {
     return;
   }
 
-  const idBase = slugify(title);
-  const id = trips.some((trip) => trip.id === idBase) ? `${idBase}-${Date.now()}` : idBase;
+  // Titles may repeat and may change; primary keys must remain stable.
+  const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
   const trip = {
     id,

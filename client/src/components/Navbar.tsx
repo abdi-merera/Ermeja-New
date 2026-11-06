@@ -1,6 +1,6 @@
-import type { CSSProperties, Dispatch, SetStateAction } from "react";
+import { useEffect, type CSSProperties, type Dispatch, type SetStateAction } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
-import { brandGreen, navItems, whatsappNumber, yellowButton } from "../constants";
+import { brandGreen, navItems } from "../constants";
 import type { Page } from "../types";
 import { Logo } from "./Logo";
 
@@ -19,6 +19,19 @@ export function Navbar({
   setIsDarkMode: (value: boolean) => void;
   choosePage: (page: Page) => void;
 }) {
+  useEffect(() => {
+    if (!mobileOpen) return;
+    let closeTimer: number | undefined;
+    const closeOnScroll = () => {
+      closeTimer = window.setTimeout(() => setMobileOpen(false), 220);
+    };
+    window.addEventListener("scroll", closeOnScroll, { passive: true, once: true });
+    return () => {
+      window.removeEventListener("scroll", closeOnScroll);
+      if (closeTimer) window.clearTimeout(closeTimer);
+    };
+  }, [mobileOpen, setMobileOpen]);
+
   return (
     <header className={`sticky top-0 z-40 ${brandGreen} border-b border-white/10 shadow-lg shadow-[#114F3C]/20`}>
       <div className="flex w-full items-center justify-start px-4 py-2 sm:py-4 sm:px-6 lg:px-8">
@@ -38,16 +51,8 @@ export function Navbar({
             </button>
           ))}
         </nav>
-        <div className="ml-24 hidden items-center gap-3 lg:flex">
+        <div className="ml-auto hidden items-center gap-3 lg:flex">
           <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-          <a
-            className={`inline-flex items-center justify-center rounded-lg p-3 transition ${yellowButton}`}
-            href={`https://wa.me/${whatsappNumber}`}
-            aria-label="Open WhatsApp chat"
-            title="WhatsApp"
-          >
-            <WhatsAppIcon className="h-5 w-5" />
-          </a>
         </div>
         <button type="button" aria-label={mobileOpen ? "Close navigation" : "Open navigation"} aria-expanded={mobileOpen} aria-controls="mobile-navigation" className="ml-auto rounded-lg bg-white/10 p-3 text-white lg:ml-0 lg:hidden" onClick={() => setMobileOpen((open) => !open)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -68,14 +73,6 @@ export function Navbar({
             ))}
             <div className="flex items-center gap-3 border-t border-white/10 pt-2 lg:hidden">
               <ThemeToggle isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-              <a
-                className={`inline-flex items-center justify-center rounded-lg p-3 ${yellowButton}`}
-                href={`https://wa.me/${whatsappNumber}`}
-                aria-label="Open WhatsApp chat"
-                title="WhatsApp"
-              >
-                <WhatsAppIcon className="h-5 w-5" />
-              </a>
             </div>
           </div>
         </nav>

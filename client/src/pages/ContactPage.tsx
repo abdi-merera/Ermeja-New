@@ -21,7 +21,7 @@ const planningSteps = [
 export function ContactPage({ contactForm, setContactForm, submitContact }: { contactForm: ContactForm; setContactForm: (form: ContactForm) => void; submitContact: ContactSubmitHandler }) {
   return (
     <section className="contact-mobile-layout bg-canvas transition-colors duration-300 dark:bg-[#071711]">
-      <div className="contact-intro relative overflow-hidden bg-[#114F3C] px-4 py-8 text-white sm:px-6 sm:py-10 lg:px-8">
+      <div className="contact-intro relative overflow-hidden bg-[#114F3C] px-4 py-6 text-white sm:px-6 sm:py-10 lg:px-8">
         <img className="absolute inset-0 h-full w-full object-cover opacity-30" src={contactHeroImage} alt="Guided hiking path in Ethiopia" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#061B15] via-[#114F3C]/90 to-[#114F3C]/40" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-6 sm:gap-10 lg:grid-cols-[0.95fr_1.05fr]">
@@ -29,11 +29,11 @@ export function ContactPage({ contactForm, setContactForm, submitContact }: { co
             <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black uppercase tracking-[0.22em] text-[#F8A900] backdrop-blur">
               Contact Ermija
             </p>
-            <h1 className="mt-5 max-w-3xl text-3xl font-black leading-[1.05] sm:text-5xl lg:text-6xl">Start with a message. We will help shape the trip.</h1>
+            <h1 className="mt-4 max-w-3xl text-3xl font-black leading-[1.05] sm:mt-5 sm:text-5xl lg:text-6xl">Plan your Ethiopia hiking trip with a local guide.</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/80">
               Ask about an upcoming package, request a private group walk, or confirm the details you need before booking.
             </p>
-            <div className="contact-intro-stats mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+            <div className="contact-intro-stats mt-6 grid max-w-2xl gap-3 sm:mt-8 sm:grid-cols-3">
               <HeroStat value="Get in touch" label="Ask our team" Icon={Clock} />
               <HeroStat value="Group" label="Trip planning" Icon={Users} />
               <a href="#contact-inquiry" className={`inline-flex min-h-[136px] items-center justify-center gap-2 rounded-lg px-5 py-4 text-base font-black transition ${yellowButton}`}>
